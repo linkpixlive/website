@@ -12,5 +12,9 @@ export default [
   ]),
   layout("routes/private/layout.tsx", [
     index("routes/private/home.tsx"),
+    route("carteira", "routes/private/wallet/index.tsx"),
+    route("widgets", "routes/private/widgets.tsx"),
+    route("perfil", "routes/private/profile.tsx"),
+    route("conta", "routes/private/account.tsx"),
   ]),
 ] satisfies RouteConfig;
