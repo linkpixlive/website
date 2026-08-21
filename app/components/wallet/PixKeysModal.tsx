@@ -2,20 +2,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigation, useSubmit } from "react-router";
+import { useFetcher } from "react-router";
 import type { PixKey } from "~/api/modules/pix-keys";
 import { AlertMessage } from "~/components/ui/AlertMessage";
 import { FormField } from "~/components/ui/FormField";
 import { Modal } from "~/components/ui/Modal";
 import { SelectField } from "~/components/ui/SelectField";
 import { SubmitButton } from "~/components/ui/SubmitButton";
+import { useToast } from "~/components/ui/useToast";
 import { pixKeySchema } from "~/validators/wallet-validator";
 
 interface PixKeysModalProps {
   isOpen: boolean;
   onClose: () => void;
   pixKeys: PixKey[];
-  error?: string | null;
 }
 
 type PixKeyType = "cpf" | "cnpj" | "email" | "phone" | "random";
@@ -113,14 +113,14 @@ export function PixKeysModal({
   isOpen,
   onClose,
   pixKeys,
-  error,
 }: PixKeysModalProps) {
-  const submit = useSubmit();
-  const navigation = useNavigation();
-  const loading = navigation.state === "submitting";
+  const fetcher = useFetcher();
+  const { toast } = useToast();
+  const loading = fetcher.state === "submitting";
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<PixKeyType | "">("");
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const {
     register,
@@ -145,8 +145,33 @@ export function PixKeysModal({
       reset({ key: "", alias: "" });
       setSelectedType("");
       setDeletingId(null);
+      setLocalError(null);
     }
   }, [isOpen, reset]);
+
+  // Handle fetcher results (toast feedback & error)
+  useEffect(() => {
+    if (!fetcher.data) return;
+
+    if (fetcher.data.success) {
+      if (fetcher.data.action === "createPixKey") {
+        toast("Chave Pix cadastrada com sucesso!", "success");
+        reset({ key: "", alias: "" });
+        setSelectedType("");
+      } else if (fetcher.data.action === "deletePixKey") {
+        toast("Chave Pix excluída com sucesso!", "success");
+      }
+    } else if (fetcher.data.error) {
+      setLocalError(fetcher.data.error);
+    }
+  }, [fetcher.data, toast, reset]);
+
+  // Clear error on new submission
+  useEffect(() => {
+    if (fetcher.state === "submitting") {
+      setLocalError(null);
+    }
+  }, [fetcher.state]);
 
   const handleTypeChange = (val: string) => {
     setSelectedType(val as PixKeyType);
@@ -165,23 +190,21 @@ export function PixKeysModal({
     if (data.alias) {
       formData.append("alias", data.alias);
     }
-    submit(formData, { method: "post" });
-    reset({ key: "", alias: "" });
-    setSelectedType("");
+    fetcher.submit(formData, { method: "post" });
   };
 
   const onDeleteConfirm = (id: string) => {
     const formData = new FormData();
     formData.append("intent", "deletePixKey");
     formData.append("id", id);
-    submit(formData, { method: "post" });
+    fetcher.submit(formData, { method: "post" });
     setDeletingId(null);
   };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Gerenciar Chaves Pix">
       <div className="space-y-6">
-        {error && <AlertMessage variant="error" message={error} />}
+        {localError && <AlertMessage variant="error" message={localError} />}
 
         {/* Existing Keys List */}
         <div className="space-y-3">

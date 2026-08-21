@@ -1,5 +1,5 @@
 import { Dialog, DialogPanel, Transition, TransitionChild } from "@headlessui/react";
-import { Grid, LayoutDashboard, LogOut, Settings, User, Wallet, X } from "lucide-react";
+import { Grid, LayoutDashboard, ListOrdered, LogOut, Settings, User, Wallet, X } from "lucide-react";
 import { Fragment } from "react";
 import { Form, Link, NavLink } from "react-router";
 
@@ -16,6 +16,7 @@ const menuItems = [
   { label: "Dashboard", to: "/", icon: LayoutDashboard },
   { label: "Carteira", to: "/carteira", icon: Wallet },
   { label: "Widgets", to: "/widgets", icon: Grid },
+  { label: "Fila de Alertas", to: "/fila", icon: ListOrdered },
   { label: "Perfil", to: "/perfil", icon: User },
   { label: "Conta", to: "/conta", icon: Settings },
 ];

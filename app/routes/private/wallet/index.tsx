@@ -142,7 +142,6 @@ export default function WalletPage() {
   const [isPixKeysOpen, setIsPixKeysOpen] = useState(false);
 
   const [withdrawalError, setWithdrawalError] = useState<string | null>(null);
-  const [pixKeysError, setPixKeysError] = useState<string | null>(null);
 
   const loadingData = navigation.state === "loading";
 
@@ -155,19 +154,9 @@ export default function WalletPage() {
         toast("Saque solicitado com sucesso!", "success");
         setIsWithdrawalOpen(false);
         setWithdrawalError(null);
-      } else if (actionData.action === "createPixKey") {
-        toast("Chave Pix cadastrada com sucesso!", "success");
-        setPixKeysError(null);
-      } else if (actionData.action === "deletePixKey") {
-        toast("Chave Pix excluída com sucesso!", "success");
-        setPixKeysError(null);
       }
-    } else if (actionData.error) {
-      if (actionData.action === "createWithdrawal") {
-        setWithdrawalError(actionData.error);
-      } else {
-        setPixKeysError(actionData.error);
-      }
+    } else if (actionData.error && actionData.action === "createWithdrawal") {
+      setWithdrawalError(actionData.error);
     }
   }, [actionData, toast]);
 
@@ -175,10 +164,6 @@ export default function WalletPage() {
     const params = new URLSearchParams(searchParams);
     params.set("page", String(newPage));
     setSearchParams(params);
-  };
-
-  const handleFilterChange = (filters: any) => {
-    // Page is handled inside filter change itself
   };
 
   return (
@@ -238,7 +223,7 @@ export default function WalletPage() {
       </div>
 
       {/* Filters Panel */}
-      <WithdrawalFilters onFilterChange={handleFilterChange} />
+      <WithdrawalFilters />
 
       {/* History Table / Cards */}
       <WithdrawalHistoryTable items={withdrawals.items} loading={loadingData} />
@@ -266,7 +251,6 @@ export default function WalletPage() {
         isOpen={isPixKeysOpen}
         onClose={() => setIsPixKeysOpen(false)}
         pixKeys={pixKeys}
-        error={pixKeysError}
       />
     </div>
   );

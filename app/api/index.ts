@@ -4,3 +4,6 @@ export * from "./modules/auth";
 export * from "./modules/wallets";
 export * from "./modules/withdrawals";
 export * from "./modules/pix-keys";
+export * from "./modules/widgets";
+export * from "./modules/overlay";
+

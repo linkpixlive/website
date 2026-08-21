@@ -1,17 +1,8 @@
-import { Filter, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Filter } from "lucide-react";
+import { useState } from "react";
 import { useSearchParams } from "react-router";
-import { Button } from "../ui/Button";
 import { DatePicker } from "../ui/DatePicker";
 import { SelectField } from "../ui/SelectField";
-
-interface WithdrawalFiltersProps {
-  onFilterChange: (filters: {
-    status?: string;
-    startDate?: string;
-    endDate?: string;
-  }) => void;
-}
 
 const statusOptions = [
   { value: "all", label: "Todos os status" },
@@ -20,74 +11,49 @@ const statusOptions = [
   { value: "rejected", label: "Rejeitados" },
 ];
 
-export function WithdrawalFilters({ onFilterChange }: WithdrawalFiltersProps) {
+export function WithdrawalFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const [status, setStatus] = useState(searchParams.get("status") || "all");
-  const [startDate, setStartDate] = useState<Date | null>(
-    searchParams.get("startDate") ? new Date(searchParams.get("startDate")!) : null
-  );
-  const [endDate, setEndDate] = useState<Date | null>(
-    searchParams.get("endDate") ? new Date(searchParams.get("endDate")!) : null
-  );
-
   const [isOpen, setIsOpen] = useState(false);
 
-  // Sync state with URL params
-  useEffect(() => {
-    setStatus(searchParams.get("status") || "all");
-    setStartDate(
-      searchParams.get("startDate") ? new Date(searchParams.get("startDate")!) : null
-    );
-    setEndDate(
-      searchParams.get("endDate") ? new Date(searchParams.get("endDate")!) : null
-    );
-  }, [searchParams]);
+  const status = searchParams.get("status") || "all";
+  const startDate = searchParams.get("startDate")
+    ? new Date(searchParams.get("startDate")!)
+    : null;
+  const endDate = searchParams.get("endDate")
+    ? new Date(searchParams.get("endDate")!)
+    : null;
 
-  const handleApply = () => {
+  const handleStatusChange = (value: string) => {
     const params = new URLSearchParams(searchParams);
-    
-    if (status && status !== "all") {
-      params.set("status", status);
+    if (value && value !== "all") {
+      params.set("status", value);
     } else {
       params.delete("status");
     }
+    params.set("page", "1");
+    setSearchParams(params);
+  };
 
-    if (startDate) {
-      params.set("startDate", startDate.toISOString().split("T")[0]);
+  const handleStartDateChange = (date: Date | null) => {
+    const params = new URLSearchParams(searchParams);
+    if (date) {
+      params.set("startDate", date.toISOString().split("T")[0]);
     } else {
       params.delete("startDate");
     }
+    params.set("page", "1");
+    setSearchParams(params);
+  };
 
-    if (endDate) {
-      params.set("endDate", endDate.toISOString().split("T")[0]);
+  const handleEndDateChange = (date: Date | null) => {
+    const params = new URLSearchParams(searchParams);
+    if (date) {
+      params.set("endDate", date.toISOString().split("T")[0]);
     } else {
       params.delete("endDate");
     }
-
-    params.set("page", "1"); // Reset to page 1 on filter apply
-    setSearchParams(params);
-
-    onFilterChange({
-      status: status !== "all" ? status : undefined,
-      startDate: startDate ? startDate.toISOString().split("T")[0] : undefined,
-      endDate: endDate ? endDate.toISOString().split("T")[0] : undefined,
-    });
-  };
-
-  const handleClear = () => {
-    setStatus("all");
-    setStartDate(null);
-    setEndDate(null);
-
-    const params = new URLSearchParams(searchParams);
-    params.delete("status");
-    params.delete("startDate");
-    params.delete("endDate");
     params.set("page", "1");
     setSearchParams(params);
-
-    onFilterChange({});
   };
 
   const hasActiveFilters =
@@ -108,14 +74,6 @@ export function WithdrawalFilters({ onFilterChange }: WithdrawalFiltersProps) {
             <span className="w-2 h-2 rounded-full bg-primary" />
           )}
         </button>
-        {hasActiveFilters && (
-          <button
-            onClick={handleClear}
-            className="text-xs text-error font-medium flex items-center gap-1 cursor-pointer outline-none"
-          >
-            <X className="h-3 w-3" /> Limpar
-          </button>
-        )}
       </div>
 
       {/* Filter panel contents */}
@@ -125,7 +83,7 @@ export function WithdrawalFilters({ onFilterChange }: WithdrawalFiltersProps) {
             label="Status"
             options={statusOptions}
             value={status}
-            onChange={setStatus}
+            onChange={handleStatusChange}
           />
         </div>
 
@@ -133,7 +91,7 @@ export function WithdrawalFilters({ onFilterChange }: WithdrawalFiltersProps) {
           <DatePicker
             label="Data de Início"
             value={startDate}
-            onChange={setStartDate}
+            onChange={handleStartDateChange}
           />
         </div>
 
@@ -141,26 +99,8 @@ export function WithdrawalFilters({ onFilterChange }: WithdrawalFiltersProps) {
           <DatePicker
             label="Data Final"
             value={endDate}
-            onChange={setEndDate}
+            onChange={handleEndDateChange}
           />
-        </div>
-
-        <div className="flex items-center gap-2 pt-2 md:pt-0 w-full md:w-auto">
-          <Button
-            onClick={handleApply}
-            className="flex-1 md:flex-initial"
-          >
-            Aplicar
-          </Button>
-          {hasActiveFilters && (
-            <Button
-              variant="ghost"
-              onClick={handleClear}
-              className="flex-1 md:flex-initial"
-            >
-              Limpar
-            </Button>
-          )}
         </div>
       </div>
     </div>
