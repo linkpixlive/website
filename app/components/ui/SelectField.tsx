@@ -1,5 +1,5 @@
 import { Field, Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
-import { Check, ChevronDown } from "lucide-react";
+import { Icon } from "./Icon";
 
 interface Option {
   value: string;
@@ -17,6 +17,20 @@ interface SelectFieldProps {
   className?: string;
 }
 
+function CheckMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M4.5 12.5L9.5 17.5L19.5 6.5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function SelectField({
   label,
   options,
@@ -31,53 +45,56 @@ export function SelectField({
 
   return (
     <Field className={`flex flex-col gap-1.5 w-full ${className}`}>
-      <Label className="text-text-secondary text-sm font-medium">{label}</Label>
+      <Label className="text-[13px] font-medium text-ink-secondary">{label}</Label>
       <Listbox value={value} onChange={onChange} disabled={disabled}>
         <div className="relative">
           <ListboxButton
             className={`
-              w-full bg-secondary rounded-lg py-2.5 px-3 text-left text-sm text-text-heading
+              w-full bg-wash rounded-full py-2.5 px-4 text-left text-sm font-medium text-ink-heading
               border transition-colors duration-150 outline-none cursor-pointer flex items-center justify-between
               ${
                 error
-                  ? "border-error focus:ring-1 focus:ring-error/30"
-                  : "border-border focus:border-border-focus focus:ring-1 focus:ring-border-focus/30"
+                  ? "border-error focus:border-error focus:ring-2 focus:ring-error/20"
+                  : "border-gray-100/80 focus:border-[#fcc717] focus:ring-2 focus:ring-brand/30"
               }
               ${disabled ? "opacity-50 cursor-not-allowed" : ""}
             `}
           >
-            <span className={!selectedOption ? "text-text-muted" : "block truncate"}>
+            <span className={!selectedOption ? "text-ink-placeholder" : "block truncate"}>
               {selectedOption ? selectedOption.label : placeholder}
             </span>
-            <ChevronDown className="h-4 w-4 text-text-muted pointer-events-none" aria-hidden="true" />
+            <Icon
+              name="alt-arrow-down"
+              size={16}
+              strokeWidth={1.9}
+              className="text-ink-secondary pointer-events-none shrink-0 ml-2"
+            />
           </ListboxButton>
 
           <ListboxOptions
             transition
-            className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg bg-surface border border-border py-1 text-base shadow-lg focus:outline-none sm:text-sm transition ease-in duration-100 data-[leave]:data-[closed]:opacity-0"
+            className="absolute z-50 mt-2 max-h-60 w-full overflow-auto rounded-[20px] bg-card border border-gray-100/70 p-2 text-base shadow-lg focus:outline-none sm:text-sm animate-pop-in data-[leave]:data-[closed]:opacity-0"
           >
             {options.length === 0 ? (
-              <div className="py-2 px-3 text-sm text-text-muted">Nenhuma opção disponível</div>
+              <div className="py-2 px-3.5 text-[13px] font-medium text-ink-muted">
+                Nenhuma opção disponível
+              </div>
             ) : (
               options.map((option) => (
                 <ListboxOption
                   key={option.value}
                   value={option.value}
-                  className={({ focus, selected }) => `
-                    relative cursor-default select-none py-2.5 pl-3 pr-9 text-sm outline-none
-                    ${focus ? "bg-surface-hover text-text-heading" : "text-text-primary"}
-                    ${selected ? "font-semibold text-primary" : ""}
+                  className={({ focus }) => `
+                    relative cursor-default select-none rounded-xl py-2.5 px-3.5 text-[13px] outline-none
+                    ${focus ? "bg-wash text-ink-body" : "text-ink-body"}
+                    ${option.value === value ? "font-bold text-ink-heading" : "font-semibold"}
                   `}
                 >
-                  {({ selected, focus }) => (
+                  {({ selected }) => (
                     <>
-                      <span className={`block truncate ${selected ? "font-medium" : "font-normal"}`}>
-                        {option.label}
-                      </span>
+                      <span className="block truncate">{option.label}</span>
                       {selected && (
-                        <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-primary">
-                          <Check className="h-4 w-4" aria-hidden="true" />
-                        </span>
+                        <CheckMark className="absolute inset-y-0 right-3 h-4 w-4 my-auto top-1/2 -translate-y-1/2 text-yellow-ink" />
                       )}
                     </>
                   )}
@@ -88,7 +105,7 @@ export function SelectField({
         </div>
       </Listbox>
       {error && (
-        <span className="text-error text-xs animate-[shake_0.4s_ease-in-out]">
+        <span className="text-error text-xs font-medium animate-[shake_0.4s_ease-in-out]">
           {error}
         </span>
       )}

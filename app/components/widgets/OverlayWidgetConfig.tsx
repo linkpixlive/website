@@ -3,16 +3,8 @@ import { useSubmit, useNavigation } from "react-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  ArrowLeft,
-  Copy,
-  Eye,
-  EyeOff,
-  FlaskConical,
-  MessageSquare,
-  RotateCcw,
-} from "lucide-react";
 import { Button } from "~/components/ui/Button";
+import { Icon } from "~/components/ui/Icon";
 import { SelectField } from "~/components/ui/SelectField";
 import { SubmitButton } from "~/components/ui/SubmitButton";
 import type { Widget, OverlaySettings } from "~/api/modules/widgets";
@@ -52,7 +44,6 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
     handleSubmit,
     control,
     watch,
-    setValue,
     formState: { errors },
   } = useForm<OverlayFormValues>({
     resolver: zodResolver(overlaySchema),
@@ -74,7 +65,7 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
     if (!widget?.token) return;
     navigator.clipboard.writeText(widgetUrl);
     setUrlCopied(true);
-    setTimeout(() => setUrlCopied(false), 2000);
+    setTimeout(() => setUrlCopied(false), 1600);
   };
 
   const onSubmit = (data: OverlayFormValues) => {
@@ -103,109 +94,120 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Page Header with Back button */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-2 pb-5 border-b border-border/50">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onBack}
-            className="p-2 rounded-lg text-text-muted hover:text-text-heading hover:bg-surface-hover transition-colors cursor-pointer outline-none shrink-0"
-            title="Voltar"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <MessageSquare className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-text-heading sm:text-2xl">
-                Widget de Mensagem
-              </h1>
-              <p className="text-xs sm:text-sm text-text-secondary">
-                Configure o overlay de alertas da sua transmissão
-              </p>
-            </div>
-          </div>
+    <div className="flex flex-col gap-5 max-w-7xl mx-auto">
+      {/* Title block with back button */}
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onBack}
+          className="w-11 h-11 rounded-full bg-white hover:bg-gray-50 border border-gray-100/80 shadow-xs text-chrome-icon transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95"
+          title="Voltar"
+          aria-label="Voltar para widgets"
+        >
+          <Icon name="alt-arrow-left" size={20} strokeWidth={2} className="mx-auto" />
+        </button>
+        <div>
+          <h1 className="text-xl sm:text-2xl lg:text-[26px] font-extrabold tracking-tight leading-tight text-ink-heading">
+            Widget de Mensagem
+          </h1>
+          <p className="mt-0.5 text-sm text-ink-secondary">
+            Configure o overlay de alertas da sua transmissão
+          </p>
         </div>
       </div>
 
-      {/* URL de Conexão Section */}
-      <div className="bg-surface border border-border rounded-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h2 className="text-sm font-semibold text-text-heading">URL de Conexão</h2>
+      {/* URL de Conexão card */}
+      <div className="rounded-[26px] bg-card border border-gray-100/70 shadow-xs p-5">
+        <div className="flex items-center justify-between mb-4 gap-3">
+          <span className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+            URL de conexão
+          </span>
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             size="sm"
             onClick={handleResetToken}
             disabled={!widget?.token || isLoading}
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <Icon name="refresh" size={14} strokeWidth={2} />
             Resetar Token
           </Button>
         </div>
 
-        <div className="p-6 flex flex-col gap-4">
-          <div className="flex items-center gap-2">
-            <div className="flex-1 bg-secondary border border-border rounded-lg px-3 py-2.5 flex items-center gap-2 min-w-0">
-              <span
-                className={`text-sm flex-1 truncate select-all ${
-                  !showUrl ? "blur-md select-none pointer-events-none" : "text-text-heading font-mono"
-                }`}
-              >
-                {widgetUrl}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowUrl((v) => !v)}
-              className="p-2.5 rounded-lg border border-border text-text-muted hover:text-text-heading hover:bg-surface-hover transition-colors cursor-pointer outline-none shrink-0"
-              title={showUrl ? "Ocultar URL" : "Mostrar URL"}
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="flex-1 bg-white border border-gray-200/90 rounded-full px-4 py-2.5 flex items-center min-w-0">
+            <span
+              className={`text-[13px] font-mono font-medium flex-1 truncate ${
+                !showUrl ? "blur-md select-none pointer-events-none text-ink-body" : "text-ink-heading select-all"
+              }`}
             >
-              {showUrl ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
-            </button>
-            <button
-              type="button"
-              onClick={handleCopyUrl}
-              disabled={!widget?.token}
-              className="p-2.5 rounded-lg border border-border text-text-muted hover:text-text-heading hover:bg-surface-hover transition-colors cursor-pointer outline-none shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-              title="Copiar URL"
-            >
-              <Copy className="h-4.5 w-4.5" />
-            </button>
+              {widgetUrl}
+            </span>
           </div>
+          <button
+            type="button"
+            onClick={() => setShowUrl((v) => !v)}
+            className="w-11 h-11 rounded-full bg-white hover:bg-gray-50 border border-gray-100/80 shadow-xs text-chrome-icon transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95"
+            title={showUrl ? "Ocultar URL" : "Mostrar URL"}
+          >
+            <Icon
+              name={showUrl ? "eye-closed" : "eye"}
+              size={18}
+              strokeWidth={2}
+              className="mx-auto"
+            />
+          </button>
+          <button
+            type="button"
+            onClick={handleCopyUrl}
+            disabled={!widget?.token}
+            className={`w-11 h-11 rounded-full border shadow-xs transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
+              urlCopied
+                ? "bg-success/10 border-success/20 text-success"
+                : "bg-white hover:bg-gray-50 border-gray-100/80 text-chrome-icon"
+            }`}
+            title={urlCopied ? "Copiado!" : "Copiar URL"}
+          >
+            <Icon
+              name={urlCopied ? "check-circle" : "copy"}
+              size={18}
+              strokeWidth={2}
+              className="mx-auto animate-fade-in"
+            />
+          </button>
+        </div>
 
-          {urlCopied && (
-            <p className="text-xs text-success animate-[fadeInUp_0.2s_ease-out]">
-              URL copiada para a área de transferência!
-            </p>
-          )}
+        <p
+          className={`mt-2 text-xs font-semibold ${
+            urlCopied ? "text-success" : "invisible"
+          }`}
+          aria-live="polite"
+        >
+          Copiado!
+        </p>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full sm:w-auto"
-              onClick={handleTestAlert}
-              disabled={!widget?.token || isLoading}
-            >
-              <FlaskConical className="w-4 h-4" />
-              Enviar Alerta de Teste
-            </Button>
-          </div>
+        <div className="flex flex-col sm:flex-row gap-3 mt-3">
+          <Button
+            type="button"
+            variant="secondary"
+            className="w-full sm:w-auto"
+            onClick={handleTestAlert}
+            disabled={!widget?.token || isLoading}
+          >
+            <Icon name="test-tube" size={16} strokeWidth={2} />
+            Enviar Alerta de Teste
+          </Button>
         </div>
       </div>
 
-      {/* Configurações Form */}
+      {/* Configurações card */}
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="bg-surface border border-border rounded-2xl overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-            <h2 className="text-sm font-semibold text-text-heading">Configurações</h2>
-          </div>
+        <div className="rounded-[26px] bg-card border border-gray-100/70 shadow-xs p-5">
+          <span className="block text-[11px] font-extrabold uppercase tracking-wider text-ink-label mb-4">
+            Configurações
+          </span>
 
-          <div className="p-6 flex flex-col gap-6">
+          <div className="flex flex-col gap-6">
             {/* Narrador Select */}
             <Controller
               name="defaultNarrator"
@@ -225,35 +227,33 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
             {/* Volume Range Slider */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <label className="text-text-secondary text-sm font-medium">
+                <label className="text-[13px] font-medium text-ink-secondary">
                   Volume do áudio
                 </label>
-                <span className="text-sm font-semibold text-text-heading">
+                <span className="text-sm font-bold text-ink-heading">
                   {volumeValue}%
                 </span>
               </div>
-              <div className="flex items-center gap-3">
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  disabled={isLoading}
-                  {...register("volume", { valueAsNumber: true })}
-                  className="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary disabled:opacity-50"
-                />
-              </div>
-              <p className="text-xs text-text-muted">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                disabled={isLoading}
+                {...register("volume", { valueAsNumber: true })}
+                className="w-full h-1.5 bg-wash rounded-full appearance-none cursor-pointer accent-brand disabled:opacity-50 outline-none"
+              />
+              <p className="text-xs font-medium text-ink-muted">
                 Controla o volume do áudio TTS durante os alertas (0–100).
               </p>
             </div>
 
             {/* Speak Name & Amount Toggle */}
-            <div className="flex items-center justify-between gap-4 py-2">
+            <div className="flex items-center justify-between gap-4 py-1">
               <div>
-                <p className="text-sm font-medium text-text-heading">
+                <p className="text-sm font-bold text-ink-heading">
                   Narrar nome e valor
                 </p>
-                <p className="text-xs text-text-secondary mt-0.5">
+                <p className="text-[13px] font-medium text-ink-secondary mt-0.5">
                   O TTS dirá o nome do doador e o valor antes de ler a mensagem.
                 </p>
               </div>
@@ -268,13 +268,17 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
                     disabled={isLoading}
                     onClick={() => field.onChange(!field.value)}
                     className={`
-                      relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer outline-none shrink-0
-                      focus:ring-1 focus:ring-border-focus/30 disabled:opacity-50 disabled:cursor-not-allowed
-                      ${field.value ? "bg-primary" : "bg-secondary border border-border"}
+                      relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95
+                      focus-visible:ring-2 focus-visible:ring-brand/40 disabled:opacity-50 disabled:cursor-not-allowed
+                      ${
+                        field.value
+                          ? "bg-brand-button"
+                          : "bg-wash border border-gray-200/90"
+                      }
                     `}
                   >
                     <span
-                      className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                      className={`inline-block h-4 w-4 rounded-full bg-white shadow-2xs transition-transform duration-150 ${
                         field.value ? "translate-x-6" : "translate-x-1"
                       }`}
                     />
@@ -284,7 +288,7 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
             </div>
 
             {/* Save Button */}
-            <div className="flex justify-end pt-4 border-t border-border">
+            <div className="flex justify-end pt-4 border-t border-gray-100">
               <SubmitButton loading={isLoading} className="w-full sm:w-auto">
                 Salvar Configurações
               </SubmitButton>

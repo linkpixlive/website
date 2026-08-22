@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lock } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useSearchParams } from "react-router";
@@ -8,6 +7,7 @@ import { authApi } from "~/api/modules/auth";
 import { AuthCard } from "~/components/auth/AuthCard";
 import { PasswordField } from "~/components/auth/PasswordField";
 import { AlertMessage } from "~/components/ui/AlertMessage";
+import { Button } from "~/components/ui/Button";
 import { SubmitButton } from "~/components/ui/SubmitButton";
 import {
   getPasswordStrength,
@@ -70,7 +70,7 @@ export default function ResetPassword() {
           <div className="text-center">
             <Link
               to="/auth/forgot-password"
-              className="text-sm text-primary hover:text-primary-hover font-medium transition-colors duration-150"
+              className="text-[13px] font-semibold text-info hover:text-blue-700 underline transition-colors duration-150"
             >
               Request a new link
             </Link>
@@ -89,11 +89,10 @@ export default function ResetPassword() {
             message="Your password has been changed successfully."
           />
           <div className="text-center mt-6">
-            <Link
-              to="/auth/login"
-              className="inline-block px-6 py-2.5 bg-primary text-white font-medium rounded-lg hover:bg-primary-hover transition-colors"
-            >
-              Go to sign in
+            <Link to="/auth/login" className="inline-block w-full">
+              <Button variant="primary" className="w-full">
+                Go to sign in
+              </Button>
             </Link>
           </div>
         </div>
@@ -109,7 +108,7 @@ export default function ResetPassword() {
             label="New Password"
             {...register("newPassword")}
             error={errors.newPassword?.message}
-            icon={Lock}
+            icon="lock"
             placeholder="Create a strong password"
             disabled={isSubmitting}
             showStrength
@@ -121,7 +120,7 @@ export default function ResetPassword() {
             label="Confirm Password"
             {...register("confirmPassword")}
             error={errors.confirmPassword?.message}
-            icon={Lock}
+            icon="lock"
             placeholder="Confirm your password"
             disabled={isSubmitting}
           />

@@ -1,4 +1,3 @@
-import { ListOrdered } from "lucide-react";
 import { QueueItemCard } from "./QueueItemCard";
 import type { OverlayDonationEntity } from "~/types/queue";
 
@@ -11,22 +10,19 @@ interface QueueListProps {
 export function QueueList({ queue, onReplay, replayLoading }: QueueListProps) {
   if (queue.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="flex items-center justify-center h-16 w-16 rounded-full bg-surface-hover mb-4">
-          <ListOrdered className="h-8 w-8 text-text-muted" />
-        </div>
-        <h3 className="text-base font-semibold text-text-heading mb-1">
+      <div className="py-10 text-center">
+        <h3 className="text-lg font-extrabold tracking-tight text-ink-heading">
           Nenhuma doação na fila
         </h3>
-        <p className="text-sm text-text-secondary max-w-xs">
-          As doações que entrarem aparecerão aqui em tempo real.
+        <p className="mx-auto mt-1 max-w-xs text-sm font-medium leading-relaxed text-ink-secondary">
+          As doações que entrarem aparecem aqui em tempo real.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <ul className="divide-y divide-gray-100">
       {queue.map((donation) => (
         <QueueItemCard
           key={donation.id}
@@ -35,6 +31,6 @@ export function QueueList({ queue, onReplay, replayLoading }: QueueListProps) {
           loading={replayLoading === donation.id}
         />
       ))}
-    </div>
+    </ul>
   );
 }

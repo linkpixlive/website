@@ -95,9 +95,13 @@ export function OtpInput({ length = 6, onComplete, onChange, disabled, error }: 
           onKeyDown={(e) => handleKeyDown(index, e)}
           disabled={disabled}
           className={`
-            w-11 h-12 text-center text-lg font-mono font-semibold bg-secondary rounded-lg text-text-heading
+            w-11 h-12 text-center text-lg font-mono font-semibold bg-wash rounded-xl text-ink-heading
             border transition-colors duration-150 outline-none
-            ${error ? "border-error focus:ring-1 focus:ring-error/30" : "border-border focus:border-border-focus focus:ring-1 focus:ring-border-focus/30"}
+            ${
+              error
+                ? "border-error focus:border-error focus:ring-2 focus:ring-error/20"
+                : "border-gray-100/80 focus:border-[#fcc717] focus:ring-2 focus:ring-brand/30"
+            }
             ${disabled ? "opacity-50 cursor-not-allowed" : ""}
           `}
         />

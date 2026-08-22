@@ -1,8 +1,8 @@
-import { Calendar, Eye, EyeOff, Receipt } from "lucide-react";
 import { useState } from "react";
 import type { Withdrawal } from "~/api/modules/withdrawals";
-import { Badge } from "../ui/Badge";
-import { Skeleton } from "../ui/Skeleton";
+import { Icon } from "~/components/ui/Icon";
+import { Badge } from "~/components/ui/Badge";
+import { Skeleton } from "~/components/ui/Skeleton";
 
 interface WithdrawalHistoryTableProps {
   items: Withdrawal[];
@@ -36,7 +36,7 @@ export function WithdrawalHistoryTable({
     return (
       <div className="space-y-3">
         {[1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-16 w-full rounded-xl" />
+          <Skeleton key={i} className="h-14 w-full rounded-xl" />
         ))}
       </div>
     );
@@ -44,12 +44,11 @@ export function WithdrawalHistoryTable({
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-center bg-surface border border-border rounded-2xl">
-        <Receipt className="h-12 w-12 text-text-muted mb-4" />
-        <h3 className="text-lg font-semibold text-text-heading">
+      <div className="flex flex-col items-center justify-center py-10 text-center">
+        <h3 className="text-lg font-extrabold tracking-tight text-ink-heading">
           Sem saques registrados
         </h3>
-        <p className="text-sm text-text-secondary mt-1">
+        <p className="text-sm text-ink-secondary mt-1">
           Nenhum histórico de saques foi encontrado com os filtros atuais.
         </p>
       </div>
@@ -59,54 +58,55 @@ export function WithdrawalHistoryTable({
   return (
     <div className="overflow-hidden">
       {/* Desktop view */}
-      <div className="hidden md:block overflow-x-auto bg-surface border border-border rounded-2xl">
-        <table className="w-full border-collapse text-left text-sm text-text-primary">
+      <div className="hidden md:block overflow-x-auto -mx-5 px-5">
+        <table className="w-full min-w-[640px] border-collapse text-left">
           <thead>
-            <tr className="border-b border-border bg-secondary/50 text-text-secondary font-medium">
-              <th className="px-6 py-4">Data</th>
-              <th className="px-6 py-4">
-                <div className="flex items-center gap-2">
+            <tr className="border-b border-gray-100">
+              <th className="px-3 py-3 text-[11px] font-extrabold uppercase tracking-wider text-ink-label first:pl-0">
+                Data
+              </th>
+              <th className="px-3 py-3 text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+                <span className="inline-flex items-center gap-1.5 uppercase tracking-wider">
                   <span>Chave Pix</span>
                   <button
                     type="button"
                     onClick={() => setShowPix((v) => !v)}
-                    className="p-0.5 rounded text-text-muted hover:text-text-heading transition-colors duration-150 cursor-pointer outline-none"
-                    title={showPix ? "Ocultar" : "Mostrar"}
+                    className="p-0.5 rounded-full text-chrome-icon hover:text-ink-heading transition-colors duration-150 cursor-pointer outline-none"
+                    title={showPix ? "Ocultar chaves" : "Mostrar chaves"}
                   >
-                    {showPix ? (
-                      <EyeOff className="h-3.5 w-3.5" />
-                    ) : (
-                      <Eye className="h-3.5 w-3.5" />
-                    )}
+                    <Icon
+                      name={showPix ? "eye-closed" : "eye"}
+                      size={14}
+                      strokeWidth={1.9}
+                    />
                   </button>
-                </div>
+                </span>
               </th>
-              {/* <th className="px-6 py-4">Valor Bruto</th> */}
-              {/* <th className="px-6 py-4">Taxa</th> */}
-              <th className="px-6 py-4">Valor</th>
-              <th className="px-6 py-4">Status</th>
+              <th className="px-3 py-3 text-right text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+                Valor
+              </th>
+              <th className="px-3 py-3 text-right text-[11px] font-extrabold uppercase tracking-wider text-ink-label last:pr-0">
+                Status
+              </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/60">
+          <tbody className="divide-y divide-gray-100">
             {items.map((item) => (
-              <tr
-                key={item.id}
-                className="hover:bg-surface-hover/30 transition-colors duration-100"
-              >
-                <td className="px-6 py-4 font-medium text-text-heading whitespace-nowrap">
+              <tr key={item.id} className="transition-colors duration-100 hover:bg-wash/70">
+                <td className="px-3 py-3.5 text-[13px] font-medium text-ink-secondary whitespace-nowrap first:pl-0">
                   {formatDate(item.createdAt)}
                 </td>
                 <td
-                  className={`px-6 py-4 max-w-[200px] truncate ${!showPix ? "blur-sm" : ""}`}
+                  className={`px-3 py-3.5 max-w-[220px] text-[13px] font-mono font-medium text-ink-body truncate ${
+                    !showPix ? "blur-sm select-none" : ""
+                  }`}
                 >
                   {item.pixValue}
                 </td>
-                {/* <td className="px-6 py-4">{formatCurrency(item.amount)}</td> */}
-                {/* <td className="px-6 py-4 text-text-muted">{formatCurrency(item.feeAmount)}</td> */}
-                <td className="px-6 py-4 font-semibold text-primary">
+                <td className="px-3 py-3.5 text-right text-sm font-bold text-ink-heading whitespace-nowrap">
                   {formatCurrency(item.netAmount)}
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-3 py-3.5 text-right last:pr-0">
                   <Badge status={item.status} />
                 </td>
               </tr>
@@ -116,58 +116,48 @@ export function WithdrawalHistoryTable({
       </div>
 
       {/* Mobile view */}
-      <div className="md:hidden space-y-4">
+      <div className="md:hidden divide-y divide-gray-100">
         {items.map((item) => (
-          <div
-            key={item.id}
-            className="bg-surface border border-border rounded-2xl p-5 space-y-4"
-          >
+          <div key={item.id} className="py-4 space-y-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-text-secondary">
-                <Calendar className="h-3.5 w-3.5" />
+              <span className="text-[11px] font-semibold text-gray-400">
                 {formatDate(item.createdAt)}
-              </div>
+              </span>
               <Badge status={item.status} />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <p className="text-xs text-text-secondary">Chave de Destino</p>
+                <p className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+                  Chave de destino
+                </p>
                 <button
                   type="button"
                   onClick={() => setShowPix((v) => !v)}
-                  className="p-0.5 rounded text-text-muted hover:text-text-heading transition-colors duration-150 cursor-pointer outline-none"
-                  title={showPix ? "Ocultar" : "Mostrar"}
+                  className="p-0.5 rounded-full text-chrome-icon hover:text-ink-heading transition-colors duration-150 cursor-pointer outline-none"
+                  title={showPix ? "Ocultar chaves" : "Mostrar chaves"}
                 >
-                  {showPix ? (
-                    <EyeOff className="h-3.5 w-3.5" />
-                  ) : (
-                    <Eye className="h-3.5 w-3.5" />
-                  )}
+                  <Icon
+                    name={showPix ? "eye-closed" : "eye"}
+                    size={14}
+                    strokeWidth={1.9}
+                  />
                 </button>
               </div>
               <p
-                className={`text-sm font-medium text-text-heading break-all ${!showPix ? "blur-sm" : ""}`}
+                className={`text-[13px] font-mono font-medium text-ink-body break-all ${
+                  !showPix ? "blur-sm select-none" : ""
+                }`}
               >
                 {item.pixValue}
               </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 pt-3 border-t border-border/50 text-xs">
-              {/* <div>
-                <p className="text-text-muted mb-0.5">Bruto</p>
-                <p className="font-medium text-text-primary">{formatCurrency(item.amount)}</p>
-              </div>
-              <div>
-                <p className="text-text-muted mb-0.5">Taxa</p>
-                <p className="font-medium text-text-primary">{formatCurrency(item.feeAmount)}</p>
-              </div> */}
-              <div>
-                <p className="text-text-muted mb-0.5">Valor</p>
-                <p className="font-semibold text-primary">
-                  {formatCurrency(item.netAmount)}
-                </p>
-              </div>
+            <div className="flex items-center justify-between pt-1">
+              <p className="text-xs font-medium text-ink-secondary">Valor recebido</p>
+              <p className="text-sm font-bold text-ink-heading">
+                {formatCurrency(item.netAmount)}
+              </p>
             </div>
           </div>
         ))}

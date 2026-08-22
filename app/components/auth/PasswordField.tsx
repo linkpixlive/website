@@ -1,13 +1,13 @@
 import { Field, Input, Label } from "@headlessui/react";
-import { Eye, EyeOff } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { forwardRef, useState } from "react";
+import { Icon } from "~/components/ui/Icon";
+import type { IconName } from "~/components/ui/Icon";
 
 export interface PasswordFieldProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'name'> {
   name: string;
   label: string;
   error?: string | null;
-  icon?: LucideIcon;
+  icon?: IconName;
   showStrength?: boolean;
   strengthScore?: number;
 }
@@ -15,28 +15,34 @@ export interface PasswordFieldProps extends Omit<React.InputHTMLAttributes<HTMLI
 const STRENGTH_LABELS = ["", "Fraca", "Razoável", "Bom", "Forte"];
 
 export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
-  ({ label, error, icon: Icon, showStrength, strengthScore = 0, className, ...props }, ref) => {
+  ({ label, error, icon, showStrength, strengthScore = 0, className, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false);
 
     return (
       <Field className="flex flex-col gap-1.5 w-full">
-        <Label className="text-text-secondary text-sm font-medium">{label}</Label>
+        <Label className="text-[13px] font-medium text-ink-secondary">{label}</Label>
         <div className="relative flex items-center">
-          {Icon && (
-            <Icon className="absolute left-3 w-4 h-4 text-text-muted pointer-events-none" />
+          {icon && (
+            <Icon
+              name={icon}
+              size={16}
+              strokeWidth={1.9}
+              className="absolute left-4 text-ink-secondary pointer-events-none"
+            />
           )}
           <Input
             ref={ref}
             type={showPassword ? "text" : "password"}
             {...props}
             className={`
-              w-full bg-secondary rounded-lg py-2.5 text-sm text-text-heading placeholder:text-text-muted
-              border transition-colors duration-150 outline-none pr-10
-              ${Icon ? "pl-9" : "pl-3"}
+              w-full bg-wash rounded-full py-2.5 text-sm font-medium text-ink-heading placeholder:text-ink-placeholder
+              border border-gray-100/80 transition-colors duration-150 outline-none
+              focus:border-[#fcc717] focus:ring-2 focus:ring-brand/30
+              ${icon ? "pl-10" : "pl-4"} pr-11
               ${
                 error
-                  ? "border-error focus:ring-1 focus:ring-error/30"
-                  : "border-border focus:border-border-focus focus:ring-1 focus:ring-border-focus/30"
+                  ? "!border-error focus:!border-error focus:!ring-error/20"
+                  : ""
               }
               ${props.disabled ? "opacity-50 cursor-not-allowed" : ""}
               ${className || ""}
@@ -46,10 +52,10 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             disabled={props.disabled}
-            className="absolute right-3 text-text-muted hover:text-text-secondary transition-colors"
-            aria-label={showPassword ? "Hide password" : "Show password"}
+            className="absolute right-4 text-chrome-icon hover:text-ink-heading active:scale-95 transition-all duration-150 cursor-pointer outline-none"
+            aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
           >
-            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            <Icon name={showPassword ? "eye-closed" : "eye"} size={16} strokeWidth={1.9} />
           </button>
         </div>
 
@@ -57,7 +63,7 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
           <div className="flex items-center gap-2 mt-1">
             <div className="flex flex-1 gap-1">
               {[1, 2, 3, 4].map((level) => {
-                let bgColor = "bg-border";
+                let bgColor = "bg-gray-100";
                 if (strengthScore >= level) {
                   if (strengthScore === 1) bgColor = "bg-error";
                   else if (strengthScore === 2) bgColor = "bg-warning";
@@ -72,14 +78,14 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
                 );
               })}
             </div>
-            <span className="text-xs text-text-muted w-10 text-right">
+            <span className="text-xs font-medium text-ink-muted w-10 text-right">
               {STRENGTH_LABELS[strengthScore]}
             </span>
           </div>
         )}
 
         {error && (
-          <span className="text-error text-xs animate-[shake_0.4s_ease-in-out]">
+          <span className="text-error text-xs font-medium animate-[shake_0.4s_ease-in-out]">
             {error}
           </span>
         )}

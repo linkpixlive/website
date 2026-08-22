@@ -1,4 +1,4 @@
-import { ExternalLink, Pause, Play, SkipForward, Trash2, TestTube } from "lucide-react";
+import { Icon } from "~/components/ui/Icon";
 import { Button } from "~/components/ui/Button";
 
 interface QueueToolbarProps {
@@ -7,7 +7,7 @@ interface QueueToolbarProps {
   onSkip: () => void;
   onClear: () => void;
   onTest: () => void;
-  onOpenPopup: () => void;
+  onOpenPopup?: () => void;
   loading?: {
     togglePause?: boolean;
     skip?: boolean;
@@ -26,66 +26,53 @@ export function QueueToolbar({
   loading = {},
 }: QueueToolbarProps) {
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-wrap items-center gap-2">
       <Button
         variant="primary"
         size="sm"
         onClick={onTogglePause}
         loading={loading.togglePause}
       >
-        {isPaused ? (
-          <>
-            <Play className="h-4 w-4" />
-            Retomar Fila
-          </>
-        ) : (
-          <>
-            <Pause className="h-4 w-4" />
-            Pausar Fila
-          </>
-        )}
+        <Icon name={isPaused ? "play" : "pause"} size={16} strokeWidth={2} />
+        {isPaused ? "Retomar Fila" : "Pausar Fila"}
       </Button>
 
       <Button
-        variant="ghost"
+        variant="secondary"
         size="sm"
         onClick={onSkip}
         loading={loading.skip}
       >
-        <SkipForward className="h-4 w-4" />
+        <Icon name="skip-next" size={16} strokeWidth={2} />
         Pular Alerta
       </Button>
 
       <Button
-        variant="ghost"
-        size="sm"
-        onClick={onClear}
-        loading={loading.clear}
-      >
-        <Trash2 className="h-4 w-4" />
-        Limpar Fila
-      </Button>
-
-      <Button
-        variant="ghost"
+        variant="secondary"
         size="sm"
         onClick={onTest}
         loading={loading.test}
       >
-        <TestTube className="h-4 w-4" />
+        <Icon name="test-tube" size={16} strokeWidth={2} />
         Testar Alerta
       </Button>
 
-      <div className="ml-auto">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onOpenPopup}
-        >
-          <ExternalLink className="h-4 w-4" />
+      <Button
+        variant="danger"
+        size="sm"
+        onClick={onClear}
+        loading={loading.clear}
+      >
+        <Icon name="trash-bin-minimalistic" size={16} strokeWidth={2} />
+        Limpar Fila
+      </Button>
+
+      {onOpenPopup && (
+        <Button variant="inverse" size="sm" onClick={onOpenPopup} className="ml-auto">
+          <Icon name="square-arrow-right-up" size={16} strokeWidth={2} />
           Abrir em Popup
         </Button>
-      </div>
+      )}
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AtSign, CreditCard, Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
@@ -84,7 +83,7 @@ export default function Register() {
           label="Nome"
           {...register("name")}
           error={errors.name?.message}
-          icon={User}
+          icon="user"
           placeholder="Luca Santos"
           disabled={isSubmitting}
         />
@@ -93,7 +92,7 @@ export default function Register() {
           label="Usuário"
           {...register("username")}
           error={errors.username?.message}
-          icon={AtSign}
+          icon="mention-circle"
           placeholder="lucasantos"
           disabled={isSubmitting}
         />
@@ -103,7 +102,7 @@ export default function Register() {
           {...register("email")}
           type="email"
           error={errors.email?.message}
-          icon={Mail}
+          icon="letter"
           placeholder="email@email.com"
           disabled={isSubmitting}
         />
@@ -117,7 +116,7 @@ export default function Register() {
             setValue("cpf", val, { shouldDirty: true, shouldValidate: true });
           }}
           error={errors.cpf?.message}
-          icon={CreditCard}
+          icon="card"
           placeholder="000.000.000-00"
           inputMode="numeric"
           maxLength={14}
@@ -128,7 +127,7 @@ export default function Register() {
           label="Senha"
           {...register("password")}
           error={errors.password?.message}
-          icon={Lock}
+          icon="lock"
           placeholder="Crie uma senha forte"
           disabled={isSubmitting}
           showStrength
@@ -139,7 +138,7 @@ export default function Register() {
           label="Confirmar Senha"
           {...register("confirmPassword")}
           error={errors.confirmPassword?.message}
-          icon={Lock}
+          icon="lock"
           placeholder="Confirme sua senha"
           disabled={isSubmitting}
         />
@@ -148,11 +147,11 @@ export default function Register() {
           <SubmitButton loading={isSubmitting}>Criar conta</SubmitButton>
         </div>
 
-        <p className="mt-4 text-center text-sm text-text-secondary">
+        <p className="mt-4 text-center text-sm font-medium text-ink-secondary">
           Já tem uma conta?{" "}
           <Link
             to="/auth/login"
-            className="text-primary hover:text-primary-hover font-medium transition-colors duration-150"
+            className="text-info hover:text-blue-700 font-semibold underline transition-colors duration-150"
           >
             Entre aqui
           </Link>

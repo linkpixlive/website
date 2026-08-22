@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { LogoTile } from "~/components/ui/Logo";
 
 interface AuthCardProps {
   title: string;
@@ -8,17 +9,15 @@ interface AuthCardProps {
 
 export function AuthCard({ title, subtitle, children }: AuthCardProps) {
   return (
-    <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4">
-      <div className="w-full max-w-105 bg-surface border border-border rounded-2xl p-6 md:p-8 animate-[fadeIn_0.3s_ease-out]">
+    <div className="min-h-screen bg-canvas flex flex-col justify-center items-center p-4">
+      <div className="w-full max-w-[420px] bg-card border border-gray-100/70 rounded-[26px] shadow-xs p-6 sm:p-8 animate-scale-in">
         <div className="mb-6 flex flex-col items-center text-center">
-          <img
-            src="/logo.svg"
-            alt="LinkPix Logo"
-            className="h-10 mb-6 object-contain"
-          />
-          <h1 className="text-text-heading text-2xl font-semibold">{title}</h1>
+          <LogoTile className="mb-5" />
+          <h1 className="text-lg font-extrabold tracking-tight text-ink-heading">
+            {title}
+          </h1>
           {subtitle && (
-            <p className="text-text-secondary text-sm mt-1">{subtitle}</p>
+            <p className="text-sm font-medium text-ink-secondary mt-1">{subtitle}</p>
           )}
         </div>
         {children}

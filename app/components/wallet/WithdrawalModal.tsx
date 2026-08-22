@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigation, useSubmit } from "react-router";
@@ -9,6 +8,8 @@ import { FormField } from "~/components/ui/FormField";
 import { Modal } from "~/components/ui/Modal";
 import { SelectField } from "~/components/ui/SelectField";
 import { SubmitButton } from "~/components/ui/SubmitButton";
+import { Icon } from "~/components/ui/Icon";
+import { Button } from "~/components/ui/Button";
 import { withdrawalSchema } from "~/validators/wallet-validator";
 
 interface WithdrawalModalProps {
@@ -155,14 +156,14 @@ export function WithdrawalModal({
 
         <div className="space-y-1">
           {pixKeys.length === 0 ? (
-            <div className="text-center p-4 bg-secondary/30 border border-dashed border-border rounded-lg">
-              <p className="text-sm text-text-secondary mb-2">
+            <div className="text-center p-4 bg-wash rounded-2xl">
+              <p className="text-[13px] font-medium text-ink-secondary mb-1">
                 Sem chaves Pix cadastradas
               </p>
               <button
                 type="button"
                 onClick={onOpenManageKeys}
-                className="text-xs text-primary hover:text-primary-hover font-semibold cursor-pointer outline-none"
+                className="text-xs font-semibold text-info hover:text-blue-700 underline cursor-pointer outline-none"
               >
                 Cadastrar Chave Pix
               </button>
@@ -185,7 +186,7 @@ export function WithdrawalModal({
               <button
                 type="button"
                 onClick={onOpenManageKeys}
-                className="text-xs text-primary hover:text-primary-hover font-medium transition-colors duration-150 cursor-pointer outline-none"
+                className="text-xs font-semibold text-info hover:text-blue-700 underline transition-colors duration-150 cursor-pointer outline-none"
               >
                 Gerenciar chaves Pix
               </button>
@@ -193,49 +194,55 @@ export function WithdrawalModal({
           )}
         </div>
 
-        <div className="flex items-start gap-2 bg-secondary/35 border border-border p-3 rounded-lg text-xs text-text-secondary">
-          <AlertCircle className="h-4 w-4 text-text-muted shrink-0 mt-0.5" />
-          <div>
+        <div className="flex items-start gap-2.5 bg-wash rounded-2xl p-3.5">
+          <Icon
+            name="info-circle"
+            size={16}
+            strokeWidth={1.9}
+            className="text-chrome-icon shrink-0 mt-0.5"
+          />
+          <div className="text-[13px] font-medium text-ink-secondary">
             <p>
               Valor mínimo para saques:{" "}
-              <span className="text-text-primary font-semibold">
+              <span className="text-ink-body font-bold">
                 {formatCurrency(minAmount)}
               </span>
             </p>
             <p className="mt-1">
               Taxa de saque aplicada:{" "}
-              <span className="text-text-primary font-semibold">
-                {feePercentage}%
-              </span>
+              <span className="text-ink-body font-bold">{feePercentage}%</span>
             </p>
           </div>
         </div>
 
         {netAmount > 0 && (
-          <div className="bg-surface-hover/30 border border-border p-4 rounded-xl space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-text-secondary">
-                Desconto da taxa ({feePercentage}%)
-              </span>
-              <span className="text-error font-medium">
+          <div className="bg-wash rounded-2xl p-4 space-y-2">
+            <div className="flex justify-between text-[13px] font-medium text-ink-secondary">
+              <span>Desconto da taxa ({feePercentage}%)</span>
+              <span className="text-error font-semibold">
                 -{formatCurrency(feeAmount)}
               </span>
             </div>
-            <div className="flex justify-between text-base font-semibold pt-2 border-t border-border/50">
-              <span className="text-text-heading">Você receberá</span>
-              <span className="text-primary">{formatCurrency(netAmount)}</span>
+            <div className="flex justify-between pt-2 border-t border-gray-100">
+              <span className="text-sm font-bold text-ink-heading">
+                Você receberá
+              </span>
+              <span className="text-sm font-bold text-ink-heading">
+                {formatCurrency(netAmount)}
+              </span>
             </div>
           </div>
         )}
 
-        <div className="flex gap-3 pt-4 border-t border-border/50">
-          <button
+        <div className="flex gap-3 pt-4 border-t border-gray-100">
+          <Button
             type="button"
+            variant="secondary"
             onClick={onClose}
-            className="flex-1 py-2.5 rounded-lg border border-border text-sm font-medium text-text-primary hover:bg-surface-hover transition-colors duration-150 cursor-pointer outline-none"
+            className="flex-1"
           >
             Cancelar
-          </button>
+          </Button>
           <SubmitButton
             loading={loading}
             disabled={pixKeys.length === 0 || loading}

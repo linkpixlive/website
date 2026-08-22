@@ -14,6 +14,7 @@
     "@hookform/resolvers": "^5.4.0",
     "@react-router/node": "8.0.0",
     "@react-router/serve": "8.0.0",
+    "@solar-icons/react": "^2.0.1",
     "axios": "^1.18.1",
     "isbot": "^5.1.36",
     "lucide-react": "^1.22.0",

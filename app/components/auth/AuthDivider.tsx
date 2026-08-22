@@ -1,11 +1,11 @@
 export function AuthDivider({ text = "or" }: { text?: string }) {
   return (
     <div className="flex items-center gap-4 my-6">
-      <div className="flex-1 h-px bg-border" />
-      <span className="text-text-muted text-xs uppercase tracking-wider font-medium">
+      <div className="flex-1 h-px bg-gray-100" />
+      <span className="text-ink-label text-[11px] uppercase tracking-wider font-extrabold">
         {text}
       </span>
-      <div className="flex-1 h-px bg-border" />
+      <div className="flex-1 h-px bg-gray-100" />
     </div>
   );
 }

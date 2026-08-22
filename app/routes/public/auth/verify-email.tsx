@@ -104,15 +104,15 @@ export default function VerifyEmail({ actionData }: Route.ComponentProps) {
 
         {loading && (
           <div className="flex justify-center">
-            <span className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-[spin_0.6s_linear_infinite]" />
+            <span className="w-5 h-5 border-2 border-brand-button/30 border-t-brand-button rounded-full animate-[spin_0.6s_linear_infinite]" />
           </div>
         )}
 
-        <div className="mt-6 text-center text-sm text-text-secondary">
+        <div className="mt-6 text-center text-sm font-medium text-ink-secondary">
           <p>Não recebeu o código?</p>
           <Link
             to="/auth/login"
-            className="inline-block mt-1 text-primary hover:text-primary-hover font-medium transition-colors duration-150"
+            className="inline-block mt-1 text-info hover:text-blue-700 font-semibold underline transition-colors duration-150"
           >
             Reenviar
           </Link>

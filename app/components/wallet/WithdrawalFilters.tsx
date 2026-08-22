@@ -1,7 +1,7 @@
-import { Filter } from "lucide-react";
 import { useState } from "react";
 import { useSearchParams } from "react-router";
 import { DatePicker } from "../ui/DatePicker";
+import { Icon } from "../ui/Icon";
 import { SelectField } from "../ui/SelectField";
 
 const statusOptions = [
@@ -56,29 +56,47 @@ export function WithdrawalFilters() {
     setSearchParams(params);
   };
 
+  const handleClearFilters = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete("status");
+    params.delete("startDate");
+    params.delete("endDate");
+    params.set("page", "1");
+    setSearchParams(params);
+  };
+
   const hasActiveFilters =
     searchParams.has("status") || searchParams.has("startDate") || searchParams.has("endDate");
 
   return (
-    <div className="bg-surface border border-border rounded-2xl p-4 md:p-6 mb-6">
-      {/* Mobile filter button trigger */}
+    <div>
       <div className="flex md:hidden items-center justify-between">
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 text-sm font-medium text-text-primary hover:text-text-heading cursor-pointer outline-none"
+          className="flex items-center gap-2 text-[13px] font-semibold text-ink-body hover:text-ink-heading cursor-pointer outline-none"
         >
-          <Filter className="h-4 w-4" />
-          {isOpen ? "Ocultar Filtros" : "Mostrar Filtros"}
-          {hasActiveFilters && (
-            <span className="w-2 h-2 rounded-full bg-primary" />
-          )}
+          <Icon name="filter" size={16} strokeWidth={1.9} className="text-chrome-icon" />
+          {isOpen ? "Ocultar filtros" : "Filtros"}
+          {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-brand" />}
         </button>
+        {hasActiveFilters && !isOpen && (
+          <button
+            type="button"
+            onClick={handleClearFilters}
+            className="text-xs font-semibold text-info hover:text-blue-700 underline cursor-pointer outline-none"
+          >
+            Limpar filtros
+          </button>
+        )}
       </div>
 
-      {/* Filter panel contents */}
-      <div className={`mt-4 md:mt-0 space-y-4 md:space-y-0 md:flex md:items-end md:gap-4 ${isOpen ? "block" : "hidden md:flex"}`}>
-        <div className="w-full md:max-w-xs">
+      <div
+        className={`mt-4 gap-4 flex-col sm:flex-row sm:flex-wrap sm:items-end ${
+          isOpen ? "flex" : "hidden md:flex"
+        }`}
+      >
+        <div className="w-full sm:w-44">
           <SelectField
             label="Status"
             options={statusOptions}
@@ -87,7 +105,7 @@ export function WithdrawalFilters() {
           />
         </div>
 
-        <div className="w-full md:max-w-xs">
+        <div className="w-full sm:w-44">
           <DatePicker
             label="Data de Início"
             value={startDate}
@@ -95,13 +113,23 @@ export function WithdrawalFilters() {
           />
         </div>
 
-        <div className="w-full md:max-w-xs">
+        <div className="w-full sm:w-44">
           <DatePicker
             label="Data Final"
             value={endDate}
             onChange={handleEndDateChange}
           />
         </div>
+
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={handleClearFilters}
+            className="hidden md:block self-end pb-2.5 text-xs font-semibold text-info hover:text-blue-700 underline cursor-pointer outline-none"
+          >
+            Limpar filtros
+          </button>
+        )}
       </div>
     </div>
   );

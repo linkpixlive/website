@@ -1,4 +1,4 @@
-import { Button } from "@headlessui/react";
+import { Button as HeadlessButton } from "@headlessui/react";
 import type { ReactNode } from "react";
 
 interface SubmitButtonProps {
@@ -29,25 +29,25 @@ export function SubmitButton({
   }
 
   return (
-    <Button
+    <HeadlessButton
       type={type}
       onClick={handleClick}
       disabled={isDisabled}
       className={`
-        w-full py-2.5 rounded-lg font-medium flex items-center justify-center gap-2
-        transition-all duration-150
+        w-full py-3 rounded-full text-sm font-bold flex items-center justify-center gap-2
+        transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-brand/40
         ${
           isDisabled
-            ? "bg-primary-disabled cursor-not-allowed text-text-muted"
-            : "bg-primary text-white hover:bg-primary-hover active:bg-primary-active cursor-pointer"
+            ? "bg-primary-disabled cursor-not-allowed text-ink-muted"
+            : "bg-brand-button text-ink-heading hover:bg-brand-hover active:scale-[0.98] cursor-pointer"
         }
         ${className}
       `}
     >
       {loading && (
-        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-[spin_0.6s_linear_infinite]" />
+        <span className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-[spin_0.6s_linear_infinite]" />
       )}
       {children}
-    </Button>
+    </HeadlessButton>
   );
 }

@@ -1,54 +1,63 @@
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
-import { X } from "lucide-react";
 import { Fragment, type ReactNode } from "react";
+import { Icon } from "./Icon";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   children: ReactNode;
+  size?: "sm" | "md" | "lg";
 }
 
-export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+const sizeStyles = {
+  sm: "sm:max-w-[420px]",
+  md: "sm:max-w-[560px]",
+  lg: "sm:max-w-[720px]",
+};
+
+export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalProps) {
   return (
     <Transition show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
         {/* Backdrop overlay */}
         <TransitionChild
           as={Fragment}
-          enter="ease-out duration-300"
+          enter="ease-out duration-200"
           enterFrom="opacity-0"
           enterTo="opacity-100"
-          leave="ease-in duration-200"
+          leave="ease-out duration-200"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity" />
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" />
         </TransitionChild>
 
         <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
             <TransitionChild
               as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-              enterTo="opacity-100 translate-y-0 sm:scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-              leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              enter="ease-out duration-200"
+              enterFrom="opacity-0 scale-[0.96]"
+              enterTo="opacity-100 scale-100"
+              leave="ease-out duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-[0.96]"
             >
-              <DialogPanel className="relative transform rounded-2xl bg-surface border border-border px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6 w-full animate-[fadeIn_0.2s_ease-out]">
+              <DialogPanel
+                className={`relative w-full transform rounded-[26px] bg-card border border-gray-100/70 p-5 text-left shadow-xl transition-all sm:my-8 sm:p-6 max-h-[90vh] overflow-y-auto animate-scale-in ${sizeStyles[size]}`}
+              >
                 {/* Header */}
                 <div className="flex items-center justify-between mb-5">
-                  <DialogTitle as="h3" className="text-lg font-semibold text-text-heading">
+                  <DialogTitle as="h3" className="text-lg font-extrabold tracking-tight text-ink-heading">
                     {title}
                   </DialogTitle>
                   <button
                     type="button"
                     onClick={onClose}
-                    className="rounded-lg p-1 text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors duration-150 outline-none cursor-pointer"
+                    className="rounded-full p-1.5 text-chrome-icon hover:bg-wash hover:text-ink-heading transition-colors duration-150 outline-none cursor-pointer active:scale-95"
                   >
-                    <X className="h-5 w-5" aria-hidden="true" />
+                    <Icon name="close-circle" size={20} strokeWidth={2} />
                   </button>
                 </div>
 

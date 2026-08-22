@@ -88,11 +88,13 @@ function QueuePopoutContent() {
 
   return (
     <div className="min-h-screen bg-background text-text-primary flex flex-col">
-      <header className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
+      <header className="flex items-center justify-between gap-4 px-6 py-4 border-b border-white/10 shrink-0">
         <div>
-          <h1 className="text-lg font-bold text-text-heading">Fila de Alertas</h1>
-          <p className="text-xs text-text-secondary mt-0.5">
-            Filha de doações em tempo real
+          <h1 className="text-lg font-extrabold tracking-tight text-text-heading leading-tight">
+            Fila de Alertas
+          </h1>
+          <p className="text-xs text-text-primary mt-0.5">
+            Fila de doações em tempo real
           </p>
         </div>
         <QueueStatusBadge
@@ -101,19 +103,18 @@ function QueuePopoutContent() {
         />
       </header>
 
-      <div className="px-6 py-4 border-b border-border/50 shrink-0">
+      <div className="px-6 py-3 border-b border-white/10 shrink-0 overflow-x-auto scrollbar-thin">
         <QueueToolbar
           isPaused={isPaused}
           onTogglePause={handleTogglePause}
           onSkip={handleSkip}
           onClear={handleClear}
           onTest={handleTest}
-          onOpenPopup={() => {}}
           loading={actionLoading}
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-4">
+      <div className="flex-1 overflow-y-auto px-6 py-4 scrollbar-thin">
         <QueueList
           queue={queue}
           onReplay={handleReplay}

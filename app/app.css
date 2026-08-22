@@ -1,46 +1,131 @@
 @import "tailwindcss";
 
+/* ── Self-hosted fonts (Fontshare ITF Free Font License) ───────────── */
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("./fonts/Satoshi-Variable.woff2") format("woff2-variations");
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Clash Display";
+  src: url("./fonts/ClashDisplay-Variable.woff2") format("woff2-variations");
+  font-weight: 200 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
-  --color-primary: #6E8A75;
-  --color-primary-hover: #839F8A;
-  --color-primary-active: #5B7261;
-  --color-primary-disabled: #2A322C;
-  
-  --color-secondary: #282C36;
+  /* ── Legacy token names remapped to the design system ────────────── */
+  --color-background: #111216; /* shell */
+  --color-surface: #181a1f; /* inset dark */
+  --color-surface-hover: #23252c; /* ~white/5 solid on inset */
+  --color-border: #2a2d35; /* ~white/10 solid on dark */
+  --color-border-focus: #fcc717;
 
-  --color-background: #101216;
-  --color-surface: #181A20;
-  --color-surface-hover: #262932;
+  --color-primary: #fed130;
+  --color-primary-hover: #fcc717;
+  --color-primary-active: #f5bd0f;
+  --color-primary-disabled: #e8eaef;
 
-  --color-border: #282A34;
-  --color-border-focus: #DED2F1;
+  --color-secondary: #f4f5f8; /* wash field fill */
 
-  --color-text-heading: #FFFFFF; 
-  --color-text-primary: #979FB9;
-  --color-text-secondary: #6D768E;
-  --color-text-muted: #525866;
+  --color-text-heading: #ffffff;
+  --color-text-primary: #9ca3af;
+  --color-text-secondary: #7f8594;
+  --color-text-muted: #707684;
 
-  --color-success: #4ADE80;
-  --color-info: #60A5FA;
-  --color-warning: #FACC15;
-  --color-error: #F87171;
+  --color-success: #10b981;
+  --color-info: #2563eb;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-error-hover: #dc2626;
 
-  --animate-fadeInUp: fadeInUp 0.3s ease-out;
-  --animate-slideInLeft: slideInLeft 0.3s ease-out;
-  --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  /* ── Shell (dark chrome) ─────────────────────────────────────────── */
+  --color-shell: #111216;
+  --color-inset-dark: #181a1f;
+  --color-media-void: #1e232d;
+  --color-inverse: #16181e;
+  --color-inverse-hover: #000000;
 
-  @keyframes fadeInUp {
+  /* ── Canvas (light surfaces) ─────────────────────────────────────── */
+  --color-canvas: #edf0f7;
+  --color-card: #ffffff;
+  --color-wash: #f4f5f8;
+  --color-tile: #f9fafb;
+
+  /* ── Accent yellow (scarce) ──────────────────────────────────────── */
+  --color-brand: #ffd037;
+  --color-brand-button: #fed130;
+  --color-brand-hover: #fcc717;
+  --color-yellow-ink: #b58a00;
+  --color-yellow-wash: #fff7d6;
+
+  /* ── Ink scale ───────────────────────────────────────────────────── */
+  --color-ink-heading: #11151e;
+  --color-ink-body: #333945;
+  --color-ink-body-strong: #222834;
+  --color-ink-secondary: #707684;
+  --color-ink-muted: #828896;
+  --color-ink-label: #9ca3af;
+  --color-ink-placeholder: #a0a6b2;
+  --color-chrome-icon: #3e4452;
+
+  /* ── Typography ──────────────────────────────────────────────────── */
+  --font-sans: "Satoshi", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Clash Display", "Satoshi", ui-sans-serif, system-ui, sans-serif;
+
+  /* ── Motion (short, ease-out) ────────────────────────────────────── */
+  --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-scale-in: scale-in 0.2s ease-out;
+  --animate-pop-in: pop-in 0.18s ease-out;
+  --animate-slide-up: slide-up 0.24s ease-out;
+  --animate-slide-left: slide-left 0.26s ease-out;
+
+  @keyframes fade-in {
     from {
       opacity: 0;
-      transform: translateY(10px);
     }
     to {
       opacity: 1;
+    }
+  }
+
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes slide-up {
+    from {
+      transform: translateY(100%);
+    }
+    to {
       transform: translateY(0);
     }
   }
 
-  @keyframes slideInLeft {
+  @keyframes slide-left {
     from {
       transform: translateX(-100%);
     }
@@ -50,16 +135,20 @@
   }
 }
 
-html,
-body {
-  @apply bg-background text-text-primary;
-  color-scheme: dark;
-  font-family: "Inter", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+html {
+  color-scheme: light;
 }
 
-/* ── Auth utility animations ────────────────────────────────────────── */
+body {
+  @apply bg-canvas text-ink-body font-sans antialiased;
+}
+
+::selection {
+  background-color: rgb(255 208 55 / 0.4);
+  color: #000000;
+}
+
+/* ── Utility animations kept for existing consumers ─────────────────── */
 
 @keyframes spin {
   to {
@@ -84,5 +173,26 @@ body {
   60%,
   80% {
     transform: translateX(4px);
+  }
+}
+
+/* ── Dense-panel scrollbars ─────────────────────────────────────────── */
+
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 9999px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
   }
 }

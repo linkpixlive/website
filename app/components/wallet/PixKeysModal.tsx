@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useFetcher } from "react-router";
@@ -10,6 +9,7 @@ import { Modal } from "~/components/ui/Modal";
 import { SelectField } from "~/components/ui/SelectField";
 import { SubmitButton } from "~/components/ui/SubmitButton";
 import { useToast } from "~/components/ui/useToast";
+import { Icon } from "~/components/ui/Icon";
 import { pixKeySchema } from "~/validators/wallet-validator";
 
 interface PixKeysModalProps {
@@ -96,7 +96,7 @@ function getPlaceholder(type: PixKeyType | ""): string {
   return type ? map[type] : "";
 }
 
-function getTypeName(type: string) {
+export function getTypeName(type: string) {
   const types: Record<string, string> = {
     cpf: "CPF",
     cnpj: "CNPJ",
@@ -207,37 +207,34 @@ export function PixKeysModal({
         {localError && <AlertMessage variant="error" message={localError} />}
 
         {/* Existing Keys List */}
-        <div className="space-y-3">
-          <h4 className="text-sm font-semibold text-text-heading">
+        <div className="space-y-2">
+          <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
             Suas chaves cadastradas
           </h4>
 
           {pixKeys.length === 0 ? (
-            <div className="text-center p-6 bg-secondary/20 border border-dashed border-border rounded-xl">
-              <p className="text-xs text-text-secondary">
+            <div className="text-center py-6 bg-wash rounded-2xl">
+              <p className="text-xs font-medium text-ink-secondary">
                 Você ainda não possui chaves Pix cadastradas.
               </p>
             </div>
           ) : (
-            <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+            <div className="divide-y divide-gray-100 max-h-60 overflow-y-auto scrollbar-thin pr-1">
               {pixKeys.map((pk) => (
-                <div
-                  key={pk.id}
-                  className="bg-secondary/40 border border-border rounded-xl p-3 flex flex-col gap-2"
-                >
+                <div key={pk.id} className="py-3 flex flex-col gap-2 first:pt-1 last:pb-1">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded bg-primary/20 text-primary border border-primary/10">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-wash text-ink-secondary">
                           {getTypeName(pk.keyType)}
                         </span>
                         {pk.alias && (
-                          <span className="text-xs font-semibold text-text-heading truncate">
+                          <span className="text-[13px] font-bold text-ink-heading truncate">
                             {pk.alias}
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-text-primary mt-1 break-all font-mono font-medium">
+                      <p className="text-xs text-ink-secondary mt-1 break-all font-mono font-medium">
                         {pk.keyMasked}
                       </p>
                     </div>
@@ -246,34 +243,34 @@ export function PixKeysModal({
                       <button
                         type="button"
                         onClick={() => setDeletingId(pk.id)}
-                        className="p-1.5 rounded-lg text-text-muted hover:text-error hover:bg-error/10 transition-colors duration-150 cursor-pointer outline-none shrink-0"
+                        className="p-1.5 rounded-full text-chrome-icon hover:text-error hover:bg-red-50 transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Icon name="trash-bin-minimalistic" size={16} strokeWidth={1.9} />
                       </button>
                     )}
                   </div>
 
                   {/* Inline Delete Confirmation */}
                   {deletingId === pk.id && (
-                    <div className="bg-error/5 border border-error/20 p-2.5 rounded-lg flex items-center justify-between gap-2 mt-1 animate-[fadeInUp_0.15s_ease-out]">
-                      <div className="flex items-center gap-1.5 text-xs text-error font-medium">
-                        <AlertCircle className="h-4 w-4 shrink-0" />
-                        <span>Confirmar exclusão?</span>
+                    <div className="bg-error/5 border border-error/20 p-3 rounded-xl space-y-2 mt-1 animate-fade-in">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-error">
+                        <Icon name="danger-circle" size={14} strokeWidth={2} />
+                        <span>Excluir esta chave Pix permanentemente?</span>
                       </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => setDeletingId(null)}
-                          className="px-2.5 py-1 rounded bg-secondary text-[11px] font-semibold text-text-primary hover:bg-surface-hover transition-colors duration-100 cursor-pointer outline-none"
-                        >
-                          Não
-                        </button>
+                      <div className="flex flex-col gap-1.5">
                         <button
                           type="button"
                           onClick={() => onDeleteConfirm(pk.id)}
-                          className="px-2.5 py-1 rounded bg-error text-[11px] font-semibold text-white hover:bg-error/85 transition-colors duration-100 cursor-pointer outline-none"
+                          className="w-full px-3 py-1.5 rounded-full bg-error text-white text-[11px] font-bold hover:bg-error-hover active:scale-[0.98] transition-all duration-150 cursor-pointer outline-none"
                         >
                           Sim, excluir
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeletingId(null)}
+                          className="w-full px-3 py-1.5 rounded-full bg-wash text-[11px] font-bold text-ink-body hover:bg-gray-100 active:scale-[0.98] transition-all duration-150 cursor-pointer outline-none"
+                        >
+                          Não, manter
                         </button>
                       </div>
                     </div>
@@ -285,8 +282,8 @@ export function PixKeysModal({
         </div>
 
         {/* Add New Key Form */}
-        <div className="border-t border-border/50 pt-5">
-          <h4 className="text-sm font-semibold text-text-heading mb-3">
+        <div className="border-t border-gray-100 pt-4">
+          <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label mb-3">
             Cadastrar nova chave
           </h4>
           <form onSubmit={handleSubmit(onAddKey)} className="space-y-3.5">
@@ -332,7 +329,7 @@ export function PixKeysModal({
               disabled={loading}
               className="w-full mt-2"
             >
-              <Plus className="h-4 w-4" />
+              <Icon name="add-circle" size={16} strokeWidth={2} />
               Adicionar Chave
             </SubmitButton>
           </form>

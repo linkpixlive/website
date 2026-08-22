@@ -8,15 +8,23 @@ interface BadgeProps {
 const statusMap: Record<string, { label: string; className: string }> = {
   pending: {
     label: "Pendente",
-    className: "text-warning bg-warning/10 border-warning/20",
+    className: "text-yellow-ink bg-warning/10",
   },
   success: {
     label: "Aprovado",
-    className: "text-success bg-success/10 border-success/20",
+    className: "text-emerald-700 bg-success/10",
+  },
+  approved: {
+    label: "Aprovado",
+    className: "text-emerald-700 bg-success/10",
   },
   failed: {
     label: "Rejeitado",
-    className: "text-error bg-error/10 border-error/20",
+    className: "text-error bg-error/10",
+  },
+  rejected: {
+    label: "Rejeitado",
+    className: "text-error bg-error/10",
   },
 };
 
@@ -24,12 +32,12 @@ export function Badge({ status, children }: BadgeProps) {
   const normalizedStatus = status.toLowerCase();
   const config = statusMap[normalizedStatus] || {
     label: status,
-    className: "text-text-secondary bg-surface-hover border-border",
+    className: "text-ink-secondary bg-wash",
   };
 
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${config.className}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold ${config.className}`}
     >
       {children || config.label}
     </span>

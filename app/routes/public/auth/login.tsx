@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Lock, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, redirect, useNavigation, useSubmit } from "react-router";
@@ -83,7 +82,7 @@ export default function Login({ actionData }: Route.ComponentProps) {
           {...register("email")}
           type="email"
           error={errors.email?.message}
-          icon={Mail}
+          icon="letter"
           placeholder="email@email.com"
           disabled={loading}
           autoFocus
@@ -94,14 +93,14 @@ export default function Login({ actionData }: Route.ComponentProps) {
             label="Senha"
             {...register("password")}
             error={errors.password?.message}
-            icon={Lock}
+            icon="lock"
             placeholder="Digite sua senha"
             disabled={loading}
           />
           <div className="flex justify-end">
             <Link
               to="/auth/forgot-password"
-              className="text-sm text-text-secondary hover:text-text-heading transition-colors duration-150"
+              className="text-[13px] font-semibold text-info hover:text-blue-700 transition-colors duration-150"
             >
               Esqueceu a senha?
             </Link>
@@ -114,11 +113,11 @@ export default function Login({ actionData }: Route.ComponentProps) {
 
         <AuthDivider text="ou" />
 
-        <p className="mt-4 text-center text-sm text-text-secondary">
+        <p className="mt-4 text-center text-sm font-medium text-ink-secondary">
           Não tem uma conta?{" "}
           <Link
             to="/auth/register"
-            className="text-primary hover:text-primary-hover font-medium transition-colors duration-150"
+            className="text-info hover:text-blue-700 font-semibold underline transition-colors duration-150"
           >
             Crie aqui
           </Link>

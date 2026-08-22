@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router";
@@ -58,7 +57,7 @@ export default function ForgotPassword() {
           <div className="text-center">
             <Link
               to="/auth/login"
-              className="text-sm text-primary hover:text-primary-hover font-medium transition-colors duration-150"
+              className="text-[13px] font-semibold text-info hover:text-blue-700 underline transition-colors duration-150"
             >
               Voltar para Login
             </Link>
@@ -77,7 +76,7 @@ export default function ForgotPassword() {
             {...register("email")}
             type="email"
             error={errors.email?.message}
-            icon={Mail}
+            icon="letter"
             placeholder="email@email.com"
             disabled={isSubmitting}
             autoFocus
@@ -90,7 +89,7 @@ export default function ForgotPassword() {
           <div className="mt-4 text-center">
             <Link
               to="/auth/login"
-              className="text-sm text-text-secondary hover:text-text-heading transition-colors duration-150"
+              className="text-[13px] font-semibold text-info hover:text-blue-700 transition-colors duration-150"
             >
               Voltar para Login
             </Link>

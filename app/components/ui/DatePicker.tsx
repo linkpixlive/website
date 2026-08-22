@@ -1,6 +1,6 @@
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
-import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { Icon } from "./Icon";
 
 interface DatePickerProps {
   label: string;
@@ -138,32 +138,39 @@ export function DatePicker({
 
   return (
     <div className={`flex flex-col gap-1.5 w-full ${className}`}>
-      <span className="text-text-secondary text-sm font-medium">{label}</span>
+      <span className="text-[13px] font-medium text-ink-secondary">{label}</span>
       <Popover className="relative">
         {({ open }) => (
           <>
             <PopoverButton
               disabled={disabled}
               className={`
-                w-full bg-secondary rounded-lg py-2.5 pl-9 pr-3 text-left text-sm text-text-heading
+                w-full bg-wash rounded-full py-2.5 pl-10 pr-4 text-left text-sm font-medium text-ink-heading
                 border transition-colors duration-150 outline-none cursor-pointer flex items-center relative
                 ${
                   error
-                    ? "border-error focus:ring-1 focus:ring-error/30"
-                    : "border-border focus:border-border-focus focus:ring-1 focus:ring-border-focus/30"
+                    ? "border-error focus:border-error focus:ring-2 focus:ring-error/20"
+                    : open
+                    ? "border-[#fcc717] ring-2 ring-brand/30"
+                    : "border-gray-100/80 hover:border-gray-200/90"
                 }
                 ${disabled ? "opacity-50 cursor-not-allowed" : ""}
               `}
             >
-              <CalendarDays className="absolute left-3 w-4 h-4 text-text-muted pointer-events-none" />
-              <span className={!value ? "text-text-muted" : ""}>
+              <Icon
+                name="calendar"
+                size={16}
+                strokeWidth={1.9}
+                className="absolute left-4 text-ink-secondary pointer-events-none"
+              />
+              <span className={!value ? "text-ink-placeholder" : ""}>
                 {formatDateLabel(value)}
               </span>
             </PopoverButton>
 
             <PopoverPanel
               transition
-              className="absolute z-50 mt-1 w-72 rounded-xl bg-surface border border-border p-4 shadow-xl focus:outline-none transition ease-in duration-100 data-[leave]:data-[closed]:opacity-0"
+              className="absolute z-50 mt-2 w-72 rounded-[20px] bg-card border border-gray-100/70 p-4 shadow-lg focus:outline-none animate-pop-in data-[leave]:data-[closed]:opacity-0"
             >
               {({ close }) => (
                 <div className="flex flex-col select-none">
@@ -172,19 +179,19 @@ export function DatePicker({
                     <button
                       type="button"
                       onClick={handlePrevMonth}
-                      className="p-1 rounded-lg hover:bg-surface-hover text-text-primary transition-colors duration-150 cursor-pointer"
+                      className="p-1.5 rounded-full hover:bg-wash text-chrome-icon transition-colors duration-150 cursor-pointer active:scale-95"
                     >
-                      <ChevronLeft className="h-4 w-4" />
+                      <Icon name="alt-arrow-left" size={16} strokeWidth={2} />
                     </button>
-                    <span className="text-sm font-semibold text-text-heading">
+                    <span className="text-sm font-bold text-ink-heading">
                       {MONTHS[viewMonth]} {viewYear}
                     </span>
                     <button
                       type="button"
                       onClick={handleNextMonth}
-                      className="p-1 rounded-lg hover:bg-surface-hover text-text-primary transition-colors duration-150 cursor-pointer"
+                      className="p-1.5 rounded-full hover:bg-wash text-chrome-icon transition-colors duration-150 cursor-pointer active:scale-95"
                     >
-                      <ChevronRight className="h-4 w-4" />
+                      <Icon name="alt-arrow-right" size={16} strokeWidth={2} />
                     </button>
                   </div>
 
@@ -193,7 +200,7 @@ export function DatePicker({
                     {DAYS_OF_WEEK.map((day, idx) => (
                       <span
                         key={idx}
-                        className="text-xs font-semibold text-text-muted py-1"
+                        className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label py-1"
                       >
                         {day}
                       </span>
@@ -210,13 +217,13 @@ export function DatePicker({
                           handleDaySelect(cell.day, cell.isCurrentMonth, close)
                         }
                         className={`
-                          text-xs py-1.5 rounded-lg font-medium transition-colors duration-100 cursor-pointer
+                          w-8 h-8 mx-auto my-0.5 inline-flex items-center justify-center rounded-full text-xs font-medium transition-colors duration-100 cursor-pointer active:scale-95
                           ${
                             isSelected(cell.day, cell.isCurrentMonth)
-                              ? "bg-primary text-white font-semibold"
+                              ? "bg-brand-button text-ink-heading font-extrabold"
                               : cell.isCurrentMonth
-                              ? "text-text-primary hover:bg-surface-hover"
-                              : "text-text-muted opacity-40 hover:bg-surface-hover/50"
+                              ? "text-ink-body hover:bg-wash"
+                              : "text-ink-label opacity-50 hover:bg-wash/60"
                           }
                         `}
                       >
@@ -233,7 +240,7 @@ export function DatePicker({
                         onChange(null);
                         close();
                       }}
-                      className="mt-3 text-xs font-medium text-error hover:text-error/80 text-center py-1 border-t border-border pt-2 cursor-pointer"
+                      className="mt-3 text-xs font-semibold text-error hover:text-error-hover text-center py-1 border-t border-gray-100 pt-2 cursor-pointer"
                     >
                       Limpar Data
                     </button>
@@ -245,7 +252,7 @@ export function DatePicker({
         )}
       </Popover>
       {error && (
-        <span className="text-error text-xs animate-[shake_0.4s_ease-in-out]">
+        <span className="text-error text-xs font-medium animate-[shake_0.4s_ease-in-out]">
           {error}
         </span>
       )}

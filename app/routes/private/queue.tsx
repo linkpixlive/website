@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLoaderData, useSearchParams } from "react-router";
+import { useLoaderData } from "react-router";
 import type { Route } from "./+types/queue";
 import { getAuthToken } from "~/util/session.server";
 import { overlayApi } from "~/api/modules/overlay";
@@ -93,10 +93,22 @@ export default function Queue() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div>
       <PageHeader
         title="Fila de Alertas"
-        subtitle="Gerencie a fila de doações em tempo real"
+        subtitle={
+          queue.length > 0 ? (
+            <>
+              Você tem{" "}
+              <strong className="font-bold text-ink-heading">
+                {queue.length} {queue.length === 1 ? "alerta" : "alertas"}
+              </strong>{" "}
+              na fila de exibição.
+            </>
+          ) : (
+            "Nenhuma doação aguardando exibição."
+          )
+        }
         actions={
           <QueueStatusBadge
             isOverlayOnline={isOverlayOnline}
@@ -105,23 +117,32 @@ export default function Queue() {
         }
       />
 
-      <div className="mb-6">
-        <QueueToolbar
-          isPaused={isPaused}
-          onTogglePause={handleTogglePause}
-          onSkip={handleSkip}
-          onClear={handleClear}
-          onTest={handleTest}
-          onOpenPopup={handleOpenPopup}
-          loading={actionLoading}
-        />
-      </div>
+      <section
+        aria-label="Fila de doações"
+        className="rounded-[26px] bg-card border border-gray-100/70 shadow-xs p-5"
+      >
+        <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label shrink-0">
+            Fila em tempo real
+          </h2>
 
-      <QueueList
-        queue={queue}
-        onReplay={handleReplay}
-        replayLoading={replayLoading}
-      />
+          <QueueToolbar
+            isPaused={isPaused}
+            onTogglePause={handleTogglePause}
+            onSkip={handleSkip}
+            onClear={handleClear}
+            onTest={handleTest}
+            onOpenPopup={handleOpenPopup}
+            loading={actionLoading}
+          />
+        </div>
+
+        <QueueList
+          queue={queue}
+          onReplay={handleReplay}
+          replayLoading={replayLoading}
+        />
+      </section>
     </div>
   );
 }

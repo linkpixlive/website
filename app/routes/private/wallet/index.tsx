@@ -8,11 +8,11 @@ import {
 import { pixKeysApi, type PixKey } from "~/api/modules/pix-keys";
 import { walletsApi } from "~/api/modules/wallets";
 import { withdrawalsApi, type Withdrawal } from "~/api/modules/withdrawals";
-import { PageHeader } from "~/components/dashboard/PageHeader";
 import { Button } from "~/components/ui/Button";
 import { Pagination } from "~/components/ui/Pagination";
 import { useToast } from "~/components/ui/useToast";
-import { BalanceCard } from "~/components/wallet/BalanceCard";
+import { formatCurrency, BalanceCard } from "~/components/wallet/BalanceCard";
+import { PixKeysCard } from "~/components/wallet/PixKeysCard";
 import { PixKeysModal } from "~/components/wallet/PixKeysModal";
 import { WithdrawalFilters } from "~/components/wallet/WithdrawalFilters";
 import { WithdrawalHistoryTable } from "~/components/wallet/WithdrawalHistoryTable";
@@ -166,74 +166,83 @@ export default function WalletPage() {
     setSearchParams(params);
   };
 
+  const openWithdrawal = () => {
+    setWithdrawalError(null);
+    setIsWithdrawalOpen(true);
+  };
+
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6">
-      <PageHeader
-        title="Carteira"
-        subtitle="Gerencie seus saldos e solicite transferências"
-        actions={
-          <div className="flex gap-3 w-full sm:w-auto">
-            <Button
-              variant="ghost"
-              onClick={() => setIsPixKeysOpen(true)}
-              className="flex-1 sm:flex-initial"
-            >
-              Chaves Pix
-            </Button>
-            <Button
-              onClick={() => {
-                setWithdrawalError(null);
-                setIsWithdrawalOpen(true);
-              }}
-              className="flex-1 sm:flex-initial"
-            >
-              Solicitar Saque
-            </Button>
-          </div>
-        }
-      />
-
-      {/* Balances Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-        <BalanceCard
-          label="Disponível para Saque"
-          amount={balances.available}
-          variant="available"
-          loading={loadingData}
-        />
-        <BalanceCard
-          label="Saldo Pendente"
-          amount={balances.pending}
-          variant="pending"
-          loading={loadingData}
-        />
-        <BalanceCard
-          label="Saldo Bloqueado"
-          amount={balances.blocked}
-          variant="blocked"
-          loading={loadingData}
-        />
+    <div className="max-w-7xl mx-auto">
+      {/* Title block */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-6">
+        <div>
+          <h1 className="text-xl sm:text-2xl lg:text-[26px] font-extrabold tracking-tight leading-tight text-ink-heading">
+            Carteira
+          </h1>
+          <p className="mt-1 text-sm text-ink-secondary">
+            Você tem{" "}
+            <span className="font-bold text-ink-heading">
+              {formatCurrency(balances.available)}
+            </span>{" "}
+            disponível para saque em{" "}
+            <span className="font-bold text-ink-heading">
+              {pixKeys.length === 1
+                ? "1 chave Pix"
+                : `${pixKeys.length} chaves Pix`}
+            </span>
+            .
+          </p>
+        </div>
+        <div className="flex gap-3 self-end sm:self-auto shrink-0">
+          <Button variant="secondary" onClick={() => setIsPixKeysOpen(true)}>
+            Chaves Pix
+          </Button>
+        </div>
       </div>
 
-      {/* History section title */}
-      <div className="mb-4">
-        <h2 className="text-lg font-bold text-text-heading">
-          Histórico de Saques
-        </h2>
+      {/* Primary + secondary columns */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        <div className="lg:col-span-7 xl:col-span-8">
+          <BalanceCard
+            balances={balances}
+            loading={loadingData}
+            onWithdraw={openWithdrawal}
+          />
+        </div>
+        <aside className="lg:col-span-5 xl:col-span-4">
+          <PixKeysCard
+            pixKeys={pixKeys}
+            onManage={() => setIsPixKeysOpen(true)}
+          />
+        </aside>
       </div>
 
-      {/* Filters Panel */}
-      <WithdrawalFilters />
+      {/* History card */}
+      <section className="mt-5 rounded-[26px] bg-card border border-gray-100/70 shadow-xs p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+            Histórico de saques
+          </h2>
+          {withdrawals.meta.total > 0 && (
+            <span className="text-[11px] font-semibold text-gray-400">
+              {withdrawals.meta.total}{" "}
+              {withdrawals.meta.total === 1 ? "registro" : "registros"}
+            </span>
+          )}
+        </div>
 
-      {/* History Table / Cards */}
-      <WithdrawalHistoryTable items={withdrawals.items} loading={loadingData} />
+        <WithdrawalFilters />
 
-      {/* Paginations */}
-      <Pagination
-        page={page}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+        <div className="mt-5">
+          <WithdrawalHistoryTable items={withdrawals.items} loading={loadingData} />
+        </div>
+
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </section>
 
       {/* Modals */}
       <WithdrawalModal

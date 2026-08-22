@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Icon } from "./Icon";
 import { Button } from "./Button";
 
 interface PaginationProps {
@@ -11,55 +11,55 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-between gap-4 mt-6 py-3 border-t border-border">
+    <div className="flex items-center justify-between gap-4 mt-6 py-3 border-t border-gray-100">
       <div className="flex-1 flex justify-between sm:hidden">
         <Button
-          variant="ghost"
+          variant="secondary"
           size="sm"
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
         >
-          <ChevronLeft className="h-4 w-4" />
+          <Icon name="alt-arrow-left" size={16} strokeWidth={2} />
           Anterior
         </Button>
-        <span className="text-sm text-text-secondary self-center">
+        <span className="text-[13px] font-medium text-ink-secondary self-center">
           {page} de {totalPages}
         </span>
         <Button
-          variant="ghost"
+          variant="secondary"
           size="sm"
           disabled={page >= totalPages}
           onClick={() => onPageChange(page + 1)}
         >
           Próxima
-          <ChevronRight className="h-4 w-4" />
+          <Icon name="alt-arrow-right" size={16} strokeWidth={2} />
         </Button>
       </div>
       <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm text-text-secondary">
-            Página <span className="font-semibold text-text-heading">{page}</span> de{" "}
-            <span className="font-semibold text-text-heading">{totalPages}</span>
+          <p className="text-[13px] font-medium text-ink-secondary">
+            Página <span className="font-bold text-ink-heading">{page}</span> de{" "}
+            <span className="font-bold text-ink-heading">{totalPages}</span>
           </p>
         </div>
         <div className="flex gap-2">
           <Button
-            variant="ghost"
+            variant="secondary"
             size="sm"
             disabled={page <= 1}
             onClick={() => onPageChange(page - 1)}
           >
-            <ChevronLeft className="h-4 w-4" />
+            <Icon name="alt-arrow-left" size={16} strokeWidth={2} />
             Anterior
           </Button>
           <Button
-            variant="ghost"
+            variant="secondary"
             size="sm"
             disabled={page >= totalPages}
             onClick={() => onPageChange(page + 1)}
           >
             Próxima
-            <ChevronRight className="h-4 w-4" />
+            <Icon name="alt-arrow-right" size={16} strokeWidth={2} />
           </Button>
         </div>
       </div>

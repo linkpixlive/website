@@ -1,5 +1,5 @@
-import { Repeat } from "lucide-react";
 import { Button } from "~/components/ui/Button";
+import { Icon } from "~/components/ui/Icon";
 import type { OverlayDonationEntity } from "~/types/queue";
 
 interface QueueItemCardProps {
@@ -16,45 +16,50 @@ function formatTimestamp(dateString: string) {
   });
 }
 
-export function QueueItemCard({ donation, onReplay, loading }: QueueItemCardProps) {
+export function QueueItemCard({
+  donation,
+  onReplay,
+  loading,
+}: QueueItemCardProps) {
   return (
-    <div className="flex items-start gap-4 bg-surface border border-border rounded-2xl p-4 transition-all duration-150 hover:border-border-focus/30">
+    <li className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
       <img
         src={donation.donorAvatarUrl || "/default-avatar.svg"}
         alt={donation.donorName}
-        className="h-10 w-10 rounded-full object-cover shrink-0"
+        className="h-9 w-9 rounded-full object-cover border border-white shadow-2xs shrink-0"
       />
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-sm font-semibold text-text-heading truncate">
+        <div className="flex items-baseline gap-2">
+          <span className="text-[15px] font-bold text-ink-heading leading-snug truncate">
             {donation.donorName}
           </span>
-          <span className="text-sm font-bold text-primary shrink-0">
+          <span className="ml-auto shrink-0 pl-2 text-sm font-extrabold text-ink-heading">
             {donation.amountFormatted}
           </span>
         </div>
 
         {donation.message && (
-          <p className="text-sm text-text-primary line-clamp-2 mb-1">
+          <p className="mt-0.5 text-xs font-medium text-ink-secondary leading-snug line-clamp-2">
             {donation.message}
           </p>
         )}
 
-        <span className="text-xs text-text-muted">
+        <span className="mt-0.5 block text-[11px] font-semibold text-gray-400">
           {formatTimestamp(donation.createdAt)}
         </span>
       </div>
 
       <Button
-        variant="ghost"
+        variant="secondary"
         size="sm"
         onClick={() => onReplay(donation.id)}
         loading={loading}
+        className="shrink-0"
       >
-        <Repeat className="h-4 w-4" />
+        <Icon name="repeat-one" size={16} strokeWidth={2} />
         Repetir
       </Button>
-    </div>
+    </li>
   );
 }
