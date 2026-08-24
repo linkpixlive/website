@@ -1,4 +1,4 @@
-import { Field, Label, Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
+import { Select } from "@base-ui/react/select";
 import { Icon } from "./Icon";
 
 interface Option {
@@ -44,12 +44,18 @@ export function SelectField({
   const selectedOption = options.find((opt) => opt.value === value);
 
   return (
-    <Field className={`flex flex-col gap-1.5 w-full ${className}`}>
-      <Label className="text-[13px] font-medium text-ink-secondary">{label}</Label>
-      <Listbox value={value} onChange={onChange} disabled={disabled}>
-        <div className="relative">
-          <ListboxButton
-            className={`
+    <div className={`flex flex-col gap-1.5 w-full ${className}`}>
+      <Select.Root
+        items={options}
+        value={selectedOption ? value : null}
+        onValueChange={(newValue) => onChange(newValue as string)}
+        disabled={disabled}
+      >
+        <Select.Label className="text-[13px] font-medium text-ink-secondary">
+          {label}
+        </Select.Label>
+        <Select.Trigger
+          className={`
               w-full bg-wash rounded-full py-2.5 px-4 text-left text-sm font-medium text-ink-heading
               border transition-colors duration-150 outline-none cursor-pointer flex items-center justify-between
               ${
@@ -59,56 +65,57 @@ export function SelectField({
               }
               ${disabled ? "opacity-50 cursor-not-allowed" : ""}
             `}
-          >
-            <span className={!selectedOption ? "text-ink-placeholder" : "block truncate"}>
-              {selectedOption ? selectedOption.label : placeholder}
-            </span>
-            <Icon
-              name="alt-arrow-down"
-              size={16}
-              strokeWidth={1.9}
-              className="text-ink-secondary pointer-events-none shrink-0 ml-2"
-            />
-          </ListboxButton>
+        >
+          <Select.Value
+            placeholder={placeholder}
+            className={!selectedOption ? "text-ink-placeholder" : "block truncate"}
+          />
+          <Select.Icon className="text-ink-secondary pointer-events-none shrink-0 ml-2">
+            <Icon name="alt-arrow-down" size={16} strokeWidth={1.9} />
+          </Select.Icon>
+        </Select.Trigger>
 
-          <ListboxOptions
-            transition
-            className="absolute z-50 mt-2 max-h-60 w-full overflow-auto rounded-[20px] bg-card border border-gray-100/70 p-2 text-base shadow-lg focus:outline-none sm:text-sm animate-pop-in data-[leave]:data-[closed]:opacity-0"
+        <Select.Portal>
+          <Select.Positioner
+            alignItemWithTrigger={false}
+            sideOffset={8}
+            align="start"
+            className="z-50 outline-hidden select-none"
           >
-            {options.length === 0 ? (
-              <div className="py-2 px-3.5 text-[13px] font-medium text-ink-muted">
-                Nenhuma opção disponível
-              </div>
-            ) : (
-              options.map((option) => (
-                <ListboxOption
-                  key={option.value}
-                  value={option.value}
-                  className={({ focus }) => `
-                    relative cursor-default select-none rounded-xl py-2.5 px-3.5 text-[13px] outline-none
-                    ${focus ? "bg-wash text-ink-body" : "text-ink-body"}
-                    ${option.value === value ? "font-bold text-ink-heading" : "font-semibold"}
-                  `}
-                >
-                  {({ selected }) => (
-                    <>
-                      <span className="block truncate">{option.label}</span>
-                      {selected && (
-                        <CheckMark className="absolute inset-y-0 right-3 h-4 w-4 my-auto top-1/2 -translate-y-1/2 text-yellow-ink" />
-                      )}
-                    </>
-                  )}
-                </ListboxOption>
-              ))
-            )}
-          </ListboxOptions>
-        </div>
-      </Listbox>
+            <Select.Popup
+              className="max-h-60 min-w-[var(--anchor-width)] overflow-y-auto rounded-[20px] bg-card border border-gray-100/70 p-2 shadow-lg outline-none origin-[var(--transform-origin)] transition-[opacity,scale] duration-150 ease-out data-starting-style:opacity-0 data-starting-style:scale-[0.96] data-ending-style:opacity-0 data-ending-style:scale-[0.96]"
+            >
+              {options.length === 0 ? (
+                <div className="py-2 px-3.5 text-[13px] font-medium text-ink-muted">
+                  Nenhuma opção disponível
+                </div>
+              ) : (
+                options.map((option) => (
+                  <Select.Item
+                    key={option.value}
+                    value={option.value}
+                    className="
+                      relative cursor-default select-none rounded-xl py-2.5 px-3.5 text-[13px] outline-none
+                      text-ink-body font-semibold data-highlighted:bg-wash
+                      data-selected:font-bold data-selected:text-ink-heading
+                    "
+                  >
+                    <Select.ItemText className="block truncate">{option.label}</Select.ItemText>
+                    <Select.ItemIndicator className="absolute inset-y-0 right-3 h-4 w-4 my-auto text-yellow-ink">
+                      <CheckMark />
+                    </Select.ItemIndicator>
+                  </Select.Item>
+                ))
+              )}
+            </Select.Popup>
+          </Select.Positioner>
+        </Select.Portal>
+      </Select.Root>
       {error && (
         <span className="text-error text-xs font-medium animate-[shake_0.4s_ease-in-out]">
           {error}
         </span>
       )}
-    </Field>
+    </div>
   );
 }

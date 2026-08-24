@@ -1,5 +1,5 @@
-import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
-import { Fragment, type ReactNode } from "react";
+import { Dialog } from "@base-ui/react/dialog";
+import type { ReactNode } from "react";
 import { Icon } from "./Icon";
 
 interface ModalProps {
@@ -18,58 +18,43 @@ const sizeStyles = {
 
 export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalProps) {
   return (
-    <Transition show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
-        {/* Backdrop overlay */}
-        <TransitionChild
-          as={Fragment}
-          enter="ease-out duration-200"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-out duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" />
-        </TransitionChild>
+    <Dialog.Root
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <Dialog.Portal>
+        <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-200 ease-out data-starting-style:opacity-0 data-ending-style:opacity-0" />
 
-        <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div className="fixed inset-0 z-50 w-screen overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-            <TransitionChild
-              as={Fragment}
-              enter="ease-out duration-200"
-              enterFrom="opacity-0 scale-[0.96]"
-              enterTo="opacity-100 scale-100"
-              leave="ease-out duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-[0.96]"
+            <Dialog.Popup
+              className={`relative w-full rounded-[26px] bg-card border border-gray-100/70 p-5 text-left shadow-xl transition-[opacity,scale] duration-200 ease-out sm:my-8 sm:p-6 max-h-[90vh] overflow-y-auto ${sizeStyles[size]} data-starting-style:opacity-0 data-starting-style:scale-[0.96] data-ending-style:opacity-0 data-ending-style:scale-[0.96]`}
             >
-              <DialogPanel
-                className={`relative w-full transform rounded-[26px] bg-card border border-gray-100/70 p-5 text-left shadow-xl transition-all sm:my-8 sm:p-6 max-h-[90vh] overflow-y-auto animate-scale-in ${sizeStyles[size]}`}
-              >
-                {/* Header */}
-                <div className="flex items-center justify-between mb-5">
-                  <DialogTitle as="h3" className="text-lg font-extrabold tracking-tight text-ink-heading">
-                    {title}
-                  </DialogTitle>
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="rounded-full p-1.5 text-chrome-icon hover:bg-wash hover:text-ink-heading transition-colors duration-150 outline-none cursor-pointer active:scale-95"
-                  >
-                    <Icon name="close-circle" size={20} strokeWidth={2} />
-                  </button>
-                </div>
+              {/* Header */}
+              <div className="flex items-center justify-between mb-5">
+                <Dialog.Title
+                  render={<h3 />}
+                  className="text-lg font-extrabold tracking-tight text-ink-heading"
+                >
+                  {title}
+                </Dialog.Title>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="rounded-full p-1.5 text-chrome-icon hover:bg-wash hover:text-ink-heading transition-colors duration-150 outline-none cursor-pointer active:scale-95"
+                >
+                  <Icon name="close-circle" size={20} strokeWidth={2} />
+                </button>
+              </div>
 
-                {/* Body */}
-                <div className="w-full">
-                  {children}
-                </div>
-              </DialogPanel>
-            </TransitionChild>
+              {/* Body */}
+              <div className="w-full">{children}</div>
+            </Dialog.Popup>
           </div>
         </div>
-      </Dialog>
-    </Transition>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

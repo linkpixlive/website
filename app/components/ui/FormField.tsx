@@ -1,5 +1,4 @@
-import { Field, Input, Label } from "@headlessui/react";
-import { forwardRef } from "react";
+import { forwardRef, useId } from "react";
 import { Icon } from "./Icon";
 import type { IconName } from "./Icon";
 
@@ -11,10 +10,15 @@ export interface FormFieldProps extends Omit<React.InputHTMLAttributes<HTMLInput
 }
 
 export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
-  ({ label, error, icon, className, ...props }, ref) => {
+  ({ id, label, error, icon, className, disabled, ...props }, ref) => {
+    const generatedId = useId();
+    const inputId = id ?? generatedId;
+
     return (
-      <Field className="flex flex-col gap-1.5 w-full">
-        <Label className="text-[13px] font-medium text-ink-secondary">{label}</Label>
+      <div className="flex flex-col gap-1.5 w-full">
+        <label htmlFor={inputId} className="text-[13px] font-medium text-ink-secondary">
+          {label}
+        </label>
         <div className="relative flex items-center">
           {icon && (
             <Icon
@@ -24,9 +28,12 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
               className="absolute left-4 text-ink-secondary pointer-events-none"
             />
           )}
-          <Input
+          <input
             ref={ref}
             {...props}
+            id={inputId}
+            disabled={disabled}
+            aria-invalid={error ? true : undefined}
             className={`
               w-full bg-wash rounded-full py-2.5 text-sm font-medium text-ink-heading placeholder:text-ink-placeholder
               border transition-colors duration-150 outline-none
@@ -36,7 +43,7 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
                   ? "border-error focus:border-error focus:ring-2 focus:ring-error/20"
                   : "border-gray-100/80 focus:border-[#fcc717] focus:ring-2 focus:ring-brand/30"
               }
-              ${props.disabled ? "opacity-50 cursor-not-allowed" : ""}
+              ${disabled ? "opacity-50 cursor-not-allowed" : ""}
               ${className || ""}
             `}
           />
@@ -46,7 +53,7 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
             {error}
           </span>
         )}
-      </Field>
+      </div>
     );
   }
 );

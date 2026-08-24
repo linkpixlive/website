@@ -1,4 +1,4 @@
-import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
+import { Popover } from "@base-ui/react/popover";
 import { useState } from "react";
 import { Icon } from "./Icon";
 
@@ -39,6 +39,7 @@ export function DatePicker({
   className = "",
 }: DatePickerProps) {
   const today = new Date();
+  const [open, setOpen] = useState(false);
   const [viewDate, setViewDate] = useState(value || today);
 
   const viewMonth = viewDate.getMonth();
@@ -64,7 +65,7 @@ export function DatePicker({
     setViewDate(new Date(viewYear, viewMonth + 1, 1));
   };
 
-  const handleDaySelect = (day: number, isCurrentMonth: boolean, close: () => void) => {
+  const handleDaySelect = (day: number, isCurrentMonth: boolean) => {
     let selectedDate: Date;
     if (isCurrentMonth) {
       selectedDate = new Date(viewYear, viewMonth, day);
@@ -77,7 +78,7 @@ export function DatePicker({
     }
     onChange(selectedDate);
     setViewDate(selectedDate);
-    close();
+    setOpen(false);
   };
 
   // Generate calendar days grid
@@ -139,12 +140,10 @@ export function DatePicker({
   return (
     <div className={`flex flex-col gap-1.5 w-full ${className}`}>
       <span className="text-[13px] font-medium text-ink-secondary">{label}</span>
-      <Popover className="relative">
-        {({ open }) => (
-          <>
-            <PopoverButton
-              disabled={disabled}
-              className={`
+      <Popover.Root open={open} onOpenChange={setOpen}>
+        <Popover.Trigger
+          disabled={disabled}
+          className={`
                 w-full bg-wash rounded-full py-2.5 pl-10 pr-4 text-left text-sm font-medium text-ink-heading
                 border transition-colors duration-150 outline-none cursor-pointer flex items-center relative
                 ${
@@ -156,67 +155,65 @@ export function DatePicker({
                 }
                 ${disabled ? "opacity-50 cursor-not-allowed" : ""}
               `}
-            >
-              <Icon
-                name="calendar"
-                size={16}
-                strokeWidth={1.9}
-                className="absolute left-4 text-ink-secondary pointer-events-none"
-              />
-              <span className={!value ? "text-ink-placeholder" : ""}>
-                {formatDateLabel(value)}
-              </span>
-            </PopoverButton>
+        >
+          <Icon
+            name="calendar"
+            size={16}
+            strokeWidth={1.9}
+            className="absolute left-4 text-ink-secondary pointer-events-none"
+          />
+          <span className={!value ? "text-ink-placeholder" : ""}>
+            {formatDateLabel(value)}
+          </span>
+        </Popover.Trigger>
 
-            <PopoverPanel
-              transition
-              className="absolute z-50 mt-2 w-72 rounded-[20px] bg-card border border-gray-100/70 p-4 shadow-lg focus:outline-none animate-pop-in data-[leave]:data-[closed]:opacity-0"
+        <Popover.Portal>
+          <Popover.Positioner side="bottom" align="start" sideOffset={8} className="z-50">
+            <Popover.Popup
+              className="w-72 rounded-[20px] bg-card border border-gray-100/70 p-4 shadow-lg focus:outline-none origin-[var(--transform-origin)] transition-[opacity,scale] duration-150 ease-out data-starting-style:opacity-0 data-starting-style:scale-[0.96] data-ending-style:opacity-0 data-ending-style:scale-[0.96]"
             >
-              {({ close }) => (
-                <div className="flex flex-col select-none">
-                  {/* Calendar Header */}
-                  <div className="flex items-center justify-between mb-4">
-                    <button
-                      type="button"
-                      onClick={handlePrevMonth}
-                      className="p-1.5 rounded-full hover:bg-wash text-chrome-icon transition-colors duration-150 cursor-pointer active:scale-95"
+              <div className="flex flex-col select-none">
+                {/* Calendar Header */}
+                <div className="flex items-center justify-between mb-4">
+                  <button
+                    type="button"
+                    onClick={handlePrevMonth}
+                    className="p-1.5 rounded-full hover:bg-wash text-chrome-icon transition-colors duration-150 cursor-pointer active:scale-95"
+                  >
+                    <Icon name="alt-arrow-left" size={16} strokeWidth={2} />
+                  </button>
+                  <span className="text-sm font-bold text-ink-heading">
+                    {MONTHS[viewMonth]} {viewYear}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleNextMonth}
+                    className="p-1.5 rounded-full hover:bg-wash text-chrome-icon transition-colors duration-150 cursor-pointer active:scale-95"
+                  >
+                    <Icon name="alt-arrow-right" size={16} strokeWidth={2} />
+                  </button>
+                </div>
+
+                {/* Days of Week Header */}
+                <div className="grid grid-cols-7 gap-1 text-center mb-1">
+                  {DAYS_OF_WEEK.map((day, idx) => (
+                    <span
+                      key={idx}
+                      className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label py-1"
                     >
-                      <Icon name="alt-arrow-left" size={16} strokeWidth={2} />
-                    </button>
-                    <span className="text-sm font-bold text-ink-heading">
-                      {MONTHS[viewMonth]} {viewYear}
+                      {day}
                     </span>
+                  ))}
+                </div>
+
+                {/* Days Grid */}
+                <div className="grid grid-cols-7 gap-1 text-center">
+                  {calendarDays.map((cell, idx) => (
                     <button
+                      key={idx}
                       type="button"
-                      onClick={handleNextMonth}
-                      className="p-1.5 rounded-full hover:bg-wash text-chrome-icon transition-colors duration-150 cursor-pointer active:scale-95"
-                    >
-                      <Icon name="alt-arrow-right" size={16} strokeWidth={2} />
-                    </button>
-                  </div>
-
-                  {/* Days of Week Header */}
-                  <div className="grid grid-cols-7 gap-1 text-center mb-1">
-                    {DAYS_OF_WEEK.map((day, idx) => (
-                      <span
-                        key={idx}
-                        className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label py-1"
-                      >
-                        {day}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Days Grid */}
-                  <div className="grid grid-cols-7 gap-1 text-center">
-                    {calendarDays.map((cell, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() =>
-                          handleDaySelect(cell.day, cell.isCurrentMonth, close)
-                        }
-                        className={`
+                      onClick={() => handleDaySelect(cell.day, cell.isCurrentMonth)}
+                      className={`
                           w-8 h-8 mx-auto my-0.5 inline-flex items-center justify-center rounded-full text-xs font-medium transition-colors duration-100 cursor-pointer active:scale-95
                           ${
                             isSelected(cell.day, cell.isCurrentMonth)
@@ -226,31 +223,30 @@ export function DatePicker({
                               : "text-ink-label opacity-50 hover:bg-wash/60"
                           }
                         `}
-                      >
-                        {cell.day}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Clean value action */}
-                  {value && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onChange(null);
-                        close();
-                      }}
-                      className="mt-3 text-xs font-semibold text-error hover:text-error-hover text-center py-1 border-t border-gray-100 pt-2 cursor-pointer"
                     >
-                      Limpar Data
+                      {cell.day}
                     </button>
-                  )}
+                  ))}
                 </div>
-              )}
-            </PopoverPanel>
-          </>
-        )}
-      </Popover>
+
+                {/* Clean value action */}
+                {value && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onChange(null);
+                      setOpen(false);
+                    }}
+                    className="mt-3 text-xs font-semibold text-error hover:text-error-hover text-center py-1 border-t border-gray-100 pt-2 cursor-pointer"
+                  >
+                    Limpar Data
+                  </button>
+                )}
+              </div>
+            </Popover.Popup>
+          </Popover.Positioner>
+        </Popover.Portal>
+      </Popover.Root>
       {error && (
         <span className="text-error text-xs font-medium animate-[shake_0.4s_ease-in-out]">
           {error}

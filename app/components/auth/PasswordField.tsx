@@ -1,5 +1,4 @@
-import { Field, Input, Label } from "@headlessui/react";
-import { forwardRef, useState } from "react";
+import { forwardRef, useId, useState } from "react";
 import { Icon } from "~/components/ui/Icon";
 import type { IconName } from "~/components/ui/Icon";
 
@@ -15,12 +14,16 @@ export interface PasswordFieldProps extends Omit<React.InputHTMLAttributes<HTMLI
 const STRENGTH_LABELS = ["", "Fraca", "Razoável", "Bom", "Forte"];
 
 export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
-  ({ label, error, icon, showStrength, strengthScore = 0, className, ...props }, ref) => {
+  ({ id, label, error, icon, showStrength, strengthScore = 0, className, disabled, ...props }, ref) => {
+    const generatedId = useId();
+    const inputId = id ?? generatedId;
     const [showPassword, setShowPassword] = useState(false);
 
     return (
-      <Field className="flex flex-col gap-1.5 w-full">
-        <Label className="text-[13px] font-medium text-ink-secondary">{label}</Label>
+      <div className="flex flex-col gap-1.5 w-full">
+        <label htmlFor={inputId} className="text-[13px] font-medium text-ink-secondary">
+          {label}
+        </label>
         <div className="relative flex items-center">
           {icon && (
             <Icon
@@ -30,10 +33,13 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
               className="absolute left-4 text-ink-secondary pointer-events-none"
             />
           )}
-          <Input
+          <input
             ref={ref}
             type={showPassword ? "text" : "password"}
             {...props}
+            id={inputId}
+            disabled={disabled}
+            aria-invalid={error ? true : undefined}
             className={`
               w-full bg-wash rounded-full py-2.5 text-sm font-medium text-ink-heading placeholder:text-ink-placeholder
               border border-gray-100/80 transition-colors duration-150 outline-none
@@ -44,14 +50,14 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
                   ? "!border-error focus:!border-error focus:!ring-error/20"
                   : ""
               }
-              ${props.disabled ? "opacity-50 cursor-not-allowed" : ""}
+              ${disabled ? "opacity-50 cursor-not-allowed" : ""}
               ${className || ""}
             `}
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            disabled={props.disabled}
+            disabled={disabled}
             className="absolute right-4 text-chrome-icon hover:text-ink-heading active:scale-95 transition-all duration-150 cursor-pointer outline-none"
             aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
           >
@@ -89,7 +95,7 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
             {error}
           </span>
         )}
-      </Field>
+      </div>
     );
   }
 );

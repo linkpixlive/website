@@ -1,4 +1,4 @@
-import { Button as HeadlessButton } from "@headlessui/react";
+import { Button } from "@base-ui/react/button";
 import type { ReactNode } from "react";
 
 interface SubmitButtonProps {
@@ -29,7 +29,7 @@ export function SubmitButton({
   }
 
   return (
-    <HeadlessButton
+    <Button
       type={type}
       onClick={handleClick}
       disabled={isDisabled}
@@ -48,6 +48,6 @@ export function SubmitButton({
         <span className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-[spin_0.6s_linear_infinite]" />
       )}
       {children}
-    </HeadlessButton>
+    </Button>
   );
 }

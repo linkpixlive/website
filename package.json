@@ -10,7 +10,7 @@
     "update:apischema": "openapi-typescript http://localhost:3000/api-json -o ./app/api/generated/api-schema.d.ts"
   },
   "dependencies": {
-    "@headlessui/react": "^2.2.10",
+    "@base-ui/react": "^1.7.0",
     "@hookform/resolvers": "^5.4.0",
     "@react-router/node": "8.0.0",
     "@react-router/serve": "8.0.0",

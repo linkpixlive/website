@@ -1,13 +1,8 @@
-import { createContext, useCallback, useState, type ReactNode } from "react";
-import { ToastContainer } from "./Toast";
+import { createContext, useCallback, type ReactNode } from "react";
+import { Toast } from "@base-ui/react/toast";
+import { ToastList } from "./Toast";
 
 export type ToastVariant = "success" | "error" | "info";
-
-export interface ToastItem {
-  id: string;
-  message: string;
-  variant: ToastVariant;
-}
 
 export interface ToastContextType {
   toast: (message: string, variant?: ToastVariant) => void;
@@ -15,31 +10,32 @@ export interface ToastContextType {
 
 export const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
+function ToastBridge({ children }: { children: ReactNode }) {
+  const manager = Toast.useToastManager();
+
+  const toast = useCallback(
+    (message: string, variant: ToastVariant = "success") => {
+      manager.add({
+        title: message,
+        type: variant,
+        priority: variant === "error" ? "high" : "low",
+      });
+    },
+    [manager],
+  );
+
+  return <ToastContext.Provider value={{ toast }}>{children}</ToastContext.Provider>;
+}
+
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const [toasts, setToasts] = useState<ToastItem[]>([]);
-
-  const addToast = useCallback((message: string, variant: ToastVariant = "success") => {
-    const id = Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { id, message, variant }]);
-
-    // Auto-dismiss after 4 seconds
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
-  }, []);
-
-  const removeToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
-
-  const toast = useCallback((message: string, variant: ToastVariant = "success") => {
-    addToast(message, variant);
-  }, [addToast]);
-
   return (
-    <ToastContext.Provider value={{ toast }}>
-      {children}
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
-    </ToastContext.Provider>
+    <Toast.Provider timeout={4000}>
+      <ToastBridge>{children}</ToastBridge>
+      <Toast.Portal>
+        <Toast.Viewport className="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2 outline-none max-w-full">
+          <ToastList />
+        </Toast.Viewport>
+      </Toast.Portal>
+    </Toast.Provider>
   );
 }

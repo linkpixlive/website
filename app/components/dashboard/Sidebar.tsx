@@ -1,4 +1,4 @@
-import { Dialog, DialogPanel, DialogBackdrop, DialogTitle } from "@headlessui/react";
+import { Dialog } from "@base-ui/react/dialog";
 import { Form, NavLink } from "react-router";
 import { Icon, type IconName } from "~/components/ui/Icon";
 import { LogoTile } from "~/components/ui/Logo";
@@ -95,43 +95,43 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       </aside>
 
       {/* Mobile drawer */}
-      <Dialog open={isOpen} onClose={onClose} as="div" className="relative z-50 lg:hidden">
-        <DialogBackdrop
-          transition
-          className="fixed inset-0 bg-black/50 transition-opacity duration-200 ease-out data-[closed]:opacity-0"
-        />
+      <Dialog.Root
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) onClose();
+        }}
+      >
+        <Dialog.Portal>
+          <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/50 transition-opacity duration-200 ease-out data-starting-style:opacity-0 data-ending-style:opacity-0 lg:hidden" />
 
-        <div className="fixed inset-0 flex">
-          <DialogPanel
-            transition
-            className="relative flex flex-col w-72 max-w-[85vw] h-full bg-shell shadow-2xl transition-transform duration-[260ms] ease-out data-[closed]:-translate-x-full focus:outline-none"
-          >
-            <div className="flex items-center justify-between pt-5 pl-4 pr-3 pb-2">
-              <DialogTitle as="h2" className="sr-only">
-                Menu de navegação
-              </DialogTitle>
-              <LogoTile href="/" />
-              <button
-                type="button"
-                onClick={onClose}
-                className="p-2 rounded-full text-text-secondary hover:text-white hover:bg-white/5 transition-colors duration-150 cursor-pointer outline-none active:scale-95"
-                aria-label="Fechar menu"
-              >
-                <Icon name="close-circle" size={20} strokeWidth={1.9} />
-              </button>
-            </div>
+          <div className="fixed inset-0 z-50 flex lg:hidden">
+            <Dialog.Popup className="relative flex flex-col w-72 max-w-[85vw] h-full bg-shell shadow-2xl transition-transform duration-[260ms] ease-out focus:outline-none data-starting-style:-translate-x-full data-ending-style:-translate-x-full">
+              <div className="flex items-center justify-between pt-5 pl-4 pr-3 pb-2">
+                <Dialog.Title render={<h2 />} className="sr-only">
+                  Menu de navegação
+                </Dialog.Title>
+                <LogoTile href="/" />
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="p-2 rounded-full text-text-secondary hover:text-white hover:bg-white/5 transition-colors duration-150 cursor-pointer outline-none active:scale-95"
+                  aria-label="Fechar menu"
+                >
+                  <Icon name="close-circle" size={20} strokeWidth={1.9} />
+                </button>
+              </div>
 
-            <nav className="flex-1 overflow-y-auto scrollbar-thin px-3 py-4 space-y-1">
-              {menuItems.map((item) => (
-                <NavRow key={item.to} item={item} onNavigate={onClose} />
-              ))}
-            </nav>
+              <nav className="flex-1 overflow-y-auto scrollbar-thin px-3 py-4 space-y-1">
+                {menuItems.map((item) => (
+                  <NavRow key={item.to} item={item} onNavigate={onClose} />
+                ))}
+              </nav>
 
-            <LogoutRow />
-          </DialogPanel>
-          <div className="flex-shrink-0 w-14" aria-hidden="true" />
-        </div>
-      </Dialog>
+              <LogoutRow />
+            </Dialog.Popup>
+          </div>
+        </Dialog.Portal>
+      </Dialog.Root>
     </>
   );
 }
