@@ -22,11 +22,12 @@ export function QueueList({ queue, onReplay, replayLoading }: QueueListProps) {
   }
 
   return (
-    <ul className="divide-y divide-gray-100">
-      {queue.map((donation) => (
+    <ul className="divide-y divide-line">
+      {queue.map((donation, index) => (
         <QueueItemCard
           key={donation.id}
           donation={donation}
+          position={index + 1}
           onReplay={onReplay}
           loading={replayLoading === donation.id}
         />

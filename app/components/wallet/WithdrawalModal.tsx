@@ -223,7 +223,7 @@ export function WithdrawalModal({
                 -{formatCurrency(feeAmount)}
               </span>
             </div>
-            <div className="flex justify-between pt-2 border-t border-gray-100">
+            <div className="flex justify-between pt-2 border-t border-line">
               <span className="text-sm font-bold text-ink-heading">
                 Você receberá
               </span>
@@ -234,7 +234,7 @@ export function WithdrawalModal({
           </div>
         )}
 
-        <div className="flex gap-3 pt-4 border-t border-gray-100">
+        <div className="flex gap-3 pt-4 border-t border-line">
           <Button
             type="button"
             variant="secondary"

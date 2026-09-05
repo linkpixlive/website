@@ -1,5 +1,6 @@
 import { Select } from "@base-ui/react/select";
 import { Icon } from "./Icon";
+import { FieldError } from "./FieldError";
 
 interface Option {
   value: string;
@@ -17,7 +18,7 @@ interface SelectFieldProps {
   className?: string;
 }
 
-function CheckMark({ className }: { className?: string }) {
+export function CheckMark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <path
@@ -61,7 +62,7 @@ export function SelectField({
               ${
                 error
                   ? "border-error focus:border-error focus:ring-2 focus:ring-error/20"
-                  : "border-gray-100/80 focus:border-[#fcc717] focus:ring-2 focus:ring-brand/30"
+                  : "border-line focus:border-border-focus focus:ring-2 focus:ring-brand/30"
               }
               ${disabled ? "opacity-50 cursor-not-allowed" : ""}
             `}
@@ -83,7 +84,7 @@ export function SelectField({
             className="z-50 outline-hidden select-none"
           >
             <Select.Popup
-              className="max-h-60 min-w-[var(--anchor-width)] overflow-y-auto rounded-[20px] bg-card border border-gray-100/70 p-2 shadow-lg outline-none origin-[var(--transform-origin)] transition-[opacity,scale] duration-150 ease-out data-starting-style:opacity-0 data-starting-style:scale-[0.96] data-ending-style:opacity-0 data-ending-style:scale-[0.96]"
+              className="max-h-60 min-w-[var(--anchor-width)] overflow-y-auto rounded-[20px] bg-card border border-line p-2 shadow-lg outline-none origin-[var(--transform-origin)] transition-[opacity,scale] duration-150 ease-out data-starting-style:opacity-0 data-starting-style:scale-[0.96] data-ending-style:opacity-0 data-ending-style:scale-[0.96]"
             >
               {options.length === 0 ? (
                 <div className="py-2 px-3.5 text-[13px] font-medium text-ink-muted">
@@ -111,11 +112,7 @@ export function SelectField({
           </Select.Positioner>
         </Select.Portal>
       </Select.Root>
-      {error && (
-        <span className="text-error text-xs font-medium animate-[shake_0.4s_ease-in-out]">
-          {error}
-        </span>
-      )}
+      <FieldError message={error} />
     </div>
   );
 }

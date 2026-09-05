@@ -37,7 +37,7 @@ export function BalanceCard({ balances, loading = false, onWithdraw }: BalanceCa
   ];
 
   return (
-    <div className="h-full rounded-[26px] bg-card border border-gray-100/70 shadow-xs p-5 flex flex-col">
+    <div className="h-full rounded-[26px] bg-card border border-line shadow-xs p-5 flex flex-col">
       <div className="flex items-center justify-between mb-3">
         <span className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
           Saldo disponível
@@ -65,7 +65,7 @@ export function BalanceCard({ balances, loading = false, onWithdraw }: BalanceCa
       )}
 
       <div className="mt-auto pt-4">
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-line">
           {secondaryRows.map((row) => (
             <div key={row.label} className="flex items-center gap-3 py-2.5 first:pt-1 last:pb-0">
               <span className="w-8 h-8 rounded-[12px] bg-tile flex items-center justify-center text-chrome-icon shrink-0">

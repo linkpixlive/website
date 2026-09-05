@@ -16,7 +16,7 @@ const AVAILABLE_WIDGETS = [
 
 export function WidgetGallery({ onSelectWidget }: WidgetGalleryProps) {
   return (
-    <div className="max-w-7xl mx-auto">
+    <div>
       {/* Title block */}
       <div className="mb-6">
         <h1 className="text-xl sm:text-2xl lg:text-[26px] font-extrabold tracking-tight leading-tight text-ink-heading">
@@ -34,8 +34,8 @@ export function WidgetGallery({ onSelectWidget }: WidgetGalleryProps) {
             key={widget.type}
             onClick={() => onSelectWidget(widget.type)}
             className="
-              text-left p-5 rounded-[26px] bg-card border border-gray-100/70 shadow-xs
-              hover:border-gray-200/90 hover:shadow-sm active:scale-[0.98]
+              text-left p-5 rounded-[26px] bg-card border border-line shadow-xs
+              hover:border-line-input hover:shadow-sm active:scale-[0.98]
               transition-all duration-150 group cursor-pointer outline-none
               focus-visible:ring-2 focus-visible:ring-brand/40 h-full flex flex-col
             "

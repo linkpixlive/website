@@ -19,6 +19,9 @@ export const widgetsApi = {
   getSettings: (token: string | null | undefined, type: string) =>
     fetchApi<Widget>(createApiClient(token).get(`/widgets/${type}`)),
 
+  getPublicSettings: (type: string, widgetToken: string) =>
+    fetchApi<Widget>(createApiClient().get(`/widgets/public/${type}/${widgetToken}`)),
+
   createSettings: (token: string | null | undefined, type: string, body: Partial<OverlaySettings>) =>
     fetchApi<Widget>(createApiClient(token).post(`/widgets/${type}`, body)),
 

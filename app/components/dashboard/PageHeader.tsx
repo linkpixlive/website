@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { HeaderActions } from "./HeaderActions";
+
 interface PageHeaderProps {
   title: string;
   subtitle?: ReactNode;
@@ -19,11 +21,10 @@ export function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
           </p>
         )}
       </div>
-      {actions && (
-        <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-          {actions}
-        </div>
-      )}
+      <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+        {actions}
+        <HeaderActions />
+      </div>
     </div>
   );
 }

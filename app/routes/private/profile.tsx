@@ -39,7 +39,7 @@ export default function Profile() {
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 items-stretch">
         <section
           aria-label="Dados públicos"
-          className="rounded-[26px] bg-card border border-gray-100/70 shadow-xs p-5 lg:col-span-7 xl:col-span-8 flex flex-col"
+          className="rounded-[26px] bg-card border border-line shadow-xs p-5 lg:col-span-7 xl:col-span-8 flex flex-col"
         >
           <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label mb-4">
             Dados públicos
@@ -75,7 +75,7 @@ export default function Profile() {
 
         <section
           aria-label="Identidade"
-          className="rounded-[26px] bg-card border border-gray-100/70 shadow-xs p-5 lg:col-span-5 xl:col-span-4"
+          className="rounded-[26px] bg-card border border-line shadow-xs p-5 lg:col-span-5 xl:col-span-4"
         >
           <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label mb-4">
             Identidade
@@ -97,7 +97,7 @@ export default function Profile() {
             </div>
           </div>
 
-          <ul className="mt-4 divide-y divide-gray-100">
+          <ul className="mt-4 divide-y divide-line">
             {stats.map((stat) => (
               <li key={stat.label} className="flex items-center justify-between py-2.5 first:pt-0 last:pb-0">
                 <span className="text-[13px] font-medium text-ink-secondary">{stat.label}</span>
@@ -109,7 +109,7 @@ export default function Profile() {
 
         <section
           aria-label="Links de doação"
-          className="rounded-[26px] bg-card border border-gray-100/70 shadow-xs p-5 lg:col-span-12"
+          className="rounded-[26px] bg-card border border-line shadow-xs p-5 lg:col-span-12"
         >
           <div className="flex items-center justify-between gap-3 mb-2">
             <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
@@ -121,7 +121,7 @@ export default function Profile() {
             </Button>
           </div>
 
-          <ul className="divide-y divide-gray-100">
+          <ul className="divide-y divide-line">
             {links.map((link) => (
               <li key={link.url} className="group flex items-center gap-3 py-3 first:pt-0">
                 <span className="w-9 h-9 rounded-lg bg-tile grid place-items-center shrink-0">

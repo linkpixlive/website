@@ -219,7 +219,7 @@ export function PixKeysModal({
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100 max-h-60 overflow-y-auto scrollbar-thin pr-1">
+            <div className="divide-y divide-line max-h-60 overflow-y-auto scrollbar-thin pr-1">
               {pixKeys.map((pk) => (
                 <div key={pk.id} className="py-3 flex flex-col gap-2 first:pt-1 last:pb-1">
                   <div className="flex items-start justify-between gap-3">
@@ -243,7 +243,7 @@ export function PixKeysModal({
                       <button
                         type="button"
                         onClick={() => setDeletingId(pk.id)}
-                        className="p-1.5 rounded-full text-chrome-icon hover:text-error hover:bg-red-50 transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95"
+                        className="p-1.5 rounded-full text-chrome-icon hover:text-error hover:bg-danger-wash transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95"
                       >
                         <Icon name="trash-bin-minimalistic" size={16} strokeWidth={1.9} />
                       </button>
@@ -268,7 +268,7 @@ export function PixKeysModal({
                         <button
                           type="button"
                           onClick={() => setDeletingId(null)}
-                          className="w-full px-3 py-1.5 rounded-full bg-wash text-[11px] font-bold text-ink-body hover:bg-gray-100 active:scale-[0.98] transition-all duration-150 cursor-pointer outline-none"
+                          className="w-full px-3 py-1.5 rounded-full bg-wash text-[11px] font-bold text-ink-body hover:bg-wash-hover active:scale-[0.98] transition-all duration-150 cursor-pointer outline-none"
                         >
                           Não, manter
                         </button>
@@ -282,7 +282,7 @@ export function PixKeysModal({
         </div>
 
         {/* Add New Key Form */}
-        <div className="border-t border-gray-100 pt-4">
+        <div className="border-t border-line pt-4">
           <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label mb-3">
             Cadastrar nova chave
           </h4>

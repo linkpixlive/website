@@ -30,7 +30,7 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
         <div className="fixed inset-0 z-50 w-screen overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
             <Dialog.Popup
-              className={`relative w-full rounded-[26px] bg-card border border-gray-100/70 p-5 text-left shadow-xl transition-[opacity,scale] duration-200 ease-out sm:my-8 sm:p-6 max-h-[90vh] overflow-y-auto ${sizeStyles[size]} data-starting-style:opacity-0 data-starting-style:scale-[0.96] data-ending-style:opacity-0 data-ending-style:scale-[0.96]`}
+              className={`relative w-full rounded-[26px] bg-card border border-line p-5 text-left shadow-xl transition-[opacity,scale] duration-200 ease-out sm:my-8 sm:p-6 max-h-[90vh] overflow-y-auto ${sizeStyles[size]} data-starting-style:opacity-0 data-starting-style:scale-[0.96] data-ending-style:opacity-0 data-ending-style:scale-[0.96]`}
             >
               {/* Header */}
               <div className="flex items-center justify-between mb-5">

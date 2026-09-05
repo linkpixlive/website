@@ -1,14 +1,16 @@
 export interface OverlayDonationEntity {
   id: string;
-  donorName: string;
-  amountFormatted: string;
-  message: string;
-  donorAvatarUrl: string;
+  name: string;
+  amount: number;
+  message: string | null;
+  audioUrl: string | null;
+  messageType: string | null;
   createdAt: string;
-  voiceUrl?: string;
-  audioUrl?: string;
+  isTest?: boolean;
+  isCurrent?: boolean;
 }
 
 export interface OverlayStatus {
   online: boolean;
+  isPaused?: boolean;
 }

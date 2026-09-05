@@ -7,11 +7,22 @@ export type ForgotPasswordPayload = components["schemas"]["ForgotPasswordDto"];
 export type ResetPasswordPayload = components["schemas"]["ResetPasswordDto"];
 export type VerifyOtpPayload = components["schemas"]["VerifyOtpDto"];
 
+export type LoginResult = string | { requires2fa: true; nonce: string };
+
+export interface Login2faPayload {
+  email: string;
+  password: string;
+  totp: string;
+  nonce: string;
+}
+
 export const authApi = {
   register: (body: RegisterPayload) =>
     fetchApi(client.post("/auth/register", body)),
   login: (body: LoginPayload) =>
-    fetchApi<string>(client.post("/auth/login", body)),
+    fetchApi<LoginResult>(client.post("/auth/login", body)),
+  login2fa: (body: Login2faPayload) =>
+    fetchApi<string>(client.post("/auth/login-2fa", body)),
   verifyOtp: (body: VerifyOtpPayload) =>
     fetchApi<string>(client.post("/auth/verify-otp", body)),
   forgotPassword: (body: ForgotPasswordPayload) =>

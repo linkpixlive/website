@@ -24,7 +24,9 @@ export default function PrivateLayoutRoute() {
         <div className="flex-1 flex flex-col lg:pl-64">
           {/* Page contents container (light work surface) */}
           <main className="flex-1 bg-canvas p-4 pb-20 sm:p-6 sm:pb-6 lg:p-7">
-            <Outlet />
+            <div className="mx-auto w-full max-w-7xl">
+              <Outlet />
+            </div>
           </main>
         </div>
 

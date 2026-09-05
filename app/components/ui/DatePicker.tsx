@@ -150,8 +150,8 @@ export function DatePicker({
                   error
                     ? "border-error focus:border-error focus:ring-2 focus:ring-error/20"
                     : open
-                    ? "border-[#fcc717] ring-2 ring-brand/30"
-                    : "border-gray-100/80 hover:border-gray-200/90"
+                    ? "border-border-focus ring-2 ring-brand/30"
+                    : "border-line hover:border-line-input"
                 }
                 ${disabled ? "opacity-50 cursor-not-allowed" : ""}
               `}
@@ -170,7 +170,7 @@ export function DatePicker({
         <Popover.Portal>
           <Popover.Positioner side="bottom" align="start" sideOffset={8} className="z-50">
             <Popover.Popup
-              className="w-72 rounded-[20px] bg-card border border-gray-100/70 p-4 shadow-lg focus:outline-none origin-[var(--transform-origin)] transition-[opacity,scale] duration-150 ease-out data-starting-style:opacity-0 data-starting-style:scale-[0.96] data-ending-style:opacity-0 data-ending-style:scale-[0.96]"
+              className="w-72 rounded-[20px] bg-card border border-line p-4 shadow-lg focus:outline-none origin-[var(--transform-origin)] transition-[opacity,scale] duration-150 ease-out data-starting-style:opacity-0 data-starting-style:scale-[0.96] data-ending-style:opacity-0 data-ending-style:scale-[0.96]"
             >
               <div className="flex flex-col select-none">
                 {/* Calendar Header */}
@@ -217,7 +217,7 @@ export function DatePicker({
                           w-8 h-8 mx-auto my-0.5 inline-flex items-center justify-center rounded-full text-xs font-medium transition-colors duration-100 cursor-pointer active:scale-95
                           ${
                             isSelected(cell.day, cell.isCurrentMonth)
-                              ? "bg-brand-button text-ink-heading font-extrabold"
+                              ? "bg-brand-button text-on-brand font-extrabold"
                               : cell.isCurrentMonth
                               ? "text-ink-body hover:bg-wash"
                               : "text-ink-label opacity-50 hover:bg-wash/60"
@@ -237,7 +237,7 @@ export function DatePicker({
                       onChange(null);
                       setOpen(false);
                     }}
-                    className="mt-3 text-xs font-semibold text-error hover:text-error-hover text-center py-1 border-t border-gray-100 pt-2 cursor-pointer"
+                    className="mt-3 text-xs font-semibold text-error hover:text-error-hover text-center py-1 border-t border-line pt-2 cursor-pointer"
                   >
                     Limpar Data
                   </button>

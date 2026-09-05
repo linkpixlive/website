@@ -30,13 +30,13 @@ export function Button({
   const variantStyles = {
     primary: isDisabled
       ? "bg-primary-disabled text-ink-muted cursor-not-allowed"
-      : "bg-brand-button text-ink-heading hover:bg-brand-hover active:scale-[0.98]",
+      : "bg-brand-button text-on-brand hover:bg-brand-hover active:scale-[0.98]",
     secondary: isDisabled
       ? "bg-wash text-ink-label cursor-not-allowed"
-      : "bg-wash text-ink-body hover:bg-gray-100 active:scale-[0.98]",
+      : "bg-wash text-ink-body hover:bg-wash-hover active:scale-[0.98]",
     ghost: isDisabled
       ? "bg-wash text-ink-label cursor-not-allowed"
-      : "bg-wash text-ink-body hover:bg-gray-100 active:scale-[0.98]",
+      : "bg-wash text-ink-body hover:bg-wash-hover active:scale-[0.98]",
     inverse: isDisabled
       ? "bg-inverse/50 text-white/60 cursor-not-allowed"
       : "bg-inverse text-white hover:bg-black active:scale-[0.98]",

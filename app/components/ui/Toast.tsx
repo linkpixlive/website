@@ -25,7 +25,7 @@ export function ToastList() {
         toast={toast}
         swipeDirection={["down", "right"]}
         className="
-          w-80 max-w-full rounded-[20px] bg-card border border-gray-100/70 shadow-xl
+          w-80 max-w-full rounded-[20px] bg-card border border-line shadow-xl
           transition-[opacity,translate] duration-200 ease-out
           data-starting-style:opacity-0 data-starting-style:translate-y-4
           data-ending-style:opacity-0

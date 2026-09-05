@@ -12,7 +12,7 @@ const menuItems: { label: string; to: string; icon: IconName; end?: boolean }[] 
   { label: "Dashboard", to: "/", icon: "widget-2", end: true },
   { label: "Carteira", to: "/carteira", icon: "wallet" },
   { label: "Widgets", to: "/widgets", icon: "widget" },
-  { label: "Fila de Alertas", to: "/fila", icon: "list" },
+  { label: "Doações", to: "/doacoes", icon: "list" },
   { label: "Perfil", to: "/perfil", icon: "user-circle" },
   { label: "Conta", to: "/conta", icon: "settings" },
 ];
@@ -82,7 +82,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   return (
     <>
       {/* Desktop rail */}
-      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 z-20 bg-shell flex-col">
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 z-20 bg-shell border-r border-white/10 flex-col">
         <div className="pt-5 px-4 pb-2">
           <LogoTile href="/" />
         </div>

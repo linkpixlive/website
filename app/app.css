@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ── Self-hosted fonts (Fontshare ITF Free Font License) ───────────── */
 
 @font-face {
@@ -63,6 +65,7 @@
   --color-brand-hover: #fcc717;
   --color-yellow-ink: #b58a00;
   --color-yellow-wash: #fff7d6;
+  --color-on-brand: #11151e; /* text on yellow — fixed in both themes */
 
   /* ── Ink scale ───────────────────────────────────────────────────── */
   --color-ink-heading: #11151e;
@@ -73,6 +76,12 @@
   --color-ink-label: #9ca3af;
   --color-ink-placeholder: #a0a6b2;
   --color-chrome-icon: #3e4452;
+
+  /* ── Hairlines (whisper borders) ─────────────────────────────────── */
+  --color-line: rgb(243 244 246 / 0.72); /* ~gray-100/70 */
+  --color-line-input: rgb(229 231 235 / 0.9); /* composer input border */
+  --color-danger-wash: #fef2f2; /* destructive menu row hover */
+  --color-wash-hover: #eceef3; /* secondary button hover (one step into the surface) */
 
   /* ── Typography ──────────────────────────────────────────────────── */
   --font-sans: "Satoshi", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
@@ -147,6 +156,56 @@
   }
 }
 
+/* ── Dark theme ────────────────────────────────────────────────────────
+   Palette derived from the shell tones in design.md: the canvas merges
+   with the shell (#111216), cards lift to inset-dark (#181a1f) and nested
+   fills step up from there. Yellow, shell chrome and radius are unchanged.
+   Utilities resolve var(--color-*) at runtime, so overriding these tokens
+   under .dark re-themes every semantic class app-wide. */
+
+.dark {
+  color-scheme: dark;
+
+  /* Legacy token names */
+  --color-secondary: #20232a;
+  --color-text-muted: #9aa0ac;
+
+  /* Canvas (light surfaces → dark surfaces) */
+  --color-canvas: #111216;
+  --color-card: #181a1f;
+  --color-wash: #20232a;
+  --color-tile: #262a33;
+
+  /* Inverse actions stay dark but must read on dark cards */
+  --color-inverse: #272b33;
+  --color-inverse-hover: #31353d;
+
+  /* Ink scale flips to light */
+  --color-ink-heading: #f5f6f8;
+  --color-ink-body: #c6cad2;
+  --color-ink-body-strong: #dfe2e8;
+  --color-ink-secondary: #9aa0ac;
+  --color-ink-muted: #7f8594;
+  --color-ink-placeholder: #6b7180;
+  --color-chrome-icon: #aab0bc;
+
+  /* Semantic (brightened for dark; error stays #ef4444 — white text pill) */
+  --color-success: #34d399;
+  --color-info: #60a5fa;
+  --color-warning: #fbbf24;
+  --color-yellow-wash: rgb(245 158 11 / 0.14);
+  --color-yellow-ink: #fbbf24;
+
+  /* Hairlines become white-based whispers */
+  --color-line: rgb(255 255 255 / 0.07);
+  --color-line-input: rgb(255 255 255 / 0.12);
+  --color-danger-wash: rgb(239 68 68 / 0.12);
+  --color-wash-hover: #262a33;
+
+  /* Disabled primary fills stop glowing on dark cards */
+  --color-primary-disabled: #262a33;
+}
+
 html {
   color-scheme: light;
 }
@@ -206,5 +265,12 @@ body {
   }
   &::-webkit-scrollbar-thumb:hover {
     background: #cbd5e1;
+  }
+
+  .dark &::-webkit-scrollbar-thumb {
+    background: #2e323b;
+  }
+  .dark &::-webkit-scrollbar-thumb:hover {
+    background: #3a3f4a;
   }
 }

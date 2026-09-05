@@ -1,4 +1,5 @@
 import type { Route } from "./+types/home";
+import { PageHeader } from "~/components/dashboard/PageHeader";
 import { Icon } from "~/components/ui/Icon";
 
 export function meta({}: Route.MetaArgs) {
@@ -29,26 +30,24 @@ export default function Home() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div>
       {/* Title block */}
-      <div className="mb-6">
-        <h1 className="text-xl sm:text-2xl lg:text-[26px] font-extrabold tracking-tight leading-tight text-ink-heading">
-          Dashboard
-        </h1>
-        <p className="mt-1 text-sm text-ink-secondary">
-          Hoje você recebeu{" "}
-          <span className="font-bold text-ink-heading">
-            {stats.donationsToday}
-          </span>{" "}
-          em doações.
-        </p>
-      </div>
+      <PageHeader
+        title="Dashboard"
+        subtitle={
+          <>
+            Hoje você recebeu{" "}
+            <span className="font-bold text-ink-heading">{stats.donationsToday}</span> em
+            doações.
+          </>
+        }
+      />
 
       {/* Primary + secondary columns */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
         {/* Summary card */}
         <div className="lg:col-span-7 xl:col-span-8">
-          <div className="h-full rounded-[26px] bg-card border border-gray-100/70 shadow-xs p-5 flex flex-col">
+          <div className="h-full rounded-[26px] bg-card border border-line shadow-xs p-5 flex flex-col">
             <span className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label mb-3">
               Doações recebidas (hoje)
             </span>
@@ -56,7 +55,7 @@ export default function Home() {
               {stats.donationsToday}
             </span>
 
-            <div className="mt-auto pt-4 divide-y divide-gray-100">
+            <div className="mt-auto pt-4 divide-y divide-line">
               {secondaryRows.map((row) => (
                 <div
                   key={row.label}
@@ -79,7 +78,7 @@ export default function Home() {
 
         {/* Activity card */}
         <aside className="lg:col-span-5 xl:col-span-4">
-          <div className="h-full rounded-[26px] bg-card border border-gray-100/70 shadow-xs p-5 flex flex-col">
+          <div className="h-full rounded-[26px] bg-card border border-line shadow-xs p-5 flex flex-col">
             <span className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label mb-3">
               Atividade recente
             </span>

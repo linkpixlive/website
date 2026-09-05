@@ -42,8 +42,8 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
             aria-invalid={error ? true : undefined}
             className={`
               w-full bg-wash rounded-full py-2.5 text-sm font-medium text-ink-heading placeholder:text-ink-placeholder
-              border border-gray-100/80 transition-colors duration-150 outline-none
-              focus:border-[#fcc717] focus:ring-2 focus:ring-brand/30
+              border border-line transition-colors duration-150 outline-none
+              focus:border-border-focus focus:ring-2 focus:ring-brand/30
               ${icon ? "pl-10" : "pl-4"} pr-11
               ${
                 error
@@ -69,7 +69,7 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
           <div className="flex items-center gap-2 mt-1">
             <div className="flex flex-1 gap-1">
               {[1, 2, 3, 4].map((level) => {
-                let bgColor = "bg-gray-100";
+                let bgColor = "bg-wash";
                 if (strengthScore >= level) {
                   if (strengthScore === 1) bgColor = "bg-error";
                   else if (strengthScore === 2) bgColor = "bg-warning";

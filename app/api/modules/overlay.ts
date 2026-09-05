@@ -13,6 +13,11 @@ export const overlayApi = {
   replayDonation: (token: string | null, donationId: string) =>
     fetchApi<void>(createApiClient(token).post(`/overlay/replay/${donationId}`)),
 
+  removeFromQueue: (token: string | null, donationId: string) =>
+    fetchApi<void>(
+      createApiClient(token).delete(`/overlay/queue/${donationId}`)
+    ),
+
   testAlert: (token: string | null) =>
     fetchApi<void>(createApiClient(token).post("/overlay/test")),
 };

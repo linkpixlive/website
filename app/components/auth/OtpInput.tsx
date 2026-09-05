@@ -100,7 +100,7 @@ export function OtpInput({ length = 6, onComplete, onChange, disabled, error }: 
             ${
               error
                 ? "border-error focus:border-error focus:ring-2 focus:ring-error/20"
-                : "border-gray-100/80 focus:border-[#fcc717] focus:ring-2 focus:ring-brand/30"
+                : "border-line focus:border-border-focus focus:ring-2 focus:ring-brand/30"
             }
             ${disabled ? "opacity-50 cursor-not-allowed" : ""}
           `}

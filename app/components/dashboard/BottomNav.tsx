@@ -9,7 +9,7 @@ const menuItems: { label: string; to: string; icon: IconName; end?: boolean }[] 
   { label: "Dashboard", to: "/", icon: "widget-2", end: true },
   { label: "Carteira", to: "/carteira", icon: "wallet" },
   { label: "Widgets", to: "/widgets", icon: "widget" },
-  { label: "Fila", to: "/fila", icon: "list" },
+  { label: "Doações", to: "/doacoes", icon: "list" },
   { label: "Perfil", to: "/perfil", icon: "user-circle" },
   { label: "Conta", to: "/conta", icon: "settings" },
 ];

@@ -39,7 +39,7 @@ export function SubmitButton({
         ${
           isDisabled
             ? "bg-primary-disabled cursor-not-allowed text-ink-muted"
-            : "bg-brand-button text-ink-heading hover:bg-brand-hover active:scale-[0.98] cursor-pointer"
+            : "bg-brand-button text-on-brand hover:bg-brand-hover active:scale-[0.98] cursor-pointer"
         }
         ${className}
       `}

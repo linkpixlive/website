@@ -61,7 +61,7 @@ export function WithdrawalHistoryTable({
       <div className="hidden md:block overflow-x-auto -mx-5 px-5">
         <table className="w-full min-w-[640px] border-collapse text-left">
           <thead>
-            <tr className="border-b border-gray-100">
+            <tr className="border-b border-line">
               <th className="px-3 py-3 text-[11px] font-extrabold uppercase tracking-wider text-ink-label first:pl-0">
                 Data
               </th>
@@ -90,7 +90,7 @@ export function WithdrawalHistoryTable({
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-line">
             {items.map((item) => (
               <tr key={item.id} className="transition-colors duration-100 hover:bg-wash/70">
                 <td className="px-3 py-3.5 text-[13px] font-medium text-ink-secondary whitespace-nowrap first:pl-0">
@@ -116,11 +116,11 @@ export function WithdrawalHistoryTable({
       </div>
 
       {/* Mobile view */}
-      <div className="md:hidden divide-y divide-gray-100">
+      <div className="md:hidden divide-y divide-line">
         {items.map((item) => (
           <div key={item.id} className="py-4 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-gray-400">
+              <span className="text-[11px] font-semibold text-ink-label">
                 {formatDate(item.createdAt)}
               </span>
               <Badge status={item.status} />

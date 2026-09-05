@@ -11,7 +11,7 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-between gap-4 mt-6 py-3 border-t border-gray-100">
+    <div className="flex items-center justify-between gap-4 mt-6 py-3 border-t border-line">
       <div className="flex-1 flex justify-between sm:hidden">
         <Button
           variant="secondary"

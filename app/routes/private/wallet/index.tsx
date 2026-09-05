@@ -8,6 +8,7 @@ import {
 import { pixKeysApi, type PixKey } from "~/api/modules/pix-keys";
 import { walletsApi } from "~/api/modules/wallets";
 import { withdrawalsApi, type Withdrawal } from "~/api/modules/withdrawals";
+import { PageHeader } from "~/components/dashboard/PageHeader";
 import { Button } from "~/components/ui/Button";
 import { Pagination } from "~/components/ui/Pagination";
 import { useToast } from "~/components/ui/useToast";
@@ -172,14 +173,12 @@ export default function WalletPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div>
       {/* Title block */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-6">
-        <div>
-          <h1 className="text-xl sm:text-2xl lg:text-[26px] font-extrabold tracking-tight leading-tight text-ink-heading">
-            Carteira
-          </h1>
-          <p className="mt-1 text-sm text-ink-secondary">
+      <PageHeader
+        title="Carteira"
+        subtitle={
+          <>
             Você tem{" "}
             <span className="font-bold text-ink-heading">
               {formatCurrency(balances.available)}
@@ -191,14 +190,14 @@ export default function WalletPage() {
                 : `${pixKeys.length} chaves Pix`}
             </span>
             .
-          </p>
-        </div>
-        <div className="flex gap-3 self-end sm:self-auto shrink-0">
+          </>
+        }
+        actions={
           <Button variant="secondary" onClick={() => setIsPixKeysOpen(true)}>
             Chaves Pix
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Primary + secondary columns */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
@@ -218,13 +217,13 @@ export default function WalletPage() {
       </div>
 
       {/* History card */}
-      <section className="mt-5 rounded-[26px] bg-card border border-gray-100/70 shadow-xs p-5">
+      <section className="mt-5 rounded-[26px] bg-card border border-line shadow-xs p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
             Histórico de saques
           </h2>
           {withdrawals.meta.total > 0 && (
-            <span className="text-[11px] font-semibold text-gray-400">
+            <span className="text-[11px] font-semibold text-ink-label">
               {withdrawals.meta.total}{" "}
               {withdrawals.meta.total === 1 ? "registro" : "registros"}
             </span>

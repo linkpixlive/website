@@ -9,7 +9,7 @@ import { useToast } from "~/components/ui/useToast";
 import { ToastProvider } from "~/components/ui/ToastProvider";
 import { QueueStatusBadge } from "~/components/queue/QueueStatusBadge";
 import { QueueToolbar } from "~/components/queue/QueueToolbar";
-import { QueueList } from "~/components/queue/QueueList";
+import { LiveNowCard } from "~/components/donations/LiveNowCard";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -29,7 +29,6 @@ function QueuePopoutContent() {
   const { queue, isOverlayOnline, isPaused } = useQueueSocket(token);
   const { toast } = useToast();
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
-  const [replayLoading, setReplayLoading] = useState<string | null>(null);
 
   const handleTogglePause = async () => {
     setActionLoading((prev) => ({ ...prev, togglePause: true }));
@@ -47,7 +46,7 @@ function QueuePopoutContent() {
     const res = await overlayApi.skipAlert(token);
     setActionLoading((prev) => ({ ...prev, skip: false }));
     if (res.success) {
-      toast("Alerta pulado!", "success");
+      toast(isPaused ? "Mensagem removida da fila!" : "Alerta pulado!", "success");
     } else {
       toast(res.error.message, "error");
     }
@@ -75,26 +74,15 @@ function QueuePopoutContent() {
     }
   };
 
-  const handleReplay = async (donationId: string) => {
-    setReplayLoading(donationId);
-    const res = await overlayApi.replayDonation(token, donationId);
-    setReplayLoading(null);
-    if (res.success) {
-      toast("Doação re-enfileirada!", "success");
-    } else {
-      toast(res.error.message, "error");
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-background text-text-primary flex flex-col">
+    <div className="min-h-screen bg-shell text-text-primary flex flex-col">
       <header className="flex items-center justify-between gap-4 px-6 py-4 border-b border-white/10 shrink-0">
         <div>
           <h1 className="text-lg font-extrabold tracking-tight text-text-heading leading-tight">
-            Fila de Alertas
+            Doações — Ao Vivo
           </h1>
           <p className="text-xs text-text-primary mt-0.5">
-            Fila de doações em tempo real
+            Controle minimalista
           </p>
         </div>
         <QueueStatusBadge
@@ -114,11 +102,11 @@ function QueuePopoutContent() {
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-4 scrollbar-thin">
-        <QueueList
+      <div className="flex-1 overflow-y-auto px-6 py-4 scrollbar-thin bg-canvas">
+        <LiveNowCard
           queue={queue}
-          onReplay={handleReplay}
-          replayLoading={replayLoading}
+          isOverlayOnline={isOverlayOnline}
+          isPaused={isPaused}
         />
       </div>
     </div>

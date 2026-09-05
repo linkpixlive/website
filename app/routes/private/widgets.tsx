@@ -128,7 +128,7 @@ export default function Widgets() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div>
       {selectedWidget === "overlay" ? (
         <OverlayWidgetConfig widget={overlayWidget} onBack={handleBack} />
       ) : (

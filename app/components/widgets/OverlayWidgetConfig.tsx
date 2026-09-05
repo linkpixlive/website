@@ -20,8 +20,6 @@ const NARRATOR_OPTIONS = [
   { value: "Antonio", label: "Antonio (Masculino)" },
 ];
 
-const WIDGET_WS_BASE = "wss://tipply.app/ws/overlay";
-
 const overlaySchema = z.object({
   volume: z.number().min(0).max(100),
   speakNameAmount: z.boolean(),
@@ -58,7 +56,7 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
   const volumeValue = watch("volume");
 
   const widgetUrl = widget?.token
-    ? `${WIDGET_WS_BASE}?token=${widget.token}`
+    ? `${window.location.origin}/overlay?token=${widget.token}`
     : "Widget não configurado ainda — salve as configurações para gerar a URL.";
 
   const handleCopyUrl = () => {
@@ -94,13 +92,13 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
   };
 
   return (
-    <div className="flex flex-col gap-5 max-w-7xl mx-auto">
+    <div className="flex flex-col gap-5">
       {/* Title block with back button */}
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={onBack}
-          className="w-11 h-11 rounded-full bg-white hover:bg-gray-50 border border-gray-100/80 shadow-xs text-chrome-icon transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95"
+          className="w-11 h-11 rounded-full bg-card hover:bg-tile border border-line shadow-xs text-chrome-icon transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95"
           title="Voltar"
           aria-label="Voltar para widgets"
         >
@@ -117,7 +115,7 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
       </div>
 
       {/* URL de Conexão card */}
-      <div className="rounded-[26px] bg-card border border-gray-100/70 shadow-xs p-5">
+      <div className="rounded-[26px] bg-card border border-line shadow-xs p-5">
         <div className="flex items-center justify-between mb-4 gap-3">
           <span className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
             URL de conexão
@@ -135,7 +133,7 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
         </div>
 
         <div className="flex items-center gap-2 min-w-0">
-          <div className="flex-1 bg-white border border-gray-200/90 rounded-full px-4 py-2.5 flex items-center min-w-0">
+          <div className="flex-1 bg-card border border-line-input rounded-full px-4 py-2.5 flex items-center min-w-0">
             <span
               className={`text-[13px] font-mono font-medium flex-1 truncate ${
                 !showUrl ? "blur-md select-none pointer-events-none text-ink-body" : "text-ink-heading select-all"
@@ -147,7 +145,7 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
           <button
             type="button"
             onClick={() => setShowUrl((v) => !v)}
-            className="w-11 h-11 rounded-full bg-white hover:bg-gray-50 border border-gray-100/80 shadow-xs text-chrome-icon transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95"
+            className="w-11 h-11 rounded-full bg-card hover:bg-tile border border-line shadow-xs text-chrome-icon transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95"
             title={showUrl ? "Ocultar URL" : "Mostrar URL"}
           >
             <Icon
@@ -164,7 +162,7 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
             className={`w-11 h-11 rounded-full border shadow-xs transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
               urlCopied
                 ? "bg-success/10 border-success/20 text-success"
-                : "bg-white hover:bg-gray-50 border-gray-100/80 text-chrome-icon"
+                : "bg-card hover:bg-tile border-line text-chrome-icon"
             }`}
             title={urlCopied ? "Copiado!" : "Copiar URL"}
           >
@@ -202,7 +200,7 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
 
       {/* Configurações card */}
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="rounded-[26px] bg-card border border-gray-100/70 shadow-xs p-5">
+        <div className="rounded-[26px] bg-card border border-line shadow-xs p-5">
           <span className="block text-[11px] font-extrabold uppercase tracking-wider text-ink-label mb-4">
             Configurações
           </span>
@@ -273,7 +271,7 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
                       ${
                         field.value
                           ? "bg-brand-button"
-                          : "bg-wash border border-gray-200/90"
+                          : "bg-wash border border-line-input"
                       }
                     `}
                   >
@@ -288,7 +286,7 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
             </div>
 
             {/* Save Button */}
-            <div className="flex justify-end pt-4 border-t border-gray-100">
+            <div className="flex justify-end pt-4 border-t border-line">
               <SubmitButton loading={isLoading} className="w-full sm:w-auto">
                 Salvar Configurações
               </SubmitButton>

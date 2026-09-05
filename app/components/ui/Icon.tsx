@@ -2,6 +2,7 @@ import { AltArrowDownIcon as AltArrowDownLinear } from "@solar-icons/react/linea
 import { AltArrowLeftIcon as AltArrowLeftLinear } from "@solar-icons/react/linear/alt-arrow-left";
 import { AltArrowRightIcon as AltArrowRightLinear } from "@solar-icons/react/linear/alt-arrow-right";
 import { AddCircleIcon as AddCircleLinear } from "@solar-icons/react/linear/add-circle";
+import { BellIcon as BellLinear } from "@solar-icons/react/linear/bell";
 import { CalendarIcon as CalendarLinear } from "@solar-icons/react/linear/calendar";
 import { CardIcon as CardLinear } from "@solar-icons/react/linear/card";
 import { CheckCircleIcon as CheckCircleLinear } from "@solar-icons/react/linear/check-circle";
@@ -10,6 +11,7 @@ import { ClockCircleIcon as ClockCircleLinear } from "@solar-icons/react/linear/
 import { CloseCircleIcon as CloseCircleLinear } from "@solar-icons/react/linear/close-circle";
 import { CopyIcon as CopyLinear } from "@solar-icons/react/linear/copy";
 import { DangerCircleIcon as DangerCircleLinear } from "@solar-icons/react/linear/danger-circle";
+import { DownloadMinimalisticIcon as DownloadMinimalisticLinear } from "@solar-icons/react/linear/download-minimalistic";
 import { EyeClosedIcon as EyeClosedLinear } from "@solar-icons/react/linear/eye-closed";
 import { EyeIcon as EyeLinear } from "@solar-icons/react/linear/eye";
 import { FilterIcon as FilterLinear } from "@solar-icons/react/linear/filter";
@@ -23,6 +25,7 @@ import { ListIcon as ListLinear } from "@solar-icons/react/linear/list";
 import { LockIcon as LockLinear } from "@solar-icons/react/linear/lock";
 import { LogoutIcon as LogoutLinear } from "@solar-icons/react/linear/logout";
 import { MentionCircleIcon as MentionCircleLinear } from "@solar-icons/react/linear/mention-circle";
+import { MoonIcon as MoonLinear } from "@solar-icons/react/linear/moon";
 import { PauseIcon as PauseLinear } from "@solar-icons/react/linear/pause";
 import { PenNewRoundIcon as PenNewRoundLinear } from "@solar-icons/react/linear/pen-new-round";
 import { PlayIcon as PlayLinear } from "@solar-icons/react/linear/play";
@@ -32,6 +35,7 @@ import { SettingsIcon as SettingsLinear } from "@solar-icons/react/linear/settin
 import { SettingsMinimalisticIcon as SettingsMinimalisticLinear } from "@solar-icons/react/linear/settings-minimalistic";
 import { SkipNextIcon as SkipNextLinear } from "@solar-icons/react/linear/skip-next";
 import { SquareArrowRightUpIcon as SquareArrowRightUpLinear } from "@solar-icons/react/linear/square-arrow-right-up";
+import { SunIcon as SunLinear } from "@solar-icons/react/linear/sun";
 import { TestTubeMinimalisticIcon as TestTubeMinimalisticLinear } from "@solar-icons/react/linear/test-tube-minimalistic";
 import { TestTubeIcon as TestTubeLinear } from "@solar-icons/react/linear/test-tube";
 import { TrashBinMinimalisticIcon as TrashBinMinimalisticLinear } from "@solar-icons/react/linear/trash-bin-minimalistic";
@@ -46,6 +50,7 @@ import { AltArrowDownIcon as AltArrowDownOutline } from "@solar-icons/react/outl
 import { AltArrowLeftIcon as AltArrowLeftOutline } from "@solar-icons/react/outline/alt-arrow-left";
 import { AltArrowRightIcon as AltArrowRightOutline } from "@solar-icons/react/outline/alt-arrow-right";
 import { AddCircleIcon as AddCircleOutline } from "@solar-icons/react/outline/add-circle";
+import { BellIcon as BellOutline } from "@solar-icons/react/outline/bell";
 import { CalendarIcon as CalendarOutline } from "@solar-icons/react/outline/calendar";
 import { CardIcon as CardOutline } from "@solar-icons/react/outline/card";
 import { CheckCircleIcon as CheckCircleOutline } from "@solar-icons/react/outline/check-circle";
@@ -54,6 +59,7 @@ import { ClockCircleIcon as ClockCircleOutline } from "@solar-icons/react/outlin
 import { CloseCircleIcon as CloseCircleOutline } from "@solar-icons/react/outline/close-circle";
 import { CopyIcon as CopyOutline } from "@solar-icons/react/outline/copy";
 import { DangerCircleIcon as DangerCircleOutline } from "@solar-icons/react/outline/danger-circle";
+import { DownloadMinimalisticIcon as DownloadMinimalisticOutline } from "@solar-icons/react/outline/download-minimalistic";
 import { EyeClosedIcon as EyeClosedOutline } from "@solar-icons/react/outline/eye-closed";
 import { EyeIcon as EyeOutline } from "@solar-icons/react/outline/eye";
 import { FilterIcon as FilterOutline } from "@solar-icons/react/outline/filter";
@@ -67,6 +73,7 @@ import { ListIcon as ListOutline } from "@solar-icons/react/outline/list";
 import { LockIcon as LockOutline } from "@solar-icons/react/outline/lock";
 import { LogoutIcon as LogoutOutline } from "@solar-icons/react/outline/logout";
 import { MentionCircleIcon as MentionCircleOutline } from "@solar-icons/react/outline/mention-circle";
+import { MoonIcon as MoonOutline } from "@solar-icons/react/outline/moon";
 import { PauseIcon as PauseOutline } from "@solar-icons/react/outline/pause";
 import { PenNewRoundIcon as PenNewRoundOutline } from "@solar-icons/react/outline/pen-new-round";
 import { PlayIcon as PlayOutline } from "@solar-icons/react/outline/play";
@@ -76,6 +83,7 @@ import { SettingsIcon as SettingsOutline } from "@solar-icons/react/outline/sett
 import { SettingsMinimalisticIcon as SettingsMinimalisticOutline } from "@solar-icons/react/outline/settings-minimalistic";
 import { SkipNextIcon as SkipNextOutline } from "@solar-icons/react/outline/skip-next";
 import { SquareArrowRightUpIcon as SquareArrowRightUpOutline } from "@solar-icons/react/outline/square-arrow-right-up";
+import { SunIcon as SunOutline } from "@solar-icons/react/outline/sun";
 import { TestTubeMinimalisticIcon as TestTubeMinimalisticOutline } from "@solar-icons/react/outline/test-tube-minimalistic";
 import { TestTubeIcon as TestTubeOutline } from "@solar-icons/react/outline/test-tube";
 import { TrashBinMinimalisticIcon as TrashBinMinimalisticOutline } from "@solar-icons/react/outline/trash-bin-minimalistic";
@@ -90,6 +98,7 @@ import { AltArrowDownIcon as AltArrowDownBold } from "@solar-icons/react/bold/al
 import { AltArrowLeftIcon as AltArrowLeftBold } from "@solar-icons/react/bold/alt-arrow-left";
 import { AltArrowRightIcon as AltArrowRightBold } from "@solar-icons/react/bold/alt-arrow-right";
 import { AddCircleIcon as AddCircleBold } from "@solar-icons/react/bold/add-circle";
+import { BellIcon as BellBold } from "@solar-icons/react/bold/bell";
 import { CalendarIcon as CalendarBold } from "@solar-icons/react/bold/calendar";
 import { CardIcon as CardBold } from "@solar-icons/react/bold/card";
 import { CheckCircleIcon as CheckCircleBold } from "@solar-icons/react/bold/check-circle";
@@ -98,6 +107,7 @@ import { ClockCircleIcon as ClockCircleBold } from "@solar-icons/react/bold/cloc
 import { CloseCircleIcon as CloseCircleBold } from "@solar-icons/react/bold/close-circle";
 import { CopyIcon as CopyBold } from "@solar-icons/react/bold/copy";
 import { DangerCircleIcon as DangerCircleBold } from "@solar-icons/react/bold/danger-circle";
+import { DownloadMinimalisticIcon as DownloadMinimalisticBold } from "@solar-icons/react/bold/download-minimalistic";
 import { EyeClosedIcon as EyeClosedBold } from "@solar-icons/react/bold/eye-closed";
 import { EyeIcon as EyeBold } from "@solar-icons/react/bold/eye";
 import { FilterIcon as FilterBold } from "@solar-icons/react/bold/filter";
@@ -111,6 +121,7 @@ import { ListIcon as ListBold } from "@solar-icons/react/bold/list";
 import { LockIcon as LockBold } from "@solar-icons/react/bold/lock";
 import { LogoutIcon as LogoutBold } from "@solar-icons/react/bold/logout";
 import { MentionCircleIcon as MentionCircleBold } from "@solar-icons/react/bold/mention-circle";
+import { MoonIcon as MoonBold } from "@solar-icons/react/bold/moon";
 import { PauseIcon as PauseBold } from "@solar-icons/react/bold/pause";
 import { PenNewRoundIcon as PenNewRoundBold } from "@solar-icons/react/bold/pen-new-round";
 import { PlayIcon as PlayBold } from "@solar-icons/react/bold/play";
@@ -120,6 +131,7 @@ import { SettingsIcon as SettingsBold } from "@solar-icons/react/bold/settings";
 import { SettingsMinimalisticIcon as SettingsMinimalisticBold } from "@solar-icons/react/bold/settings-minimalistic";
 import { SkipNextIcon as SkipNextBold } from "@solar-icons/react/bold/skip-next";
 import { SquareArrowRightUpIcon as SquareArrowRightUpBold } from "@solar-icons/react/bold/square-arrow-right-up";
+import { SunIcon as SunBold } from "@solar-icons/react/bold/sun";
 import { TestTubeMinimalisticIcon as TestTubeMinimalisticBold } from "@solar-icons/react/bold/test-tube-minimalistic";
 import { TestTubeIcon as TestTubeBold } from "@solar-icons/react/bold/test-tube";
 import { TrashBinMinimalisticIcon as TrashBinMinimalisticBold } from "@solar-icons/react/bold/trash-bin-minimalistic";
@@ -149,6 +161,7 @@ const REGISTRY = {
   "alt-arrow-down": entry(AltArrowDownLinear, AltArrowDownOutline, AltArrowDownBold),
   "alt-arrow-left": entry(AltArrowLeftLinear, AltArrowLeftOutline, AltArrowLeftBold),
   "alt-arrow-right": entry(AltArrowRightLinear, AltArrowRightOutline, AltArrowRightBold),
+  bell: entry(BellLinear, BellOutline, BellBold),
   calendar: entry(CalendarLinear, CalendarOutline, CalendarBold),
   card: entry(CardLinear, CardOutline, CardBold),
   "chat-dots": entry(ChatDotsLinear, ChatDotsOutline, ChatDotsBold),
@@ -157,6 +170,11 @@ const REGISTRY = {
   "close-circle": entry(CloseCircleLinear, CloseCircleOutline, CloseCircleBold),
   copy: entry(CopyLinear, CopyOutline, CopyBold),
   "danger-circle": entry(DangerCircleLinear, DangerCircleOutline, DangerCircleBold),
+  "download-minimalistic": entry(
+    DownloadMinimalisticLinear,
+    DownloadMinimalisticOutline,
+    DownloadMinimalisticBold,
+  ),
   eye: entry(EyeLinear, EyeOutline, EyeBold),
   "eye-closed": entry(EyeClosedLinear, EyeClosedOutline, EyeClosedBold),
   filter: entry(FilterLinear, FilterOutline, FilterBold),
@@ -178,6 +196,7 @@ const REGISTRY = {
   lock: entry(LockLinear, LockOutline, LockBold),
   logout: entry(LogoutLinear, LogoutOutline, LogoutBold),
   "mention-circle": entry(MentionCircleLinear, MentionCircleOutline, MentionCircleBold),
+  moon: entry(MoonLinear, MoonOutline, MoonBold),
   pause: entry(PauseLinear, PauseOutline, PauseBold),
   "pen-new-round": entry(PenNewRoundLinear, PenNewRoundOutline, PenNewRoundBold),
   play: entry(PlayLinear, PlayOutline, PlayBold),
@@ -195,6 +214,7 @@ const REGISTRY = {
     SquareArrowRightUpOutline,
     SquareArrowRightUpBold,
   ),
+  sun: entry(SunLinear, SunOutline, SunBold),
   "test-tube": entry(TestTubeLinear, TestTubeOutline, TestTubeBold),
   "test-tube-minimalistic": entry(
     TestTubeMinimalisticLinear,

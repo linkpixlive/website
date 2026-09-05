@@ -1,5 +1,6 @@
 import { forwardRef, useId } from "react";
 import { Icon } from "./Icon";
+import { FieldError } from "./FieldError";
 import type { IconName } from "./Icon";
 
 export interface FormFieldProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'name'> {
@@ -41,18 +42,14 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
               ${
                 error
                   ? "border-error focus:border-error focus:ring-2 focus:ring-error/20"
-                  : "border-gray-100/80 focus:border-[#fcc717] focus:ring-2 focus:ring-brand/30"
+                  : "border-line focus:border-border-focus focus:ring-2 focus:ring-brand/30"
               }
               ${disabled ? "opacity-50 cursor-not-allowed" : ""}
               ${className || ""}
             `}
           />
         </div>
-        {error && (
-          <span className="text-error text-xs font-medium animate-[shake_0.4s_ease-in-out]">
-            {error}
-          </span>
-        )}
+        <FieldError message={error} />
       </div>
     );
   }
