@@ -4,6 +4,7 @@ import { AltArrowRightIcon as AltArrowRightLinear } from "@solar-icons/react/lin
 import { AddCircleIcon as AddCircleLinear } from "@solar-icons/react/linear/add-circle";
 import { BellIcon as BellLinear } from "@solar-icons/react/linear/bell";
 import { CalendarIcon as CalendarLinear } from "@solar-icons/react/linear/calendar";
+import { CameraAddIcon as CameraAddLinear } from "@solar-icons/react/linear/camera-add";
 import { CardIcon as CardLinear } from "@solar-icons/react/linear/card";
 import { CheckCircleIcon as CheckCircleLinear } from "@solar-icons/react/linear/check-circle";
 import { ChatDotsIcon as ChatDotsLinear } from "@solar-icons/react/linear/chat-dots";
@@ -52,6 +53,7 @@ import { AltArrowRightIcon as AltArrowRightOutline } from "@solar-icons/react/ou
 import { AddCircleIcon as AddCircleOutline } from "@solar-icons/react/outline/add-circle";
 import { BellIcon as BellOutline } from "@solar-icons/react/outline/bell";
 import { CalendarIcon as CalendarOutline } from "@solar-icons/react/outline/calendar";
+import { CameraAddIcon as CameraAddOutline } from "@solar-icons/react/outline/camera-add";
 import { CardIcon as CardOutline } from "@solar-icons/react/outline/card";
 import { CheckCircleIcon as CheckCircleOutline } from "@solar-icons/react/outline/check-circle";
 import { ChatDotsIcon as ChatDotsOutline } from "@solar-icons/react/outline/chat-dots";
@@ -100,6 +102,7 @@ import { AltArrowRightIcon as AltArrowRightBold } from "@solar-icons/react/bold/
 import { AddCircleIcon as AddCircleBold } from "@solar-icons/react/bold/add-circle";
 import { BellIcon as BellBold } from "@solar-icons/react/bold/bell";
 import { CalendarIcon as CalendarBold } from "@solar-icons/react/bold/calendar";
+import { CameraAddIcon as CameraAddBold } from "@solar-icons/react/bold/camera-add";
 import { CardIcon as CardBold } from "@solar-icons/react/bold/card";
 import { CheckCircleIcon as CheckCircleBold } from "@solar-icons/react/bold/check-circle";
 import { ChatDotsIcon as ChatDotsBold } from "@solar-icons/react/bold/chat-dots";
@@ -163,6 +166,7 @@ const REGISTRY = {
   "alt-arrow-right": entry(AltArrowRightLinear, AltArrowRightOutline, AltArrowRightBold),
   bell: entry(BellLinear, BellOutline, BellBold),
   calendar: entry(CalendarLinear, CalendarOutline, CalendarBold),
+  "camera-add": entry(CameraAddLinear, CameraAddOutline, CameraAddBold),
   card: entry(CardLinear, CardOutline, CardBold),
   "chat-dots": entry(ChatDotsLinear, ChatDotsOutline, ChatDotsBold),
   "check-circle": entry(CheckCircleLinear, CheckCircleOutline, CheckCircleBold),

@@ -22,8 +22,14 @@ export function PaymentConfirmedStep({
         Confirmação
       </span>
 
-      <div className="flex items-center justify-center size-16 rounded-full bg-success/10">
-        <Icon name="check-circle" size={32} strokeWidth={2.3} className="text-success" />
+      <div className="relative flex items-center justify-center size-16">
+        <span
+          aria-hidden="true"
+          className="absolute inline-flex size-16 rounded-full bg-success/20 animate-confirmed-ring motion-reduce:animate-none"
+        />
+        <span className="relative flex items-center justify-center size-16 rounded-full bg-success/10 animate-confirmed-pop motion-reduce:animate-none">
+          <Icon name="check-circle" size={32} strokeWidth={2.3} className="text-success" />
+        </span>
       </div>
 
       <div className="flex flex-col gap-1">
@@ -42,10 +48,6 @@ export function PaymentConfirmedStep({
           “{donation.message}”
         </p>
       )}
-
-      <p className="text-xs font-medium text-ink-muted">
-        — {donation.donorName} · Voz: {donation.voiceName ?? "padrão do streamer"}
-      </p>
 
       <Button variant="secondary" onClick={onNewDonation} className="w-full">
         Fazer nova doação

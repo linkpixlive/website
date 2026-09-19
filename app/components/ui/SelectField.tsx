@@ -51,6 +51,7 @@ export function SelectField({
         value={selectedOption ? value : null}
         onValueChange={(newValue) => onChange(newValue as string)}
         disabled={disabled}
+        modal={false}
       >
         <Select.Label className="text-[13px] font-medium text-ink-secondary">
           {label}
@@ -62,7 +63,7 @@ export function SelectField({
               ${
                 error
                   ? "border-error focus:border-error focus:ring-2 focus:ring-error/20"
-                  : "border-line focus:border-border-focus focus:ring-2 focus:ring-brand/30"
+                  : "border-line-input focus:border-border-focus focus:ring-2 focus:ring-brand/30"
               }
               ${disabled ? "opacity-50 cursor-not-allowed" : ""}
             `}

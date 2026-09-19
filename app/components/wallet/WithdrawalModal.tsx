@@ -11,6 +11,7 @@ import { SubmitButton } from "~/components/ui/SubmitButton";
 import { Icon } from "~/components/ui/Icon";
 import { Button } from "~/components/ui/Button";
 import { withdrawalSchema } from "~/validators/wallet-validator";
+import { formatPixKeyValue } from "./pixKeyFormat";
 
 interface WithdrawalModalProps {
   isOpen: boolean;
@@ -107,13 +108,14 @@ export function WithdrawalModal({
     }
   }, [amountWatch, feePercentage]);
 
-  // Clean form values on modal close/open
+  // Clean form values on modal open — destinatário sempre começa vazio
+  // para exigir seleção manual (evita saque na chave errada por padrão).
   useEffect(() => {
     if (isOpen) {
-      reset({ amount: "", pixId: pixKeys[0]?.id || "" });
+      reset({ amount: "", pixId: "" });
       setAmountDisplay("");
     }
-  }, [isOpen, pixKeys, reset]);
+  }, [isOpen, reset]);
 
   const onSubmit = (data: { amount: number; pixId: string }) => {
     const formData = new FormData();
@@ -123,12 +125,15 @@ export function WithdrawalModal({
     submit(formData, { method: "post" });
   };
 
-  const pixKeyOptions = pixKeys.map((pk) => ({
-    value: pk.id,
-    label: pk.alias
-      ? `${pk.alias} (${pk.key ?? pk.keyMasked})`
-      : pk.key || pk.keyMasked,
-  }));
+  const pixKeyOptions = pixKeys.map((pk) => {
+    // Valor completo (sem máscara) para o usuário confirmar o destino exato.
+    // Fallback para keyMasked caso a chave descriptografada não venha na listagem.
+    const displayValue = formatPixKeyValue(pk.key ?? pk.keyMasked, pk.keyType);
+    return {
+      value: pk.id,
+      label: pk.alias ? `${pk.alias} (${displayValue})` : displayValue,
+    };
+  });
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -176,6 +181,7 @@ export function WithdrawalModal({
               onChange={(val) =>
                 setValue("pixId", val, { shouldValidate: true })
               }
+              placeholder="Selecione a chave Pix..."
               error={errors.pixId?.message}
               disabled={loading}
             />

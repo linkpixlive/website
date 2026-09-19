@@ -15,7 +15,7 @@ export function DonationAlertCard({ donation }: DonationAlertCardProps) {
   const { name, amount, message, isTest } = donation;
 
   return (
-    <div className="alert-card-in w-[400px] max-w-[92vw] rounded-[26px] bg-white border border-[#eef0f5] shadow-[0_18px_50px_-12px_rgba(17,21,30,0.35)] p-6">
+    <div className="alert-card-in w-[400px] max-w-[92vw] rounded-[26px] bg-white border border-[#dfe3ea] shadow-[0_18px_50px_-12px_rgba(17,21,30,0.35)] p-6">
       <style>{`
         @keyframes alert-card-in {
           0% { opacity: 0; transform: translateY(24px) scale(0.96); }
@@ -33,7 +33,7 @@ export function DonationAlertCard({ donation }: DonationAlertCardProps) {
       )}
 
       <div className="flex items-center gap-3">
-        <div className="h-11 w-11 rounded-full bg-[#f4f5f8] border border-[#eef0f5] flex items-center justify-center shrink-0">
+        <div className="h-11 w-11 rounded-full bg-[#eceef3] border border-[#dfe3ea] flex items-center justify-center shrink-0">
           <span className="text-base font-extrabold text-[#11151e]">
             {name.charAt(0).toUpperCase() || "?"}
           </span>

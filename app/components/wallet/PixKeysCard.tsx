@@ -1,7 +1,7 @@
 import type { PixKey } from "~/api/modules/pix-keys";
 import { Button } from "~/components/ui/Button";
 import { Icon } from "~/components/ui/Icon";
-import { getTypeName } from "./PixKeysModal";
+import { displayMaskedKey, getTypeName } from "./pixKeyFormat";
 
 interface PixKeysCardProps {
   pixKeys: PixKey[];
@@ -40,7 +40,7 @@ export function PixKeysCard({ pixKeys, onManage }: PixKeysCardProps) {
                   {pk.alias || getTypeName(pk.keyType)}
                 </p>
                 <p className="text-xs text-ink-secondary font-mono font-medium truncate">
-                  {pk.keyMasked}
+                  {displayMaskedKey(pk.keyMasked)}
                 </p>
               </div>
             </div>

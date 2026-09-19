@@ -38,8 +38,10 @@ export function TwoFactorModal({ isOpen, onClose, enabled }: TwoFactorModalProps
   const loading = fetcher.state === "submitting";
   const { toast } = useToast();
   const [localError, setLocalError] = useState<string | null>(null);
+  const [disableToken, setDisableToken] = useState("");
   const [copied, setCopied] = useState(false);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastToastedResult = useRef<unknown>(null);
 
   const data = fetcher.data as FetcherData;
 
@@ -65,14 +67,20 @@ export function TwoFactorModal({ isOpen, onClose, enabled }: TwoFactorModalProps
   }, [isOpen, enabled, fetcher, setupPayload, setupError]);
 
   useEffect(() => {
+    if (!data || data === lastToastedResult.current) return;
     if (
       (isAction(data, "2faEnable") || isAction(data, "2faDisable")) &&
       data.success
     ) {
+      lastToastedResult.current = data;
       toast(data.message ?? "Autenticação em dois fatores atualizada.", "success");
       onClose();
     }
   }, [data, toast, onClose]);
+
+  useEffect(() => {
+    if (isOpen) setDisableToken("");
+  }, [isOpen]);
 
   useEffect(() => {
     if (fetcher.state === "submitting") {
@@ -101,8 +109,12 @@ export function TwoFactorModal({ isOpen, onClose, enabled }: TwoFactorModalProps
     submitIntent("2faEnable", { token: code });
   };
 
-  const handleDisable = (values: { password: string }) => {
+  const handleDisable = (values: { password: string; token: string }) => {
     if (loading) return;
+    if (values.token.length !== 6) {
+      setLocalError("Digite o código de 6 dígitos do seu app autenticador.");
+      return;
+    }
     setLocalError(null);
     submitIntent("2faDisable", values);
   };
@@ -131,7 +143,10 @@ export function TwoFactorModal({ isOpen, onClose, enabled }: TwoFactorModalProps
           onSubmit={(event) => {
             event.preventDefault();
             const value = new FormData(event.currentTarget);
-            handleDisable({ password: String(value.get("password") ?? "") });
+            handleDisable({
+              password: String(value.get("password") ?? ""),
+              token: disableToken,
+            });
           }}
           className="space-y-4"
         >
@@ -142,7 +157,8 @@ export function TwoFactorModal({ isOpen, onClose, enabled }: TwoFactorModalProps
             />
           )}
           <p className="text-[13px] font-medium text-ink-secondary leading-relaxed">
-            Confirme sua senha para desativar a proteção extra no login.
+            Confirme sua senha e o código do app autenticador para desativar a
+            proteção extra no login.
           </p>
           <PasswordField
             label="Senha"
@@ -151,6 +167,16 @@ export function TwoFactorModal({ isOpen, onClose, enabled }: TwoFactorModalProps
             autoComplete="current-password"
             disabled={loading}
           />
+          <div className="space-y-2">
+            <span className="block text-[13px] font-medium text-ink-secondary">
+              Digite o código de 6 dígitos do app para confirmar.
+            </span>
+            <OtpInput
+              onComplete={setDisableToken}
+              disabled={loading}
+              error={Boolean(localError || submitError)}
+            />
+          </div>
           <SubmitButton loading={loading} disabled={loading}>
             Desativar 2FA
           </SubmitButton>

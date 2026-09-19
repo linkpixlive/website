@@ -29,27 +29,30 @@ export default function DonationPage() {
   const { username } = useParams();
 
   async function handleCreateDonation(values: DonationFormValues) {
-    return createDonation({
-      name: values.name,
-      message: values.message,
-      amount: values.amount,
-      voiceId: values.voiceId,
-    });
+    return createDonation(
+      {
+        name: values.name,
+        message: values.message,
+        amount: values.amount,
+        voiceId: values.voiceId,
+      },
+      username ?? "",
+    );
   }
 
   if (!streamer) {
     return (
-      <main className="flex justify-center px-4 py-6 sm:py-10">
+      <main className="flex flex-1 items-center justify-center px-4 py-6 sm:py-10">
         <div className="w-full max-w-md flex flex-col items-center gap-6">
           <NotFoundState username={username ?? ""} />
-          <LogoTile />
+          <LogoTile variant="auto" imgClassName="h-6" textClassName="text-lg" />
         </div>
       </main>
     );
   }
 
   return (
-    <main className="flex justify-center px-4 py-6 sm:py-10">
+    <main className="flex flex-1 items-center justify-center px-4 py-6 sm:py-10">
       <div className="w-full max-w-md flex flex-col gap-5 animate-fade-in">
         <UnifiedDonationCard
           profile={streamer}
@@ -58,7 +61,7 @@ export default function DonationPage() {
         />
 
         <div className="flex flex-col items-center gap-2 pb-2">
-          <LogoTile />
+          <LogoTile variant="auto" imgClassName="h-6" textClassName="text-lg" />
           <p className="text-[11px] font-medium text-ink-label">
             Doações processadas via Pix · LinkPix
           </p>

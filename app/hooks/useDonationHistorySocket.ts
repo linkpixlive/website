@@ -32,8 +32,9 @@ export function useDonationHistorySocket(
 
     const matchesFilters = (donation: DonationHistory) => {
       if (filters?.status && donation.status !== filters.status) return false;
-      if (filters?.days && ["7", "15", "30"].includes(filters.days)) {
-        const daysNum = parseInt(filters.days, 10);
+      const daysFilter = filters?.days || "30";
+      if (["7", "15", "30"].includes(daysFilter)) {
+        const daysNum = parseInt(daysFilter, 10);
         const now = new Date();
         const end = new Date(now);
         end.setHours(23, 59, 59, 999);
@@ -43,6 +44,12 @@ export function useDonationHistorySocket(
         if (!donation.approvedAt) return false;
         const approved = new Date(donation.approvedAt);
         if (approved < start || approved > end) return false;
+      } else if (daysFilter === "today") {
+        // "Hoje" = últimas 24h corridas (mesma regra do backend).
+        if (!donation.approvedAt) return false;
+        const approved = new Date(donation.approvedAt).getTime();
+        if (Number.isNaN(approved)) return false;
+        if (approved < Date.now() - 24 * 60 * 60 * 1000) return false;
       }
       const term = filters?.search?.trim();
       if (term && term.length >= 2) {

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Popover } from "@base-ui/react/popover";
 import { Button } from "~/components/ui/Button";
 import { Icon } from "~/components/ui/Icon";
-import { Modal } from "~/components/ui/Modal";
 import { overlayApi } from "~/api/modules/overlay";
 import { useToast } from "~/components/ui/useToast";
 import type { OverlayDonationEntity } from "~/types/queue";
@@ -32,33 +31,63 @@ export function DonationQueuePopover({
   token,
 }: DonationQueuePopoverProps) {
   const [open, setOpen] = useState(false);
-  const [confirmId, setConfirmId] = useState<string | null>(null);
+  // A mesma doação pode aparecer várias vezes na fila (ex. "Repetir"),
+  // então a confirmação é identificada pela LINHA clicada (índice), não
+  // pelo id — com snapshot do id para validar antes de remover.
+  const [confirmIndex, setConfirmIndex] = useState<number | null>(null);
+  const [confirmDonationId, setConfirmDonationId] = useState<
+    string | undefined
+  >(undefined);
   const [removing, setRemoving] = useState(false);
   const { toast } = useToast();
 
   const pendingCount = queue.length;
 
+  const handleConfirmClick = (
+    donation: OverlayDonationEntity,
+    index: number,
+  ) => {
+    setConfirmIndex(index);
+    setConfirmDonationId(donation.id);
+  };
+
+  const resetConfirm = () => {
+    setConfirmIndex(null);
+    setConfirmDonationId(undefined);
+  };
+
   const handleRemove = async () => {
-    if (!confirmId) return;
+    if (confirmIndex === null) return;
+    const target = queue[confirmIndex];
+    if (!target || target.id !== confirmDonationId) {
+      toast("A fila mudou. Selecione o item novamente.", "error");
+      resetConfirm();
+      return;
+    }
+    if (!target.id) {
+      toast("Não foi possível identificar o item da fila.", "error");
+      resetConfirm();
+      return;
+    }
     setRemoving(true);
-    const res = await overlayApi.removeFromQueue(token, confirmId);
+    const res = await overlayApi.removeFromQueue(token, target.id);
     setRemoving(false);
     if (res.success) {
       toast("Removido da fila.", "success");
-      setConfirmId(null);
+      resetConfirm();
     } else {
       toast(res.error.message, "error");
     }
   };
 
-  const confirmDonation = confirmId
-    ? queue.find((d) => d.id === confirmId)
-    : null;
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) resetConfirm();
+  };
 
   return (
-    <>
-      <Popover.Root open={open} onOpenChange={setOpen}>
-        <Popover.Trigger
+    <Popover.Root open={open} onOpenChange={handleOpenChange}>
+      <Popover.Trigger
           render={
             <Button variant="secondary" size="sm">
               <Icon name="list" size={16} strokeWidth={2} />
@@ -103,40 +132,39 @@ export function DonationQueuePopover({
                 <ul className="divide-y divide-line">
                   {queue.map((donation, index) => {
                     const isCurrent = Boolean(donation.isCurrent);
+                    const isConfirming = confirmIndex === index;
                     return (
                       <li
-                        key={donation.id}
-                        className={`flex items-center gap-3 py-3 first:pt-0 last:pb-0 ${isCurrent ? "-mx-2 px-2 rounded-2xl bg-yellow-wash/50 dark:bg-warning/10 border border-transparent dark:border-warning/10" : ""}`}
+                        key={
+                          donation.id != null
+                            ? `${donation.id}-${index}`
+                            : `fila-${index}`
+                        }
+                        className={`flex flex-col gap-2 py-3 first:pt-0 last:pb-0 ${isCurrent ? "-mx-2 px-2 rounded-2xl bg-yellow-wash/50 dark:bg-warning/10 border border-transparent dark:border-warning/10" : ""}`}
                       >
+                        <div className="flex items-center gap-3">
                         <span className="w-5 text-center text-[11px] font-extrabold text-ink-label shrink-0">
                           {index + 1}
                         </span>
-                        <img
-                          src="/default-avatar.svg"
-                          alt={donation.name}
-                          className="h-8 w-8 rounded-full object-cover border border-white shadow-2xs shrink-0"
-                        />
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-sm font-bold text-ink-heading truncate">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-ink-heading truncate min-w-0">
                               {donation.name}
                             </span>
-                            <span className="ml-auto text-xs font-extrabold text-ink-heading">
+                            {donation.isTest && (
+                              <span className="inline-flex items-center rounded-full bg-wash text-ink-secondary border border-line text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 shrink-0">
+                                Teste
+                              </span>
+                            )}
+                            <span className="ml-auto text-xs font-extrabold text-ink-heading shrink-0">
                               {formatAmount(donation.amount)}
                             </span>
                           </div>
-                          {(isCurrent || donation.isTest) && (
+                          {isCurrent && (
                             <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                              {isCurrent && (
-                                <span className="inline-flex items-center rounded-full bg-yellow-wash text-yellow-ink border border-yellow-wash dark:bg-warning/15 dark:text-warning dark:border-warning/20 text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5">
-                                  Exibindo agora
-                                </span>
-                              )}
-                              {donation.isTest && (
-                                <span className="inline-flex items-center rounded-full bg-wash text-ink-secondary border border-line text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5">
-                                  Teste
-                                </span>
-                              )}
+                              <span className="inline-flex items-center rounded-full bg-yellow-wash text-yellow-ink border border-yellow-wash dark:bg-warning/15 dark:text-warning dark:border-warning/20 text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5">
+                                Exibindo agora
+                              </span>
                             </div>
                           )}
                           {donation.message && (
@@ -148,15 +176,52 @@ export function DonationQueuePopover({
                             {formatTimestamp(donation.createdAt)}
                           </span>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setConfirmId(donation.id)}
-                          className="w-8 h-8 rounded-full bg-wash hover:bg-error/10 hover:text-error border border-line flex items-center justify-center text-chrome-icon transition-colors shrink-0 outline-none"
-                          title="Remover da fila"
-                          aria-label={`Remover ${donation.name} da fila`}
+                        {!isConfirming && (
+                          <button
+                            type="button"
+                            onClick={() => handleConfirmClick(donation, index)}
+                            className="w-8 h-8 rounded-full bg-wash hover:bg-danger-wash hover:text-error border border-line flex items-center justify-center text-chrome-icon transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95"
+                            title="Remover da fila"
+                            aria-label={`Remover ${donation.name} da fila`}
+                          >
+                            <Icon name="trash-bin-minimalistic" size={16} strokeWidth={2} />
+                          </button>
+                        )}
+                      </div>
+
+                      {isConfirming && (
+                        <div
+                          className="flex items-center gap-2 rounded-xl bg-error/5 border border-error/20 px-2.5 py-1.5 animate-fade-in"
+                          title="Ela continuará no histórico e poderá ser repetida depois."
                         >
-                          <Icon name="trash-bin-minimalistic" size={16} strokeWidth={2} />
-                        </button>
+                          <Icon
+                            name="danger-circle"
+                            size={14}
+                            strokeWidth={2}
+                            className="text-error shrink-0"
+                          />
+                          <p className="min-w-0 flex-1 truncate text-xs font-semibold text-ink-body">
+                            Remover{" "}
+                            <span className="font-bold">{donation.name}</span>?
+                          </p>
+                          <button
+                            type="button"
+                            onClick={handleRemove}
+                            disabled={removing}
+                            className="shrink-0 px-2.5 py-1 rounded-full bg-error text-white text-[11px] font-bold hover:bg-error-hover active:scale-[0.98] transition-all duration-150 cursor-pointer outline-none disabled:opacity-60 disabled:cursor-wait"
+                          >
+                            {removing ? "…" : "Sim"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => resetConfirm()}
+                            disabled={removing}
+                            className="shrink-0 px-2.5 py-1 rounded-full bg-wash text-[11px] font-bold text-ink-body hover:bg-wash-hover active:scale-[0.98] transition-all duration-150 cursor-pointer outline-none disabled:opacity-60"
+                          >
+                            Não
+                          </button>
+                        </div>
+                      )}
                       </li>
                     );
                   })}
@@ -165,41 +230,6 @@ export function DonationQueuePopover({
             </Popover.Popup>
           </Popover.Positioner>
         </Popover.Portal>
-      </Popover.Root>
-
-      <Modal
-        isOpen={!!confirmId}
-        onClose={() => setConfirmId(null)}
-        title="Remover da fila?"
-        size="sm"
-      >
-        <p className="text-sm font-medium text-ink-secondary leading-snug">
-          Remover{" "}
-          <span className="font-bold text-ink-heading">
-            {confirmDonation?.name ?? "esta doação"}
-          </span>{" "}
-          da fila? Ela continuará no histórico e poderá ser repetida depois.
-        </p>
-        <div className="flex gap-3 mt-6">
-          <Button
-            variant="secondary"
-            className="flex-1"
-            onClick={() => setConfirmId(null)}
-            disabled={removing}
-          >
-            Cancelar
-          </Button>
-          <Button
-            variant="danger"
-            className="flex-1"
-            onClick={handleRemove}
-            loading={removing}
-          >
-            <Icon name="trash-bin-minimalistic" size={16} strokeWidth={2} />
-            Remover
-          </Button>
-        </div>
-      </Modal>
-    </>
+    </Popover.Root>
   );
 }

@@ -1,12 +1,11 @@
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   redirect,
   useActionData,
   useLoaderData,
 } from "react-router";
-import type { Route } from "./+types/account";
-import { PageHeader } from "~/components/dashboard/PageHeader";
+import type { Route } from "./+types/conta";
 import { Button } from "~/components/ui/Button";
 import { Icon, type IconName } from "~/components/ui/Icon";
 import { ChangePasswordModal } from "~/components/account/ChangePasswordModal";
@@ -18,13 +17,6 @@ import {
   type AccountSettings,
 } from "~/api/modules/account-settings";
 import { getAuthToken, clearAuthCookie } from "~/util/session.server";
-
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Conta — LinkPix" },
-    { name: "description", content: "Configurações de segurança e preferências da sua conta" },
-  ];
-}
 
 const FALLBACK_SETTINGS: AccountSettings = {
   id: "",
@@ -114,6 +106,7 @@ export async function action({ request }: Route.ActionArgs) {
   if (intent === "2faDisable") {
     const res = await accountSettingsApi.disable2fa(token, {
       password: String(formData.get("password")),
+      token: String(formData.get("token")),
     });
 
     if (!res.success) {
@@ -138,66 +131,6 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   return null;
-}
-
-const PREFERENCES_STORAGE_KEY = "linkpix:account:preferences";
-
-interface AccountPreferences {
-  soundAlerts: boolean;
-  compactMode: boolean;
-}
-
-const DEFAULT_PREFERENCES: AccountPreferences = {
-  soundAlerts: true,
-  compactMode: false,
-};
-
-function useAccountPreferences() {
-  const [preferences, setPreferences] =
-    useState<AccountPreferences>(DEFAULT_PREFERENCES);
-
-  // Lazy read from localStorage keeps SSR markup stable.
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(PREFERENCES_STORAGE_KEY);
-      if (raw) {
-        setPreferences({ ...DEFAULT_PREFERENCES, ...JSON.parse(raw) });
-      }
-    } catch {
-      // Corrupted storage falls back to defaults.
-    }
-  }, []);
-
-  const togglePreference = (key: keyof AccountPreferences) => {
-    setPreferences((current) => {
-      const next = { ...current, [key]: !current[key] };
-      try {
-        localStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(next));
-      } catch {
-        // Storage unavailable (private mode): preference stays in-memory.
-      }
-      return next;
-    });
-  };
-
-  return { preferences, togglePreference };
-}
-
-function Switch({ on }: { on: boolean }) {
-  return (
-    <span
-      aria-hidden="true"
-      className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors duration-150 ${
-        on ? "bg-inverse" : "bg-wash border border-line-input"
-      }`}
-    >
-      <span
-        className={`absolute h-3.5 w-3.5 rounded-full transition-all duration-150 ${
-          on ? "left-[18px] bg-white" : "left-[3px] bg-ink-label"
-        }`}
-      />
-    </span>
-  );
 }
 
 function TwoFactorBadge({ enabled }: { enabled: boolean }) {
@@ -258,16 +191,12 @@ function SettingRow({
 
 function Account({
   settings,
-  preferences,
-  onTogglePreference,
   onChangePassword,
   onChangeEmail,
   onToggleTwoFactor,
   onDeactivate,
 }: {
   settings?: AccountSettings;
-  preferences: AccountPreferences;
-  onTogglePreference: (key: keyof AccountPreferences) => void;
   onChangePassword: () => void;
   onChangeEmail: () => void;
   onToggleTwoFactor: () => void;
@@ -277,20 +206,10 @@ function Account({
 
   return (
     <div>
-      <PageHeader
-        title="Conta"
-        subtitle={
-          <>
-            Configurações de segurança e preferências da{" "}
-            <strong className="font-bold text-ink-heading">sua conta</strong>.
-          </>
-        }
-      />
-
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 items-stretch">
         <section
           aria-label="Segurança"
-          className="rounded-[26px] bg-card border border-line shadow-xs p-5 lg:col-span-7 xl:col-span-8"
+          className="rounded-[26px] bg-card border border-line shadow-xs p-5 lg:col-span-12"
         >
           <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label mb-2">
             Segurança
@@ -326,74 +245,14 @@ function Account({
         </section>
 
         <section
-          aria-label="Preferências"
-          className="rounded-[26px] bg-card border border-line shadow-xs p-5 lg:col-span-5 xl:col-span-4 flex flex-col"
-        >
-          <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label mb-2">
-            Preferências
-          </h2>
-
-          <ul className="space-y-0.5">
-            <li className="flex items-center gap-3 rounded-xl px-3.5 py-2.5">
-              <span className="w-9 h-9 rounded-lg bg-tile grid place-items-center shrink-0">
-                <Icon name="tuning" size={18} strokeWidth={1.9} className="text-chrome-icon" />
-              </span>
-              <span className="flex-1 min-w-0">
-                <span className="block text-[13px] font-semibold text-ink-body leading-tight">
-                  Alertas sonoros
-                </span>
-                <span className="block text-xs font-medium text-ink-muted mt-0.5">
-                  Som ao receber doações
-                </span>
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={preferences.soundAlerts}
-                aria-label="Alertas sonoros"
-                onClick={() => onTogglePreference("soundAlerts")}
-                className="cursor-pointer outline-none"
-              >
-                <Switch on={preferences.soundAlerts} />
-              </button>
-            </li>
-            <li className="flex items-center gap-3 rounded-xl px-3.5 py-2.5">
-              <span className="w-9 h-9 rounded-lg bg-tile grid place-items-center shrink-0">
-                <Icon
-                  name="settings-minimalistic"
-                  size={18}
-                  strokeWidth={1.9}
-                  className="text-chrome-icon"
-                />
-              </span>
-              <span className="flex-1 min-w-0">
-                <span className="block text-[13px] font-semibold text-ink-body leading-tight">
-                  Modo compacto
-                </span>
-                <span className="block text-xs font-medium text-ink-muted mt-0.5">
-                  Listas mais densas
-                </span>
-              </span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={preferences.compactMode}
-                aria-label="Modo compacto"
-                onClick={() => onTogglePreference("compactMode")}
-                className="cursor-pointer outline-none"
-              >
-                <Switch on={preferences.compactMode} />
-              </button>
-            </li>
-          </ul>
-        </section>
-
-        <section
           aria-label="Zona de risco"
           className="rounded-[26px] bg-card border border-line shadow-xs p-5 lg:col-span-12"
         >
-          <div className="rounded-[20px] border border-[#ef4444]/30 p-4 sm:p-5">
-            <h2 className="text-sm font-extrabold text-error">Zona de risco</h2>
+          <div className="rounded-[20px] border border-error/30 bg-error/[0.06] p-4 sm:p-5">
+            <h2 className="flex items-center gap-2 text-sm font-extrabold text-error">
+              <Icon name="danger-circle" size={16} strokeWidth={2} />
+              Zona de risco
+            </h2>
             <p className="mt-1 max-w-md text-xs font-medium leading-relaxed text-ink-secondary">
               Ao desativar a conta, seus widgets e links deixam de funcionar e
               todas as sessões são encerradas. É possível{" "}
@@ -402,7 +261,7 @@ function Account({
             </p>
             <div className="mt-4">
               <Button
-                variant="danger"
+                variant="danger-soft"
                 size="sm"
                 type="button"
                 onClick={onDeactivate}
@@ -419,7 +278,6 @@ function Account({
 
 export default function AccountPage() {
   const { settings } = useLoaderData<typeof loader>();
-  const { preferences, togglePreference } = useAccountPreferences();
   const actionData = useActionData<typeof action>();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
@@ -439,8 +297,6 @@ export default function AccountPage() {
     <div>
       <Account
         settings={settings}
-        preferences={preferences}
-        onTogglePreference={togglePreference}
         onChangePassword={() => setIsPasswordModalOpen(true)}
         onChangeEmail={() => setIsEmailModalOpen(true)}
         onToggleTwoFactor={() => setIsTwoFactorModalOpen(true)}

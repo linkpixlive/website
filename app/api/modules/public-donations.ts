@@ -1,95 +1,183 @@
-import type { DonationPayment, DonationStatus, StreamerProfile, TtsVoice } from "~/types/donation";
+import { client, fetchApi } from "../http/client";
+import type {
+  DonationPayment,
+  DonationStatus,
+  DonationView,
+  StreamerProfile,
+  TtsVoice,
+} from "~/types/donation";
 
-const MOCK_STREAMERS: Record<string, StreamerProfile> = {
-  tipply: {
-    name: "Tipply",
-    username: "tipply",
-    profileImageUrl: null,
-    overlayActive: true,
-    minAudioAmount: 5,
-    minTextAmount: 1,
-    maxLength: 250,
-  },
-  mari_live: {
-    name: "Mari Live",
-    username: "mari_live",
-    profileImageUrl: null,
-    overlayActive: false,
-    minAudioAmount: 10,
-    minTextAmount: 2,
-    maxLength: 200,
-  },
+const DEFAULT_ERROR_MESSAGE =
+  "Nossos sistemas estão com problemas. Tente novamente mais tarde.";
+
+const PROVIDER_LABELS: Record<string, string> = {
+  google: "Google",
+  gradium: "Gradium",
 };
 
-export const MOCK_VOICES: TtsVoice[] = [
-  { id: "voice-ana", name: "Ana", tag: "Feminina · Brasileira", sampleUrl: "/tts-samples/ana.wav" },
-  {
-    id: "voice-bruno",
-    name: "Bruno",
-    tag: "Masculina · Brasileira",
-    sampleUrl: "/tts-samples/bruno.wav",
-  },
-  {
-    id: "voice-carla",
-    name: "Carla",
-    tag: "Feminina · Neutra",
-    sampleUrl: "/tts-samples/carla.wav",
-  },
-  {
-    id: "voice-diego",
-    name: "Diego",
-    tag: "Masculina · Grave",
-    sampleUrl: "/tts-samples/diego.wav",
-  },
-];
+export function providerTag(provider: string | null | undefined): string {
+  if (!provider) return "";
+  return PROVIDER_LABELS[provider.toLowerCase()] ?? provider;
+}
 
-const DONATION_TTL_MS = 30 * 60 * 1000;
-// Simula o webhook do gateway: a doação vira "paid" alguns segundos após a criação.
-const MOCK_CONFIRM_DELAY_MS = 9000;
-const MOCK_PIX_CODE =
-  "00020126360014br.gov.bcb.pix0114tipply@pagamento.com520400005303986540610.005802BR5919TIPPYLIVE6009SAO PAULO62070503***6304ABCD";
+/** amount chega em reais (Decimal serializado como número) e sai em centavos. */
+export function reaisToCents(amount: number): number {
+  return Math.round(amount * 100);
+}
+
+interface DonationApiResponse {
+  id: string;
+  amount: number;
+  status: string;
+  pix: string | null;
+  createdAt: string;
+  expiredAt: string | null;
+}
+
+export function mapDonationPayment(data: DonationApiResponse): DonationPayment {
+  return {
+    id: data.id,
+    amount: reaisToCents(data.amount),
+    pix: data.pix ?? "",
+    createdAt: Date.parse(data.createdAt),
+    expiredAt: data.expiredAt ? Date.parse(data.expiredAt) : 0,
+  };
+}
+
+interface DonationViewApiResponse {
+  id: string;
+  status: DonationStatus;
+  amount: number;
+  donorName: string;
+  message: string | null;
+  streamerName: string;
+  /** Backends antigos podem omitir; a confirmação resolve o destino com fallback. */
+  streamerUsername?: string;
+  voiceName: string | null;
+  createdAt: string;
+  expiredAt: string | null;
+}
+
+export function mapDonationView(data: DonationViewApiResponse): DonationView {
+  return {
+    id: data.id,
+    status: data.status,
+    amount: reaisToCents(data.amount),
+    donorName: data.donorName,
+    message: data.message,
+    streamerName: data.streamerName,
+    streamerUsername: data.streamerUsername ?? "",
+    voiceName: data.voiceName,
+    createdAt: Date.parse(data.createdAt),
+    expiredAt: data.expiredAt ? Date.parse(data.expiredAt) : 0,
+  };
+}
+
+/** O backend nunca marca expirado: quem decide é o expiredAt do Pix. */
+export function resolveStatus(view: DonationView): DonationStatus {
+  if (
+    view.status === "pending" &&
+    view.expiredAt > 0 &&
+    Date.now() > view.expiredAt
+  ) {
+    return "expired";
+  }
+  return view.status;
+}
+
+interface StreamerProfileApiResponse {
+  name: string;
+  username: string;
+  /** Campo novo no backend; respostas antigas podem omitir. */
+  verified?: boolean;
+  profileImageUrl: string | null;
+  overlayActive: boolean;
+  minAudioAmount: number;
+  minTextAmount: number;
+  maxLength: number;
+}
+
+export function mapStreamerProfile(data: StreamerProfileApiResponse): StreamerProfile {
+  return {
+    name: data.name,
+    username: data.username,
+    verified: data.verified ?? false,
+    profileImageUrl: data.profileImageUrl,
+    overlayActive: data.overlayActive,
+    minAudioAmount: data.minAudioAmount,
+    minTextAmount: data.minTextAmount,
+    maxLength: data.maxLength,
+  };
+}
+
+export async function getStreamerByUsername(
+  username: string,
+): Promise<StreamerProfile | null> {
+  const res = await fetchApi<StreamerProfileApiResponse>(
+    client.get(`/user/${encodeURIComponent(username)}`),
+  );
+  return res.success ? mapStreamerProfile(res.data) : null;
+}
+
+interface PublicVoiceApiResponse {
+  id: string;
+  name: string;
+  provider?: string | null;
+  sampleUrl: string | null;
+  /** Foto do personagem retornada pelo GET /voices. */
+  photoUrl?: string | null;
+}
+
+export async function listVoices(): Promise<TtsVoice[]> {
+  const res = await fetchApi<PublicVoiceApiResponse[]>(client.get("/voices"));
+  if (!res.success) return [];
+  return res.data.map((voice) => ({
+    id: voice.id,
+    name: voice.name,
+    tag: providerTag(voice.provider),
+    sampleUrl: voice.sampleUrl ?? null,
+    imageUrl: voice.photoUrl ?? null,
+  }));
+}
 
 export interface CreateDonationInput {
   name: string;
   message: string;
+  /** Valor em centavos. */
   amount: number;
   voiceId: string | null;
 }
 
-const donations = new Map<string, { confirmAt: number; expiredAt: number }>();
-
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-export async function getStreamerByUsername(username: string): Promise<StreamerProfile | null> {
-  await delay(200);
-  return MOCK_STREAMERS[username.toLowerCase()] ?? null;
-}
-
-export async function createDonation(input: CreateDonationInput): Promise<DonationPayment> {
-  await delay(600);
-  const now = Date.now();
-  const id = `don_${now.toString(36)}`;
-  const expiredAt = now + DONATION_TTL_MS;
-  donations.set(id, { confirmAt: now + MOCK_CONFIRM_DELAY_MS, expiredAt });
+/** `voiceId` fica de fora do corpo quando nulo (doação "Voz padrão do streamer"). */
+export function buildDonationBody(input: CreateDonationInput, username: string) {
   return {
-    id,
-    amount: input.amount,
-    pix: MOCK_PIX_CODE,
-    createdAt: now,
-    expiredAt,
+    name: input.name,
+    message: input.message,
+    amount: input.amount / 100,
+    username,
+    ...(input.voiceId ? { voiceId: input.voiceId } : {}),
   };
 }
 
-export async function getDonationStatus(id: string): Promise<DonationStatus> {
-  await delay(150);
-  const entry = donations.get(id);
-  if (!entry) return "failed";
-  if (Date.now() >= entry.expiredAt) return "expired";
-  return Date.now() >= entry.confirmAt ? "paid" : "pending";
+export async function createDonation(
+  input: CreateDonationInput,
+  username: string,
+): Promise<DonationPayment> {
+  const res = await fetchApi<DonationApiResponse>(
+    client.post("/donation", buildDonationBody(input, username)),
+  );
+  if (!res.success) {
+    throw new Error(res.error?.message || DEFAULT_ERROR_MESSAGE);
+  }
+  return mapDonationPayment(res.data);
 }
 
-export async function listVoices(): Promise<TtsVoice[]> {
-  return MOCK_VOICES;
+/** `null` = doação não encontrada (404); outras falhas lançam. */
+export async function getDonationView(id: string): Promise<DonationView | null> {
+  const res = await fetchApi<DonationViewApiResponse>(client.get(`/donation/${id}`));
+  if (!res.success) {
+    if (res.error?.code === 404) return null;
+    throw new Error(res.error?.message || DEFAULT_ERROR_MESSAGE);
+  }
+  return mapDonationView(res.data);
 }

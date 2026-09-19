@@ -6,6 +6,7 @@ export interface AccountSettings {
   has2fa: boolean;
   active: boolean;
   usernameChangedAt: string | null;
+  verifiedEmail?: boolean;
 }
 
 export interface ChangePasswordPayload {
@@ -26,9 +27,18 @@ export interface Enable2faPayload {
   token: string;
 }
 
+export interface Disable2faPayload {
+  password: string;
+  token: string;
+}
+
 export interface Setup2faResponse {
   otpauthUrl: string;
   secret: string;
+}
+
+export interface UpdateProfilePayload {
+  name: string;
 }
 
 export interface MessageResponse {
@@ -38,6 +48,10 @@ export interface MessageResponse {
 export const accountSettingsApi = {
   getSettings: (token?: string | null) =>
     fetchApi<AccountSettings>(createApiClient(token).get("/account-settings")),
+  updateProfile: (token: string | null, body: UpdateProfilePayload) =>
+    fetchApi<{ name: string }>(
+      createApiClient(token).patch("/account-settings/profile", body),
+    ),
   changePassword: (token: string | null, body: ChangePasswordPayload) =>
     fetchApi<MessageResponse>(
       createApiClient(token).patch("/account-settings/password", body),
@@ -58,7 +72,7 @@ export const accountSettingsApi = {
     fetchApi<MessageResponse>(
       createApiClient(token).post("/account-settings/2fa/enable", body),
     ),
-  disable2fa: (token: string | null, body: DeactivateAccountPayload) =>
+  disable2fa: (token: string | null, body: Disable2faPayload) =>
     fetchApi<MessageResponse>(
       createApiClient(token).post("/account-settings/2fa/disable", body),
     ),

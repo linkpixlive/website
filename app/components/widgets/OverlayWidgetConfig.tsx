@@ -5,30 +5,31 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "~/components/ui/Button";
 import { Icon } from "~/components/ui/Icon";
-import { SelectField } from "~/components/ui/SelectField";
+import { VoiceSelectField } from "~/components/donation/VoiceSelectField";
+import { RangeSlider } from "~/components/ui/RangeSlider";
 import { SubmitButton } from "~/components/ui/SubmitButton";
 import type { Widget, OverlaySettings } from "~/api/modules/widgets";
+import type { TtsVoice } from "~/types/donation";
 
 interface OverlayWidgetConfigProps {
-  widget: Widget<OverlaySettings> | null;
-  onBack: () => void;
+  widget: Widget<OverlaySettings>;
+  /** Mesma lista do formulário de doação (GET /voices). */
+  voices: TtsVoice[];
 }
-
-const NARRATOR_OPTIONS = [
-  { value: "Ricardo", label: "Ricardo (Masculino)" },
-  { value: "Francisca", label: "Francisca (Feminino)" },
-  { value: "Antonio", label: "Antonio (Masculino)" },
-];
 
 const overlaySchema = z.object({
   volume: z.number().min(0).max(100),
   speakNameAmount: z.boolean(),
+  audioOnly: z.boolean(),
   defaultNarrator: z.string().min(1, "Selecione um narrador"),
 });
 
 type OverlayFormValues = z.infer<typeof overlaySchema>;
 
-export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps) {
+export function OverlayWidgetConfig({
+  widget,
+  voices,
+}: OverlayWidgetConfigProps) {
   const submit = useSubmit();
   const navigation = useNavigation();
   const isLoading = navigation.state === "submitting";
@@ -36,31 +37,43 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
   const [showUrl, setShowUrl] = useState(false);
   const [urlCopied, setUrlCopied] = useState(false);
 
+  // Valor legado (ex.: "Ricardo") ou vazio (default novo do backend) não
+  // existe na lista de vozes — pré-seleciona a 1ª voz ativa para exibição
+  // e para o submit, em vez de travar o form com erro.
+  const initialNarrator = voices.some(
+    (v) => v.id === widget.settings.defaultNarrator,
+  )
+    ? widget.settings.defaultNarrator
+    : (voices[0]?.id ?? widget.settings.defaultNarrator);
+
   // Form setup using react-hook-form
   const {
-    register,
-    handleSubmit,
     control,
     watch,
+    handleSubmit,
     formState: { errors },
   } = useForm<OverlayFormValues>({
     resolver: zodResolver(overlaySchema),
     defaultValues: {
-      volume: widget?.settings.volume ?? 100,
-      speakNameAmount: widget?.settings.speakNameAmount ?? true,
-      defaultNarrator: widget?.settings.defaultNarrator ?? "Ricardo",
+      volume: widget.settings.volume,
+      speakNameAmount: widget.settings.speakNameAmount,
+      audioOnly: widget.settings.audioOnly ?? false,
+      defaultNarrator: initialNarrator,
     },
   });
 
   // Watch volume to display its percentage in real-time
   const volumeValue = watch("volume");
 
-  const widgetUrl = widget?.token
-    ? `${window.location.origin}/overlay?token=${widget.token}`
-    : "Widget não configurado ainda — salve as configurações para gerar a URL.";
+  // SSR-safe: `window` não existe no servidor (F5/refresh renderiza no
+  // servidor primeiro). Monta a URL absoluta só no cliente.
+  const [widgetUrl, setWidgetUrl] = useState(`/overlay?token=${widget.token}`);
+
+  useEffect(() => {
+    setWidgetUrl(`${window.location.origin}/overlay?token=${widget.token}`);
+  }, [widget.token]);
 
   const handleCopyUrl = () => {
-    if (!widget?.token) return;
     navigator.clipboard.writeText(widgetUrl);
     setUrlCopied(true);
     setTimeout(() => setUrlCopied(false), 1600);
@@ -71,8 +84,8 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
     formData.append("intent", "saveOverlay");
     formData.append("volume", String(data.volume));
     formData.append("speakNameAmount", String(data.speakNameAmount));
+    formData.append("audioOnly", String(data.audioOnly));
     formData.append("defaultNarrator", data.defaultNarrator);
-    formData.append("isPaused", String(widget?.settings.isPaused ?? false));
     submit(formData, { method: "post" });
   };
 
@@ -93,26 +106,10 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Title block with back button */}
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={onBack}
-          className="w-11 h-11 rounded-full bg-card hover:bg-tile border border-line shadow-xs text-chrome-icon transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95"
-          title="Voltar"
-          aria-label="Voltar para widgets"
-        >
-          <Icon name="alt-arrow-left" size={20} strokeWidth={2} className="mx-auto" />
-        </button>
-        <div>
-          <h1 className="text-xl sm:text-2xl lg:text-[26px] font-extrabold tracking-tight leading-tight text-ink-heading">
-            Widget de Mensagem
-          </h1>
-          <p className="mt-0.5 text-sm text-ink-secondary">
-            Configure o overlay de alertas da sua transmissão
-          </p>
-        </div>
-      </div>
+      <p className="text-sm text-ink-secondary">
+        Configure o overlay de alertas da sua{" "}
+        <span className="font-bold text-ink-heading">transmissão</span>.
+      </p>
 
       {/* URL de Conexão card */}
       <div className="rounded-[26px] bg-card border border-line shadow-xs p-5">
@@ -125,7 +122,7 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
             variant="secondary"
             size="sm"
             onClick={handleResetToken}
-            disabled={!widget?.token || isLoading}
+            disabled={isLoading}
           >
             <Icon name="refresh" size={14} strokeWidth={2} />
             Resetar Token
@@ -158,8 +155,7 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
           <button
             type="button"
             onClick={handleCopyUrl}
-            disabled={!widget?.token}
-            className={`w-11 h-11 rounded-full border shadow-xs transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
+            className={`w-11 h-11 rounded-full border shadow-xs transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95 ${
               urlCopied
                 ? "bg-success/10 border-success/20 text-success"
                 : "bg-card hover:bg-tile border-line text-chrome-icon"
@@ -190,7 +186,7 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
             variant="secondary"
             className="w-full sm:w-auto"
             onClick={handleTestAlert}
-            disabled={!widget?.token || isLoading}
+            disabled={isLoading}
           >
             <Icon name="test-tube" size={16} strokeWidth={2} />
             Enviar Alerta de Teste
@@ -206,24 +202,26 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
           </span>
 
           <div className="flex flex-col gap-6">
-            {/* Narrador Select */}
+            {/* Narrador padrão — mesma lista de vozes do formulário de doação */}
             <Controller
               name="defaultNarrator"
               control={control}
               render={({ field }) => (
-                <SelectField
+                <VoiceSelectField
                   label="Narrador padrão (TTS)"
-                  options={NARRATOR_OPTIONS}
+                  voices={voices}
                   value={field.value}
-                  onChange={field.onChange}
+                  onChange={(voiceId) => field.onChange(voiceId ?? "")}
                   error={errors.defaultNarrator?.message}
-                  disabled={isLoading}
+                  disabled={isLoading || voices.length === 0}
+                  hint="Voz usada por padrão quando o doador não escolher nenhuma voz personalizada."
+                  includeDefaultOption={false}
                 />
               )}
             />
 
             {/* Volume Range Slider */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 max-w-xs">
               <div className="flex items-center justify-between">
                 <label className="text-[13px] font-medium text-ink-secondary">
                   Volume do áudio
@@ -232,16 +230,22 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
                   {volumeValue}%
                 </span>
               </div>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                disabled={isLoading}
-                {...register("volume", { valueAsNumber: true })}
-                className="w-full h-1.5 bg-wash rounded-full appearance-none cursor-pointer accent-brand disabled:opacity-50 outline-none"
+              <Controller
+                name="volume"
+                control={control}
+                render={({ field }) => (
+                  <RangeSlider
+                    min={0}
+                    max={100}
+                    value={field.value}
+                    onChange={field.onChange}
+                    disabled={isLoading}
+                    aria-label="Volume do áudio"
+                  />
+                )}
               />
               <p className="text-xs font-medium text-ink-muted">
-                Controla o volume do áudio TTS durante os alertas (0–100).
+                Controle o volume dos alertas.
               </p>
             </div>
 
@@ -257,6 +261,46 @@ export function OverlayWidgetConfig({ widget, onBack }: OverlayWidgetConfigProps
               </div>
               <Controller
                 name="speakNameAmount"
+                control={control}
+                render={({ field }) => (
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={field.value}
+                    disabled={isLoading}
+                    onClick={() => field.onChange(!field.value)}
+                    className={`
+                      relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95
+                      focus-visible:ring-2 focus-visible:ring-brand/40 disabled:opacity-50 disabled:cursor-not-allowed
+                      ${
+                        field.value
+                          ? "bg-brand-button"
+                          : "bg-wash border border-line-input"
+                      }
+                    `}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 rounded-full bg-white shadow-2xs transition-transform duration-150 ${
+                        field.value ? "translate-x-6" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                )}
+              />
+            </div>
+
+            {/* Audio-only Toggle */}
+            <div className="flex items-center justify-between gap-4 py-1">
+              <div>
+                <p className="text-sm font-bold text-ink-heading">
+                  Somente áudio (sem visual)
+                </p>
+                <p className="text-[13px] font-medium text-ink-secondary mt-0.5">
+                  Esconde o overlay visual, mantém apenas o áudio.
+                </p>
+              </div>
+              <Controller
+                name="audioOnly"
                 control={control}
                 render={({ field }) => (
                   <button

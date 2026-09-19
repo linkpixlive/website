@@ -9,8 +9,3 @@ export interface OverlayDonationEntity {
   isTest?: boolean;
   isCurrent?: boolean;
 }
-
-export interface OverlayStatus {
-  online: boolean;
-  isPaused?: boolean;
-}

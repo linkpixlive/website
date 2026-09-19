@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Outlet } from "react-router";
 import { Sidebar } from "~/components/dashboard/Sidebar";
-import { BottomNav } from "~/components/dashboard/BottomNav";
+import { MobileHeader } from "~/components/dashboard/MobileHeader";
 import { ToastProvider } from "~/components/ui/ToastProvider";
 import { requireValidAuth } from "~/util/auth.server";
 import type { Route } from "./+types/layout";
@@ -22,16 +22,14 @@ export default function PrivateLayoutRoute() {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col lg:pl-64">
+          <MobileHeader onOpenMenu={() => setIsSidebarOpen(true)} />
           {/* Page contents container (light work surface) */}
-          <main className="flex-1 bg-canvas p-4 pb-20 sm:p-6 sm:pb-6 lg:p-7">
+          <main className="flex-1 bg-canvas p-4 sm:p-6 lg:p-7">
             <div className="mx-auto w-full max-w-7xl">
               <Outlet />
             </div>
           </main>
         </div>
-
-        {/* Mobile bottom navigation */}
-        <BottomNav onOpenMenu={() => setIsSidebarOpen(true)} />
       </div>
     </ToastProvider>
   );

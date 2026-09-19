@@ -39,7 +39,7 @@ On dark surfaces, inactive icons are `#7f8594`. Active icons are white (desktop 
 |---|---|---|
 | Canvas | `#edf0f7` | The work area behind cards. Content never full-bleeds white. |
 | Surface | `#ffffff` | Cards, modals, popovers, sheets, inputs-on-white |
-| Wash | `#f4f5f8` | Nested wells, list hover, secondary buttons, search fields, chat bubbles |
+| Wash | `#eceef3` | Nested wells, list hover, secondary buttons, search fields, chat bubbles |
 | Tile | `#f9fafb` (`gray-50`) | Tiny icon tiles only |
 
 ### Text
@@ -52,7 +52,7 @@ On dark surfaces, inactive icons are `#7f8594`. Active icons are white (desktop 
 | Secondary | `#707684` | medium |
 | Muted | `#828896` | medium |
 | Label / meta | `#9ca3af` | medium, or extrabold + uppercase for section labels |
-| Placeholder | `#a0a6b2` | medium |
+| Placeholder | `#707684` | medium |
 | Chrome icon (on white) | `#3e4452` | — |
 
 Do not use `#000000` or `gray-900` for text. Do not use `gray-500` as a catch-all muted.
@@ -290,10 +290,10 @@ On media: frosted `bg-white/90 backdrop-blur-md` when on, `bg-[#181a1f]/90` when
 
 Pill. Two legal fills:
 
-1. **Wash field** — `bg-[#f4f5f8] border-gray-100/80`, used in modals and search.
+1. **Wash field** — `bg-[#eceef3] border-[#dfe3ea]`, used in modals and search.
 2. **Composer** — `bg-white border-gray-200/90`, used when the field sits on a white card (chat, inline edit).
 
-Both: transparent inner input, `font-medium`, placeholder `#a0a6b2` / `gray-400`, no outline. Focus is `focus-within:border-[#fcc717] focus-within:ring-2 focus-within:ring-[#ffd037]/30`. Leading icon in `#707684`. Trailing submit is a 32px yellow circle.
+Both: transparent inner input, `font-medium`, placeholder `#707684`, no outline. Focus is `focus-within:border-[#fcc717] focus-within:ring-2 focus-within:ring-[#ffd037]/30`. Leading icon in `#707684`. Trailing submit is a 32px yellow circle.
 
 ### Menus
 

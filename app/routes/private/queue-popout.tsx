@@ -1,122 +1,63 @@
-import { useState } from "react";
 import { useLoaderData } from "react-router";
 import type { Route } from "./+types/queue-popout";
 import { getAuthToken } from "~/util/session.server";
 import { requireValidAuth } from "~/util/auth.server";
-import { overlayApi } from "~/api/modules/overlay";
-import { useQueueSocket } from "~/hooks/useQueueSocket";
-import { useToast } from "~/components/ui/useToast";
+import { dashboardApi, type DonationHistory } from "~/api/modules/dashboard";
 import { ToastProvider } from "~/components/ui/ToastProvider";
-import { QueueStatusBadge } from "~/components/queue/QueueStatusBadge";
-import { QueueToolbar } from "~/components/queue/QueueToolbar";
-import { LiveNowCard } from "~/components/donations/LiveNowCard";
+import { DonationsLivePanel } from "~/components/donations/DonationsLivePanel";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Fila de Alertas — LinkPix" },
-    { name: "description", content: "Gerencie a fila de doações em tempo real" },
+    { title: "Doações — Ao Vivo — LinkPix" },
+    { name: "description", content: "Acompanhe e gerencie as doações em tempo real" },
   ];
 }
+
+const POPOUT_HISTORY_LIMIT = 20;
 
 export async function loader({ request }: Route.LoaderArgs) {
   await requireValidAuth(request);
   const token = getAuthToken(request);
-  return { token };
-}
 
-function QueuePopoutContent() {
-  const { token } = useLoaderData<typeof loader>();
-  const { queue, isOverlayOnline, isPaused } = useQueueSocket(token);
-  const { toast } = useToast();
-  const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
-
-  const handleTogglePause = async () => {
-    setActionLoading((prev) => ({ ...prev, togglePause: true }));
-    const res = await overlayApi.togglePause(token);
-    setActionLoading((prev) => ({ ...prev, togglePause: false }));
-    if (res.success) {
-      toast(isPaused ? "Fila retomada!" : "Fila pausada!", "success");
-    } else {
-      toast(res.error.message, "error");
-    }
+  let history: {
+    items: DonationHistory[];
+    meta: { total: number; page: number; limit: number; totalPages: number };
+  } = {
+    items: [],
+    meta: {
+      total: 0,
+      page: 1,
+      limit: POPOUT_HISTORY_LIMIT,
+      totalPages: 1,
+    },
   };
 
-  const handleSkip = async () => {
-    setActionLoading((prev) => ({ ...prev, skip: true }));
-    const res = await overlayApi.skipAlert(token);
-    setActionLoading((prev) => ({ ...prev, skip: false }));
+  try {
+    const res = await dashboardApi.getHistory(token, {
+      page: 1,
+      limit: POPOUT_HISTORY_LIMIT,
+      days: "30",
+    });
     if (res.success) {
-      toast(isPaused ? "Mensagem removida da fila!" : "Alerta pulado!", "success");
-    } else {
-      toast(res.error.message, "error");
+      history = res.data;
     }
-  };
+  } catch (err) {
+    console.error("Popout loader fetch error:", err);
+  }
 
-  const handleClear = async () => {
-    setActionLoading((prev) => ({ ...prev, clear: true }));
-    const res = await overlayApi.clearQueue(token);
-    setActionLoading((prev) => ({ ...prev, clear: false }));
-    if (res.success) {
-      toast("Fila limpa!", "success");
-    } else {
-      toast(res.error.message, "error");
-    }
-  };
-
-  const handleTest = async () => {
-    setActionLoading((prev) => ({ ...prev, test: true }));
-    const res = await overlayApi.testAlert(token);
-    setActionLoading((prev) => ({ ...prev, test: false }));
-    if (res.success) {
-      toast("Alerta de teste enviado!", "success");
-    } else {
-      toast(res.error.message, "error");
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-shell text-text-primary flex flex-col">
-      <header className="flex items-center justify-between gap-4 px-6 py-4 border-b border-white/10 shrink-0">
-        <div>
-          <h1 className="text-lg font-extrabold tracking-tight text-text-heading leading-tight">
-            Doações — Ao Vivo
-          </h1>
-          <p className="text-xs text-text-primary mt-0.5">
-            Controle minimalista
-          </p>
-        </div>
-        <QueueStatusBadge
-          isOverlayOnline={isOverlayOnline}
-          isPaused={isPaused}
-        />
-      </header>
-
-      <div className="px-6 py-3 border-b border-white/10 shrink-0 overflow-x-auto scrollbar-thin">
-        <QueueToolbar
-          isPaused={isPaused}
-          onTogglePause={handleTogglePause}
-          onSkip={handleSkip}
-          onClear={handleClear}
-          onTest={handleTest}
-          loading={actionLoading}
-        />
-      </div>
-
-      <div className="flex-1 overflow-y-auto px-6 py-4 scrollbar-thin bg-canvas">
-        <LiveNowCard
-          queue={queue}
-          isOverlayOnline={isOverlayOnline}
-          isPaused={isPaused}
-        />
-      </div>
-    </div>
-  );
+  return { token, history };
 }
 
 export default function QueuePopout() {
+  const { token, history } = useLoaderData<typeof loader>();
+
   return (
     <ToastProvider>
-      <QueuePopoutContent />
+      <div className="min-h-screen bg-canvas text-text-primary">
+        <div className="mx-auto w-full max-w-7xl p-4 sm:p-6">
+          <DonationsLivePanel token={token} initialHistory={history} />
+        </div>
+      </div>
     </ToastProvider>
   );
 }

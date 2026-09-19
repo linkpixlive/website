@@ -1,97 +1,161 @@
-import type { Route } from "./+types/home";
+import { useState } from "react";
+import { useLoaderData, useNavigation, useSearchParams } from "react-router";
+import { accountSettingsApi } from "~/api/modules/account-settings";
+import {
+  dashboardApi,
+  type DashboardRange,
+  type DashboardStats,
+  type DonationHistory,
+} from "~/api/modules/dashboard";
+import { donationSettingsApi } from "~/api/modules/donation-settings";
+import { pixKeysApi } from "~/api/modules/pix-keys";
+import { walletsApi } from "~/api/modules/wallets";
+import { widgetsApi } from "~/api/modules/widgets";
+import { withdrawalsApi, type Withdrawal } from "~/api/modules/withdrawals";
+import { AccountStatusCard, type AccountChecklist } from "~/components/dashboard/AccountStatusCard";
+import { BestMomentCard } from "~/components/dashboard/BestMomentCard";
+import { formatCurrency, formatRangeLabel } from "~/components/dashboard/format";
 import { PageHeader } from "~/components/dashboard/PageHeader";
-import { Icon } from "~/components/ui/Icon";
+import { PeriodFilter } from "~/components/dashboard/PeriodFilter";
+import { RecentDonationsCard } from "~/components/dashboard/RecentDonationsCard";
+import type { ChartMode } from "~/components/dashboard/RevenueAreaChart";
+import { SummaryCard } from "~/components/dashboard/SummaryCard";
+import { WalletResumeCard } from "~/components/dashboard/WalletResumeCard";
+import { requireValidAuth } from "~/util/auth.server";
+import { getAuthToken } from "~/util/session.server";
+import type { Route } from "./+types/home";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Dashboard — LinkPix" },
-    { name: "description", content: "Bem-vindo ao painel administrativo LinkPix" },
+    { title: "Resumo — LinkPix" },
+    { name: "description", content: "Resumo de doações, carteira e status da conta" },
   ];
 }
 
-export default function Home() {
-  const stats = {
-    donationsToday: "R$ 0,00",
-    averageDonation: "R$ 0,00",
-    pageViews: "0",
+function parseRange(raw: string | null): DashboardRange {
+  return raw === "15" || raw === "30" ? raw : "7";
+}
+
+interface HomeLoaderData {
+  token: string | null;
+  range: DashboardRange;
+  firstName: string;
+  stats: DashboardStats | null;
+  balances: { available: number; pending: number; blocked: number } | null;
+  lastWithdrawal: Withdrawal | null;
+  checklist: AccountChecklist | null;
+  recent: DonationHistory[];
+}
+
+export async function loader({ request }: Route.LoaderArgs): Promise<HomeLoaderData> {
+  const user = await requireValidAuth(request);
+  const token = getAuthToken(request);
+  const url = new URL(request.url);
+  const range = parseRange(url.searchParams.get("range"));
+
+  const firstName = String(user?.name ?? "Streamer").trim().split(/\s+/)[0] || "Streamer";
+
+  const [statsRes, balancesRes, withdrawalsRes, pixKeysRes, rulesRes, overlayRes, accountRes, historyRes] =
+    await Promise.allSettled([
+      dashboardApi.getStats(token, range),
+      walletsApi.getBalances(token),
+      withdrawalsApi.list(token, { page: 1, limit: 1 }),
+      pixKeysApi.list(token),
+      donationSettingsApi.getSettings(token),
+      // Leitura pura: getSettings (404 = não configurado). Nunca ensureSettings aqui,
+      // que criaria o widget implicitamente.
+      widgetsApi.getSettings(token, "overlay"),
+      accountSettingsApi.getSettings(token),
+      dashboardApi.getHistory(token, { page: 1, limit: 5 }),
+    ]);
+
+  const stats = statsRes.status === "fulfilled" && statsRes.value.success ? statsRes.value.data : null;
+  const balances =
+    balancesRes.status === "fulfilled" && balancesRes.value.success ? balancesRes.value.data : null;
+  const lastWithdrawal =
+    withdrawalsRes.status === "fulfilled" && withdrawalsRes.value.success
+      ? (withdrawalsRes.value.data.items[0] ?? null)
+      : null;
+  const pixKeys = pixKeysRes.status === "fulfilled" && pixKeysRes.value.success ? pixKeysRes.value.data : [];
+  const rules = rulesRes.status === "fulfilled" && rulesRes.value.success ? rulesRes.value.data : null;
+  const overlay =
+    overlayRes.status === "fulfilled" && overlayRes.value.success ? overlayRes.value.data : null;
+  const account =
+    accountRes.status === "fulfilled" && accountRes.value.success ? accountRes.value.data : null;
+  const recent =
+    historyRes.status === "fulfilled" && historyRes.value.success ? historyRes.value.data.items : [];
+
+  const checklist: AccountChecklist = {
+    pixCount: pixKeys.length,
+    rulesReviewed: rules
+      ? rules.minTextAmount !== 1 ||
+        rules.minAudioAmount !== 1 ||
+        rules.aiModeration ||
+        (rules.customRules?.trim().length ?? 0) > 0
+      : false,
+    overlayConfigured: overlay ? overlay.active : false,
+    profileComplete: Boolean(user?.username && user?.name && user?.profileImageUrl),
+    has2fa: account?.has2fa ?? false,
+    emailVerified: account && typeof account.verifiedEmail === "boolean" ? account.verifiedEmail : null,
   };
 
-  const secondaryRows = [
-    {
-      label: "Média por doação",
-      value: stats.averageDonation,
-      icon: "graph" as const,
-    },
-    {
-      label: "Visualizações da página",
-      value: stats.pageViews,
-      icon: "eye" as const,
-    },
-  ];
+  return { token, range, firstName, stats, balances, lastWithdrawal, checklist, recent };
+}
+
+export default function Home() {
+  const { token, range, firstName, stats, balances, lastWithdrawal, checklist, recent } =
+    useLoaderData<typeof loader>();
+  const [, setSearchParams] = useSearchParams();
+  const navigation = useNavigation();
+  const [mode, setMode] = useState<ChartMode>("amount");
+
+  const loadingData = navigation.state === "loading";
+
+  const handleRangeChange = (next: DashboardRange) => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.set("range", next);
+      return params;
+    });
+  };
 
   return (
     <div>
-      {/* Title block */}
       <PageHeader
-        title="Dashboard"
+        title={`Resumo, ${firstName}`}
         subtitle={
-          <>
-            Hoje você recebeu{" "}
-            <span className="font-bold text-ink-heading">{stats.donationsToday}</span> em
-            doações.
-          </>
+          stats ? (
+            <>
+              De {formatRangeLabel(stats.start, stats.end)} você recebeu{" "}
+              <strong className="font-bold text-ink-heading">
+                {formatCurrency(stats.totalAmount)} em {stats.totalCount}{" "}
+                {stats.totalCount === 1 ? "doação" : "doações"}
+              </strong>
+              .
+            </>
+          ) : (
+            "Acompanhe seus recebimentos, carteira e pendências da conta."
+          )
         }
+        actions={<PeriodFilter value={range} onChange={handleRangeChange} />}
       />
 
-      {/* Primary + secondary columns */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-        {/* Summary card */}
         <div className="lg:col-span-7 xl:col-span-8">
-          <div className="h-full rounded-[26px] bg-card border border-line shadow-xs p-5 flex flex-col">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label mb-3">
-              Doações recebidas (hoje)
-            </span>
-            <span className="text-[26px] leading-tight font-extrabold tracking-tight text-ink-heading">
-              {stats.donationsToday}
-            </span>
-
-            <div className="mt-auto pt-4 divide-y divide-line">
-              {secondaryRows.map((row) => (
-                <div
-                  key={row.label}
-                  className="flex items-center gap-3 py-2.5 first:pt-1 last:pb-0"
-                >
-                  <span className="w-8 h-8 rounded-[12px] bg-tile flex items-center justify-center text-chrome-icon shrink-0">
-                    <Icon name={row.icon} size={16} strokeWidth={2} />
-                  </span>
-                  <span className="text-[13px] font-medium text-ink-secondary">
-                    {row.label}
-                  </span>
-                  <span className="ml-auto text-sm font-semibold text-ink-body">
-                    {row.value}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <SummaryCard stats={stats} mode={mode} onModeChange={setMode} loading={loadingData} />
         </div>
-
-        {/* Activity card */}
         <aside className="lg:col-span-5 xl:col-span-4">
-          <div className="h-full rounded-[26px] bg-card border border-line shadow-xs p-5 flex flex-col">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label mb-3">
-              Atividade recente
-            </span>
+          <AccountStatusCard checklist={checklist} />
+        </aside>
+      </div>
 
-            <div className="flex-1 flex flex-col items-center justify-center py-10 text-center">
-              <p className="text-lg font-extrabold tracking-tight text-ink-heading">
-                Tudo tranquilo
-              </p>
-              <p className="text-sm text-ink-secondary mt-1">
-                Sem movimentações registradas nas últimas 24 horas.
-              </p>
-            </div>
-          </div>
+      <div className="mt-5 grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        <div className="lg:col-span-7 xl:col-span-8">
+          <RecentDonationsCard items={recent} token={token} loading={loadingData} />
+        </div>
+        <aside className="lg:col-span-5 xl:col-span-4 flex flex-col gap-5">
+          <WalletResumeCard balances={balances} lastWithdrawal={lastWithdrawal} loading={loadingData} />
+          <BestMomentCard stats={stats} />
         </aside>
       </div>
     </div>

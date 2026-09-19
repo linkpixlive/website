@@ -80,7 +80,6 @@ export function DonationFormInner({
           label="Seu nome"
           {...register("name")}
           error={errors.name?.message}
-          icon="user"
           placeholder="Como quer aparecer no alerta?"
           disabled={loading}
         />

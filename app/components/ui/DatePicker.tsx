@@ -145,13 +145,13 @@ export function DatePicker({
           disabled={disabled}
           className={`
                 w-full bg-wash rounded-full py-2.5 pl-10 pr-4 text-left text-sm font-medium text-ink-heading
-                border transition-colors duration-150 outline-none cursor-pointer flex items-center relative
+                border transition-colors duration-150 outline-none cursor-pointer flex items-center relative min-w-0
                 ${
                   error
                     ? "border-error focus:border-error focus:ring-2 focus:ring-error/20"
                     : open
                     ? "border-border-focus ring-2 ring-brand/30"
-                    : "border-line hover:border-line-input"
+                    : "border-line-input hover:border-ink-muted"
                 }
                 ${disabled ? "opacity-50 cursor-not-allowed" : ""}
               `}
@@ -160,9 +160,13 @@ export function DatePicker({
             name="calendar"
             size={16}
             strokeWidth={1.9}
-            className="absolute left-4 text-ink-secondary pointer-events-none"
+            className="absolute left-4 text-ink-secondary pointer-events-none shrink-0"
           />
-          <span className={!value ? "text-ink-placeholder" : ""}>
+          <span
+            className={`block flex-1 min-w-0 truncate whitespace-nowrap ${
+              !value ? "text-ink-placeholder" : ""
+            }`}
+          >
             {formatDateLabel(value)}
           </span>
         </Popover.Trigger>

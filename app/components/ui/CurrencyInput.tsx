@@ -90,7 +90,7 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
                   "w-full bg-wash rounded-full py-2.5 pl-10 pr-4 text-sm font-medium text-ink-heading placeholder:text-ink-placeholder border transition-colors duration-150 outline-none",
                   currentError
                     ? "border-error focus:border-error focus:ring-2 focus:ring-error/20"
-                    : "border-line focus:border-border-focus focus:ring-2 focus:ring-brand/30",
+                    : "border-line-input focus:border-border-focus focus:ring-2 focus:ring-brand/30",
                   disabled && "opacity-50 cursor-not-allowed",
                   className,
                 )}

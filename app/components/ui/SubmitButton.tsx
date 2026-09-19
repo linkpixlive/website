@@ -34,7 +34,7 @@ export function SubmitButton({
       onClick={handleClick}
       disabled={isDisabled}
       className={`
-        w-full py-3 rounded-full text-sm font-bold flex items-center justify-center gap-2
+        w-full px-8 py-3 rounded-full text-sm font-bold whitespace-nowrap flex items-center justify-center gap-2
         transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-brand/40
         ${
           isDisabled

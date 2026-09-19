@@ -33,7 +33,7 @@
   --color-primary-active: #f5bd0f;
   --color-primary-disabled: #e8eaef;
 
-  --color-secondary: #f4f5f8; /* wash field fill */
+  --color-secondary: #eceef3; /* wash field fill */
 
   --color-text-heading: #ffffff;
   --color-text-primary: #9ca3af;
@@ -56,7 +56,7 @@
   /* ── Canvas (light surfaces) ─────────────────────────────────────── */
   --color-canvas: #edf0f7;
   --color-card: #ffffff;
-  --color-wash: #f4f5f8;
+  --color-wash: #eceef3;
   --color-tile: #f9fafb;
 
   /* ── Accent yellow (scarce) ──────────────────────────────────────── */
@@ -74,14 +74,14 @@
   --color-ink-secondary: #707684;
   --color-ink-muted: #828896;
   --color-ink-label: #9ca3af;
-  --color-ink-placeholder: #a0a6b2;
+  --color-ink-placeholder: #707684;
   --color-chrome-icon: #3e4452;
 
   /* ── Hairlines (whisper borders) ─────────────────────────────────── */
   --color-line: rgb(243 244 246 / 0.72); /* ~gray-100/70 */
-  --color-line-input: rgb(229 231 235 / 0.9); /* composer input border */
+  --color-line-input: #dfe3ea; /* composer input border */
   --color-danger-wash: #fef2f2; /* destructive menu row hover */
-  --color-wash-hover: #eceef3; /* secondary button hover (one step into the surface) */
+  --color-wash-hover: #e2e5ec; /* secondary button hover (one step into the surface) */
 
   /* ── Typography ──────────────────────────────────────────────────── */
   --font-sans: "Satoshi", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
@@ -94,6 +94,8 @@
   --animate-slide-up: slide-up 0.24s ease-out;
   --animate-slide-down: slide-down 0.2s ease-out;
   --animate-slide-left: slide-left 0.26s ease-out;
+  --animate-confirmed-pop: confirmed-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-confirmed-ring: confirmed-ring 0.9s ease-out 0.05s both;
 
   @keyframes fade-in {
     from {
@@ -152,6 +154,28 @@
     }
     to {
       transform: translateX(0);
+    }
+  }
+
+  @keyframes confirmed-pop {
+    from {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes confirmed-ring {
+    from {
+      opacity: 0.5;
+      transform: scale(0.7);
+    }
+    to {
+      opacity: 0;
+      transform: scale(1.4);
     }
   }
 }
@@ -245,6 +269,77 @@ body {
   80% {
     transform: translateX(4px);
   }
+}
+
+/* ── Range slider com preenchimento primário ─────────────────────────
+   A parte consumida usa --color-brand-button; o restante, --color-wash.
+   Tokens resolvem em runtime, então acompanha light/dark sem variantes. */
+
+.slider-primary {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 16px; /* área de toque; a trilha de 6px centraliza sozinha */
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+}
+
+.slider-primary::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to right,
+    var(--color-brand-button) 0%,
+    var(--color-brand-button) var(--slider-fill, 50%),
+    var(--color-wash) var(--slider-fill, 50%)
+  );
+}
+
+.slider-primary::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 16px;
+  width: 16px;
+  margin-top: -5px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 1px solid var(--color-line-input);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+}
+
+.slider-primary::-moz-range-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-wash);
+}
+
+.slider-primary::-moz-range-progress {
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-brand-button);
+}
+
+.slider-primary::-moz-range-thumb {
+  height: 14px;
+  width: 14px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 1px solid var(--color-line-input);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+}
+
+.slider-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.slider-primary:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgb(254 209 48 / 0.35);
+}
+
+.slider-primary:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 4px rgb(254 209 48 / 0.35);
 }
 
 /* ── Dense-panel scrollbars ─────────────────────────────────────────── */

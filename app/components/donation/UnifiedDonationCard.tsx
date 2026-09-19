@@ -1,23 +1,47 @@
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { StreamerProfileCardInner } from "./StreamerProfileCard";
+import { useNavigate } from "react-router";
+import { AlertMessage } from "~/components/ui/AlertMessage";
+import { useDonationStatus } from "~/hooks/useDonationStatus";
+import type {
+  DonationPayment,
+  StreamerProfile,
+  TtsVoice,
+} from "~/types/donation";
+import type { DonationFormValues } from "~/validators/donation-validator";
+import { createDonationSchema } from "~/validators/donation-validator";
 import {
+  DEFAULT_VOICE_VALUE,
   DonationFormInner,
-  type DonationFormInstance,
   type DonationFormInput,
   type DonationFormOutput,
-  DEFAULT_VOICE_VALUE,
 } from "./DonationForm";
-import { PaymentStep, type DonationSummary } from "./PaymentStep";
-import { PaymentConfirmedStep } from "./PaymentConfirmedStep";
-import { useDonationStatus } from "~/hooks/useDonationStatus";
-import { createDonationSchema } from "~/validators/donation-validator";
-import type { DonationFormValues } from "~/validators/donation-validator";
-import type { DonationPayment, StreamerProfile, TtsVoice } from "~/types/donation";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { PaymentStep } from "./PaymentStep";
+import { StreamerProfileCardInner } from "./StreamerProfileCard";
 
 function cn(...classes: (string | undefined | null | false)[]): string {
   return classes.filter(Boolean).join(" ");
+}
+
+/**
+ * Trecho da mensagem genérica que o backend devolve quando a moderação IA
+ * barra nome/mensagem antes do QRCode. Não revela categoria nem palavra —
+ * o doador só precisa editar e tentar de novo.
+ */
+const MODERATION_BLOCK_HINT = "Mensagem não permitida";
+
+function isModerationBlock(message: string): boolean {
+  return message.includes(MODERATION_BLOCK_HINT);
+}
+
+function focusDonationMessage() {
+  requestAnimationFrame(() => {
+    document
+      .getElementById("donation-message")
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById("donation-message")?.focus({ preventScroll: true });
+  });
 }
 
 interface UnifiedDonationCardProps {
@@ -33,53 +57,83 @@ export function UnifiedDonationCard({
   onCreateDonation,
   className,
 }: UnifiedDonationCardProps) {
+  const navigate = useNavigate();
   const [payment, setPayment] = useState<DonationPayment | null>(null);
   const [donation, setDonation] = useState<DonationFormValues | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
-  const { status } = useDonationStatus(payment?.id ?? null, { enabled: !!payment });
-  const confirmed = !!payment && status === "paid";
+  const [error, setError] = useState<string | null>(null);
+  const { status } = useDonationStatus(payment?.id ?? null, {
+    enabled: !!payment,
+  });
 
   // O formulário vive aqui (fora dos passos) para preservar os valores
   // quando o doador volta a editar após gerar o Pix.
   const form = useForm<DonationFormInput, unknown, DonationFormOutput>({
-    resolver: zodResolver(createDonationSchema(profile.maxLength, profile.minTextAmount * 100)),
-    defaultValues: { name: "", message: "", amountText: "", voiceId: DEFAULT_VOICE_VALUE },
+    resolver: zodResolver(
+      createDonationSchema(profile.maxLength, profile.minTextAmount * 100),
+    ),
+    defaultValues: {
+      name: "",
+      message: "",
+      amountText: "",
+      voiceId: DEFAULT_VOICE_VALUE,
+    },
   });
+
+  useEffect(() => {
+    if (payment && status === "paid") {
+      // `u` garante que a confirmação saiba voltar para o streamer mesmo se
+      // o backend omitir streamerUsername no GET /donation/:id.
+      navigate(
+        `/doacao/${payment.id}?u=${encodeURIComponent(profile.username)}`,
+      );
+    }
+  }, [payment, status, navigate, profile.username]);
 
   async function handleSubmit(values: DonationFormValues) {
     setSubmitting(true);
-    const result = await onCreateDonation(values);
-    setDonation(values);
-    setPayment(result);
-    setSubmitting(false);
+    setError(null);
+    try {
+      const result = await onCreateDonation(values);
+      setDonation(values);
+      setPayment(result);
+    } catch (e) {
+      const message =
+        e instanceof Error
+          ? e.message
+          : "Não foi possível criar a doação. Tente novamente.";
+      setError(message);
+      // Bloqueio da moderação: o formulário preserva os valores (o form vive
+      // fora dos passos) e o doador é levado de volta ao campo da mensagem.
+      if (isModerationBlock(message)) focusDonationMessage();
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   async function handleRegenerate() {
     if (!donation) return;
     setRegenerating(true);
-    const result = await onCreateDonation(donation);
-    setPayment(result);
-    setRegenerating(false);
+    setError(null);
+    try {
+      const result = await onCreateDonation(donation);
+      setPayment(result);
+    } catch (e) {
+      const message =
+        e instanceof Error
+          ? e.message
+          : "Não foi possível gerar um novo QR Code. Tente novamente.";
+      setError(message);
+      if (isModerationBlock(message)) focusDonationMessage();
+    } finally {
+      setRegenerating(false);
+    }
   }
 
   function handleEditDonation() {
     setPayment(null);
   }
-
-  function handleNewDonation() {
-    form.reset({ name: "", message: "", amountText: "", voiceId: DEFAULT_VOICE_VALUE });
-    setDonation(null);
-    setPayment(null);
-  }
-
-  const summary: DonationSummary | null = donation
-    ? {
-        donorName: donation.name,
-        message: donation.message,
-        voiceName: voices.find((voice) => voice.id === donation.voiceId)?.name ?? null,
-      }
-    : null;
 
   return (
     <div
@@ -94,6 +148,11 @@ export function UnifiedDonationCard({
 
       <div className="p-5 pt-5">
         <div className={cn(payment && "hidden")}>
+          {error && (
+            <div className="mb-4">
+              <AlertMessage variant="error" message={error} />
+            </div>
+          )}
           <DonationFormInner
             profile={profile}
             voices={voices}
@@ -103,26 +162,20 @@ export function UnifiedDonationCard({
           />
         </div>
 
-        {payment && summary && (
+        {payment && (
           <>
-            <div className={cn(confirmed && "hidden")}>
-              <PaymentStep
-                payment={payment}
-                streamerName={profile.name}
-                donation={summary}
-                regenerating={regenerating}
-                onRegenerate={handleRegenerate}
-                onEdit={handleEditDonation}
-              />
-            </div>
-            <div className={cn(!confirmed && "hidden")}>
-              <PaymentConfirmedStep
-                amount={payment.amount}
-                streamerName={profile.name}
-                donation={summary}
-                onNewDonation={handleNewDonation}
-              />
-            </div>
+            {error && (
+              <div className="mb-4">
+                <AlertMessage variant="error" message={error} />
+              </div>
+            )}
+            <PaymentStep
+              payment={payment}
+              regenerating={regenerating}
+              paymentFailed={status === "failed"}
+              onRegenerate={handleRegenerate}
+              onEdit={handleEditDonation}
+            />
           </>
         )}
       </div>

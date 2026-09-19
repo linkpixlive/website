@@ -34,7 +34,9 @@ export const AutoGrowTextarea = forwardRef<HTMLTextAreaElement, AutoGrowTextarea
   ) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [height, setHeight] = useState(MIN_HEIGHT);
-    const [counter, setCounter] = useState(0);
+    const [counter, setCounter] = useState(() =>
+      typeof value === "string" ? value.length : 0,
+    );
     const [supportsFieldSizing, setSupportsFieldSizing] = useState(false);
     const [isClient, setIsClient] = useState(false);
 
@@ -60,6 +62,10 @@ export const AutoGrowTextarea = forwardRef<HTMLTextAreaElement, AutoGrowTextarea
     useEffect(() => {
       adjustHeight();
     }, [value, maxRows, minRows]);
+
+    useEffect(() => {
+      if (typeof value === "string") setCounter(value.length);
+    }, [value]);
 
     const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
       const newValue = event.target.value;
@@ -92,7 +98,7 @@ export const AutoGrowTextarea = forwardRef<HTMLTextAreaElement, AutoGrowTextarea
           maxLength={maxLength}
           className={cn(
             "w-full bg-wash border rounded-[20px] px-4 py-2.5 text-sm font-medium text-ink-heading placeholder:text-ink-placeholder outline-none transition-all duration-120 ease-out resize-none",
-            "border-line focus:border-border-focus focus:ring-2 focus:ring-brand/30",
+            "border-line-input focus:border-border-focus focus:ring-2 focus:ring-brand/30",
             disabled && "opacity-50 cursor-not-allowed",
             className,
           )}
@@ -105,7 +111,7 @@ export const AutoGrowTextarea = forwardRef<HTMLTextAreaElement, AutoGrowTextarea
           {...restProps}
         />
         {showCounter && maxLength && (
-          <div className="flex items-center justify-between mt-1.5">
+          <div className="flex items-center justify-end mt-1.5">
             <span className="text-[11px] font-medium text-ink-label">
               {counter}/{maxLength}
             </span>

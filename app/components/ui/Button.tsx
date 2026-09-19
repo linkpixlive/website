@@ -3,7 +3,14 @@ import type { ReactNode } from "react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
-  variant?: "primary" | "secondary" | "ghost" | "inverse" | "danger" | "success";
+  variant?:
+    | "primary"
+    | "secondary"
+    | "ghost"
+    | "inverse"
+    | "danger"
+    | "danger-soft"
+    | "success";
   size?: "sm" | "md";
   loading?: boolean;
 }
@@ -43,6 +50,9 @@ export function Button({
     danger: isDisabled
       ? "bg-error/40 text-white cursor-not-allowed"
       : "bg-error text-white hover:bg-error-hover shadow-md shadow-error/30 active:scale-[0.98]",
+    "danger-soft": isDisabled
+      ? "bg-wash text-ink-label cursor-not-allowed"
+      : "bg-error/10 text-error border border-error/20 hover:bg-error/15 active:scale-[0.98]",
     success: isDisabled
       ? "bg-success/40 text-white cursor-not-allowed"
       : "bg-success text-white hover:bg-emerald-600 active:scale-[0.98]",

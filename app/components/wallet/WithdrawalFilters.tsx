@@ -105,7 +105,7 @@ export function WithdrawalFilters() {
           />
         </div>
 
-        <div className="w-full sm:w-44">
+        <div className="w-full sm:w-48">
           <DatePicker
             label="Data de Início"
             value={startDate}
@@ -113,7 +113,7 @@ export function WithdrawalFilters() {
           />
         </div>
 
-        <div className="w-full sm:w-44">
+        <div className="w-full sm:w-48">
           <DatePicker
             label="Data Final"
             value={endDate}

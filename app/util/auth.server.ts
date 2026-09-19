@@ -19,11 +19,14 @@ export async function requireValidAuth(request: Request) {
     const client = createApiClient(token);
     const response = await client.get("/auth/me");
 
-    if (!response.data) {
+    // O backend envolve as respostas no envelope { success, data, ... }.
+    const user = response.data?.data ?? response.data;
+
+    if (!user?.id) {
       redirectToLogin(true);
     }
-    
-    return response.data;
+
+    return user;
   } catch {
     // Fallback: decode JWT payload to prevent auth loop if /auth/me is missing in the backend during dev
     try {

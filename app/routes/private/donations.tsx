@@ -1,16 +1,13 @@
-import { useState } from "react";
 import { useLoaderData, useNavigation, useSearchParams } from "react-router";
 import { dashboardApi, type DonationHistory } from "~/api/modules/dashboard";
-import { overlayApi } from "~/api/modules/overlay";
 import { PageHeader } from "~/components/dashboard/PageHeader";
 import { DonationHistoryFilters } from "~/components/donations/DonationHistoryFilters";
 import { DonationHistoryList } from "~/components/donations/DonationHistoryList";
 import { DonationQueuePopover } from "~/components/donations/DonationQueuePopover";
-import { QueueStateBanners } from "~/components/donations/QueueStateBanners";
 import { QueueToolbar } from "~/components/queue/QueueToolbar";
 import { Pagination } from "~/components/ui/Pagination";
-import { useToast } from "~/components/ui/useToast";
 import { useDonationHistorySocket } from "~/hooks/useDonationHistorySocket";
+import { useQueueActions } from "~/hooks/useQueueActions";
 import { useQueueSocket } from "~/hooks/useQueueSocket";
 import { getAuthToken } from "~/util/session.server";
 import type { Route } from "./+types/donations";
@@ -28,7 +25,8 @@ export async function loader({ request }: Route.LoaderArgs) {
   const page = Number(url.searchParams.get("page") || "1");
   const limit = Number(url.searchParams.get("limit") || "10");
   const status = url.searchParams.get("status") || undefined;
-  const days = url.searchParams.get("days") || undefined;
+  // Padrão = últimos 30 dias (teto de retenção, alinhado ao lifecycle do R2).
+  const days = url.searchParams.get("days") || "30";
   const search = url.searchParams.get("search") || undefined;
   const searchBy = url.searchParams.get("searchBy") || undefined;
 
@@ -63,11 +61,10 @@ export default function Donations() {
   const { token, history, page, totalPages } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigation = useNavigation();
-  const { toast } = useToast();
-  const { queue, isOverlayOnline, isPaused } = useQueueSocket(token);
+  const { queue, isPaused } = useQueueSocket(token);
   const filters = {
     status: searchParams.get("status") || undefined,
-    days: searchParams.get("days") || undefined,
+    days: searchParams.get("days") || "30",
     search: searchParams.get("search") || undefined,
     searchBy: searchParams.get("searchBy") || undefined,
   };
@@ -77,74 +74,21 @@ export default function Donations() {
     page,
     filters,
   );
-  const [actionLoading, setActionLoading] = useState<Record<string, boolean>>(
-    {},
-  );
-  const [replayLoading, setReplayLoading] = useState<string | null>(null);
+  const {
+    actionLoading,
+    replayLoading,
+    handleTogglePause,
+    handleSkip,
+    handleClear,
+    handleTest,
+    handleReplay,
+  } = useQueueActions(token, isPaused);
 
   const loadingData = navigation.state === "loading";
   const pendingCount = queue.filter((d) => !d.isCurrent).length;
   const displayItems = liveItems;
   const displayTotal = liveTotal;
   const currentId = queue.find((d) => d.isCurrent)?.id ?? null;
-
-  const handleTogglePause = async () => {
-    setActionLoading((prev) => ({ ...prev, togglePause: true }));
-    const res = await overlayApi.togglePause(token);
-    setActionLoading((prev) => ({ ...prev, togglePause: false }));
-    if (res.success) {
-      toast(isPaused ? "Fila retomada!" : "Fila pausada!", "success");
-    } else {
-      toast(res.error.message, "error");
-    }
-  };
-
-  const handleSkip = async () => {
-    setActionLoading((prev) => ({ ...prev, skip: true }));
-    const res = await overlayApi.skipAlert(token);
-    setActionLoading((prev) => ({ ...prev, skip: false }));
-    if (res.success) {
-      toast(
-        isPaused ? "Mensagem removida da fila!" : "Alerta pulado!",
-        "success",
-      );
-    } else {
-      toast(res.error.message, "error");
-    }
-  };
-
-  const handleClear = async () => {
-    setActionLoading((prev) => ({ ...prev, clear: true }));
-    const res = await overlayApi.clearQueue(token);
-    setActionLoading((prev) => ({ ...prev, clear: false }));
-    if (res.success) {
-      toast("Fila limpa!", "success");
-    } else {
-      toast(res.error.message, "error");
-    }
-  };
-
-  const handleTest = async () => {
-    setActionLoading((prev) => ({ ...prev, test: true }));
-    const res = await overlayApi.testAlert(token);
-    setActionLoading((prev) => ({ ...prev, test: false }));
-    if (res.success) {
-      toast("Alerta de teste enviado!", "success");
-    } else {
-      toast(res.error.message, "error");
-    }
-  };
-
-  const handleReplay = async (donationId: string) => {
-    setReplayLoading(donationId);
-    const res = await overlayApi.replayDonation(token, donationId);
-    setReplayLoading(null);
-    if (res.success) {
-      toast("Doação re-enfileirada!", "success");
-    } else {
-      toast(res.error.message, "error");
-    }
-  };
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams);
@@ -156,7 +100,7 @@ export default function Donations() {
     window.open(
       "/fila/popout",
       "queue_popup",
-      "width=900,height=700,resizable=yes",
+      "width=1024,height=800,resizable=yes,scrollbars=yes",
     );
   };
 
@@ -196,14 +140,6 @@ export default function Donations() {
       />
 
       <div className="flex flex-col gap-5">
-        <QueueStateBanners
-          isOverlayOnline={isOverlayOnline}
-          isPaused={isPaused}
-          pendingCount={pendingCount}
-          onResume={handleTogglePause}
-          resumeLoading={actionLoading.togglePause}
-        />
-
         <section
           aria-label="Controles da fila"
           className="rounded-[26px] bg-card border border-line shadow-xs p-5"
@@ -251,6 +187,7 @@ export default function Donations() {
               onReplay={handleReplay}
               replayLoading={replayLoading}
               currentId={currentId}
+              token={token}
             />
           </div>
 

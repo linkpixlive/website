@@ -13,7 +13,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Register a new user */
+        /** Registrar um novo usuário */
         post: operations["AuthController_register"];
         delete?: never;
         options?: never;
@@ -30,8 +30,25 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Login a user */
+        /** Autenticar usuário */
         post: operations["AuthController_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/login-2fa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Autenticar usuário com segundo fator (2FA) */
+        post: operations["AuthController_login2fa"];
         delete?: never;
         options?: never;
         head?: never;
@@ -47,7 +64,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Forgot password */
+        /** Esqueci a senha */
         post: operations["AuthController_forgotPassword"];
         delete?: never;
         options?: never;
@@ -64,7 +81,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Change password */
+        /** Alterar senha */
         post: operations["AuthController_resetPassword"];
         delete?: never;
         options?: never;
@@ -81,7 +98,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Verify OTP */
+        /** Verificar OTP */
         post: operations["AuthController_verifyOtp"];
         delete?: never;
         options?: never;
@@ -98,7 +115,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Logout current session */
+        /** Sair da sessão atual */
         post: operations["AuthController_logout"];
         delete?: never;
         options?: never;
@@ -115,12 +132,29 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Logout from all devices */
+        /** Sair de todos os dispositivos */
         post: operations["AuthController_logoutAll"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/profile/username": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Alterar nome de usuário */
+        patch: operations["ProfileController_changeUsername"];
         trace?: never;
     };
     "/dashboard/stats": {
@@ -130,7 +164,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get 30-day donation statistics */
+        /** Obter estatísticas de doações dos últimos 30 dias */
         get: operations["DashboardController_getStats"];
         put?: never;
         post?: never;
@@ -147,7 +181,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get paginated donation history */
+        /** Obter histórico de doações paginado */
         get: operations["DashboardController_getHistory"];
         put?: never;
         post?: never;
@@ -164,7 +198,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get public user information */
+        /** Obter informações públicas do usuário */
         get: operations["DonationsController_getUser"];
         put?: never;
         post?: never;
@@ -183,7 +217,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Create a new donation */
+        /** Criar uma nova doação */
         post: operations["DonationsController_donation"];
         delete?: never;
         options?: never;
@@ -191,17 +225,17 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/webhook/pix": {
+    "/donation/{id}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Obter status e resumo público de uma doação */
+        get: operations["DonationsController_getDonation"];
         put?: never;
-        /** Pix webhook is activated when a payment update is identified in the gateway. */
-        post: operations["DonationsController_webhookPix"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -215,26 +249,25 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get settings for a specific widget type */
+        /** Obter configurações de um tipo de widget */
         get: operations["WidgetsController_getSettings"];
-        /** Update settings for a specific widget type */
-        put: operations["WidgetsController_updateSettings"];
-        /** Create settings for a specific widget type */
-        post: operations["WidgetsController_createSettings"];
+        /** Criar ou atualizar configurações de um tipo de widget */
+        put: operations["WidgetsController_upsertSettings"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/widgets/public/{type}/{token}": {
+    "/widgets/public/{token}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Get public widget settings for OBS/External use */
+        /** Obter configurações públicas do widget para OBS/Uso externo */
         get: operations["WidgetsController_getPublicSettings"];
         put?: never;
         post?: never;
@@ -253,7 +286,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Reset the token for a specific widget type */
+        /** Resetar o token de um tipo de widget */
         post: operations["WidgetsController_resetToken"];
         delete?: never;
         options?: never;
@@ -270,7 +303,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Send a test notification to the overlay */
+        /** Enviar notificação de teste para o overlay */
         post: operations["OverlayController_test"];
         delete?: never;
         options?: never;
@@ -287,7 +320,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Toggle pause state of overlay alerts */
+        /** Alternar pausa dos alertas do overlay */
         post: operations["OverlayController_togglePause"];
         delete?: never;
         options?: never;
@@ -304,7 +337,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Skip the current alert and dispatch the next one */
+        /** Pular o alerta atual e exibir o próximo */
         post: operations["OverlayController_skip"];
         delete?: never;
         options?: never;
@@ -322,8 +355,25 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Clear all pending alerts from the queue */
+        /** Limpar todos os alertas pendentes da fila */
         delete: operations["OverlayController_clearQueue"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/overlay/queue/{donationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remover doação específica da fila */
+        delete: operations["OverlayController_removeFromQueue"];
         options?: never;
         head?: never;
         patch?: never;
@@ -338,8 +388,62 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Re-add a donation to the alert queue for replay */
+        /** Readicionar doação à fila de alertas para repetir */
         post: operations["OverlayController_replay"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/voices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar todas as vozes */
+        get: operations["VoicesController_findAll"];
+        put?: never;
+        /** Criar uma nova voz */
+        post: operations["VoicesController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/voices/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obter uma voz pelo ID */
+        get: operations["VoicesController_findById"];
+        put?: never;
+        post?: never;
+        /** Remover uma voz */
+        delete: operations["VoicesController_remove"];
+        options?: never;
+        head?: never;
+        /** Atualizar uma voz */
+        patch: operations["VoicesController_update"];
+        trace?: never;
+    };
+    "/voices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listar vozes ativas (público) */
+        get: operations["VoicesPublicController_findActive"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -353,10 +457,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List all Pix keys for the current user */
+        /** Listar todas as chaves Pix do usuário */
         get: operations["PixKeysController_findAll"];
         put?: never;
-        /** Register a new Pix key */
+        /** Registrar uma nova chave Pix */
         post: operations["PixKeysController_create"];
         delete?: never;
         options?: never;
@@ -371,7 +475,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List all Pix keys masked for the current user */
+        /** Listar todas as chaves Pix mascaradas do usuário */
         get: operations["PixKeysController_findAllMasked"];
         put?: never;
         post?: never;
@@ -391,7 +495,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Delete a Pix key */
+        /** Excluir uma chave Pix */
         delete: operations["PixKeysController_remove"];
         options?: never;
         head?: never;
@@ -405,7 +509,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get the current user balance summary */
+        /** Obter o resumo de saldo do usuário */
         get: operations["WalletsController_getBalances"];
         put?: never;
         post?: never;
@@ -422,10 +526,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List withdrawal history with filters */
+        /** Listar histórico de saques com filtros */
         get: operations["WithdrawalsController_findAll"];
         put?: never;
-        /** Request a new withdrawal */
+        /** Solicitar um novo saque */
         post: operations["WithdrawalsController_create"];
         delete?: never;
         options?: never;
@@ -446,8 +550,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Approve a pending withdrawal */
-        patch: operations["WithdrawalsAdminController_approve"];
+        /** Aprovar um saque pendente */
+        patch: operations["AdminController_approveWithdrawal"];
         trace?: never;
     };
     "/admin/withdrawals/{id}/reject": {
@@ -463,8 +567,25 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Reject a pending withdrawal */
-        patch: operations["WithdrawalsAdminController_reject"];
+        /** Rejeitar um saque pendente */
+        patch: operations["AdminController_rejectWithdrawal"];
+        trace?: never;
+    };
+    "/admin/users/{id}/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Verificar/desverificar um usuário (Admin) */
+        patch: operations["AdminController_verifyUser"];
         trace?: never;
     };
     "/donation-settings": {
@@ -474,15 +595,185 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get current user donation business rules */
+        /** Obter regras de doação do usuário atual */
         get: operations["DonationSettingsController_getMySettings"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        /** Update donation business rules */
+        /** Atualizar regras de doação */
         patch: operations["DonationSettingsController_updateSettings"];
+        trace?: never;
+    };
+    "/webhook/pix": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** O webhook Pix é ativado quando uma atualização de pagamento é identificada no gateway. */
+        post: operations["WebhooksController_webhookPix"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Obter configurações da conta */
+        get: operations["AccountSettingsController_getSettings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account-settings/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Atualizar perfil (nome e campos simples) */
+        patch: operations["AccountSettingsController_updateProfile"];
+        trace?: never;
+    };
+    "/account-settings/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Atualizar email */
+        patch: operations["AccountSettingsController_changeEmail"];
+        trace?: never;
+    };
+    "/account-settings/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Atualizar senha */
+        patch: operations["AccountSettingsController_changePassword"];
+        trace?: never;
+    };
+    "/account-settings/deactivate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Desativar conta */
+        patch: operations["AccountSettingsController_deactivateAccount"];
+        trace?: never;
+    };
+    "/account-settings/2fa/setup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Iniciar configuração do 2FA (TOTP) */
+        post: operations["AccountSettingsController_setup2fa"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account-settings/2fa/enable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ativar 2FA validando o primeiro código TOTP */
+        post: operations["AccountSettingsController_enable2fa"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account-settings/2fa/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Desativar 2FA */
+        post: operations["AccountSettingsController_disable2fa"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Health check da aplicação. */
+        get: operations["HealthController_check"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
 }
@@ -491,28 +782,28 @@ export interface components {
     schemas: {
         RegisterAuthDto: {
             /**
-             * @description Full name of the user
+             * @description Nome completo do usuário
              * @example John Doe
              */
             name: string;
             /**
-             * @description Unique alphanumeric username
+             * @description Nome de usuário alfanumérico único
              * @example johndoe
              */
             username: string;
             /**
              * Format: email
-             * @description Valid email address
+             * @description Endereço de email válido
              * @example johndoe@email.com
              */
             email: string;
             /**
-             * @description Password (min 8 chars, must contain upper, lower, number or special)
+             * @description Senha (mín 8 caracteres, deve conter maiúscula, minúscula, número ou especial)
              * @example P@ssword123
              */
             password: string;
             /**
-             * @description CPF (11 digits, numbers only)
+             * @description CPF (11 dígitos, apenas números)
              * @example 12345678901
              */
             cpf: string;
@@ -526,6 +817,22 @@ export interface components {
             /** @example P@ssword123 */
             password: string;
         };
+        Login2faDto: {
+            /**
+             * Format: email
+             * @example johndoe@email.com
+             */
+            email: string;
+            /** @example P@ssword123 */
+            password: string;
+            /** @example 123456 */
+            totp: string;
+            /**
+             * Format: uuid
+             * @example a1b2c3d4-e5f6-7890-abcd-ef1234567890
+             */
+            nonce: string;
+        };
         ForgotPasswordDto: {
             /**
              * Format: email
@@ -537,7 +844,7 @@ export interface components {
             /** @example reset-token-123 */
             token: string;
             /**
-             * @description New password for the account
+             * @description Nova senha para a conta
              * @example NewP@ssword123
              */
             newPassword: string;
@@ -551,62 +858,59 @@ export interface components {
              */
             email: string;
         };
+        UpdateUsernameDto: {
+            newUsername: string;
+        };
         DashboardStatsEntity: {
             /**
-             * @description Total donation amount in the last 30 days
+             * @description Valor total de doações nos últimos 30 dias
              * @example 1500.5
              */
             totalAmount: number;
             /**
-             * @description Total number of donations in the last 30 days
+             * @description Número total de doações nos últimos 30 dias
              * @example 42
              */
             totalCount: number;
             /**
-             * @description Day of week with most donations (0-6, where 0 is Sunday)
+             * @description Dia da semana com mais doações (0-6, onde 0 é domingo)
              * @example 4
              */
             peakDay: number | null;
             /**
-             * @description Hour of day with most donations (0-23)
+             * @description Hora do dia com mais doações (0-23)
              * @example 20
              */
             peakHour: number | null;
             /**
-             * @description Most frequent donation amount
+             * @description Valor de doação mais frequente
              * @example 10
              */
             modeAmount: number | null;
         };
-        Decimal2: Record<string, never>;
         DonationHistoryEntity: {
             /**
-             * @description Transaction ID
+             * @description ID da transação
              * @example uuid-123
              */
             id: string;
             /**
-             * @description Donor name
+             * @description Nome do doador
              * @example John Doe
              */
             name: string;
             /**
-             * @description Donation amount
+             * @description Valor da doação
              * @example 10
              */
-            amount: components["schemas"]["Decimal2"];
+            amount: number;
             /**
-             * @description Donation message
+             * @description Mensagem da doação
              * @example Keep up the good work!
              */
             message: string | null;
             /**
-             * @description Voice audio key
-             * @example tts/audio.mp3
-             */
-            audioUrl: string | null;
-            /**
-             * @description Type of message (text, video, etc.)
+             * @description Tipo de mensagem (texto, vídeo, etc.)
              * @example text
              * @enum {string|null}
              */
@@ -617,10 +921,10 @@ export interface components {
              */
             status: "pending" | "paid" | "displayed" | "failed" | "expired";
             /**
-             * Format: date-time
-             * @example 2026-04-16T12:00:00.000Z
+             * @description URL pública do áudio
+             * @example https://cdn.tipply.live/tts/johndoe-uuid-123.wav
              */
-            createdAt: string;
+            voiceUrl: string | null;
             /**
              * Format: date-time
              * @example 2026-04-16T12:05:00.000Z
@@ -653,11 +957,15 @@ export interface components {
             message: string;
             /** @example 10 */
             amount: number;
-            /** @example voice-id-123 */
-            voiceId: string;
+            /**
+             * Format: uuid
+             * @example uuid-voice-id
+             */
+            voiceId?: string | null;
             /** @example streamer_username */
             username: string;
         };
+        Decimal2: Record<string, never>;
         DonationEntity: {
             /** @example uuid-123 */
             id: string;
@@ -686,6 +994,37 @@ export interface components {
              */
             expiredAt: string | null;
         };
+        DonationPublicEntity: {
+            /** @example uuid-123 */
+            id: string;
+            /**
+             * @example pending
+             * @enum {string}
+             */
+            status: "pending" | "paid" | "displayed" | "failed" | "expired";
+            /** @example 10 */
+            amount: components["schemas"]["Decimal2"];
+            /** @example John Doe */
+            donorName: string;
+            /** @example Keep up the good work! */
+            message: string | null;
+            /** @example Jane Streamer */
+            streamerName: string;
+            /** @example jane_streamer */
+            streamerUsername: string;
+            /** @example Google Feminina PT-BR */
+            voiceName: string | null;
+            /**
+             * Format: date-time
+             * @example 2026-04-16T12:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2026-04-16T12:30:00.000Z
+             */
+            expiredAt: string | null;
+        };
         Object: Record<string, never>;
         WidgetEntity: {
             /** @example a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6 */
@@ -696,6 +1035,80 @@ export interface components {
             settings: Record<string, never>;
             /** Format: date-time */
             updatedAt: string;
+        };
+        VoiceEntity: {
+            /** @example uuid-123 */
+            id: string;
+            /** @example Google Feminina PT-BR */
+            name: string;
+            /** @example google */
+            provider: string;
+            /** @example pt-BR-Standard-A */
+            voiceId: string;
+            /** @example true */
+            isActive: boolean;
+            /** @example https://cdn.example.com/voices/foto.png */
+            photoUri: string | null;
+            /**
+             * @description Áudio de exemplo reproduzido no formulário de doação
+             * @example https://cdn.example.com/voices/amostra.wav
+             */
+            sampleUrl: string | null;
+            /**
+             * Format: date-time
+             * @example 2026-04-16T12:00:00.000Z
+             */
+            createdAt: string;
+        };
+        CreateVoiceDto: {
+            /** @example Google Feminina PT-BR */
+            name: string;
+            /** @example google */
+            provider: string;
+            /** @example pt-BR-Standard-A */
+            voiceId: string;
+            /**
+             * @default true
+             * @example true
+             */
+            isActive: boolean;
+            /** @example https://cdn.example.com/voices/foto.png */
+            photoUri?: string;
+            /**
+             * @description Áudio de exemplo reproduzido no formulário de doação
+             * @example https://cdn.example.com/voices/amostra.wav
+             */
+            sampleUrl?: string;
+        };
+        UpdateVoiceDto: {
+            /** @example Google Feminina PT-BR */
+            name?: string;
+            /** @example google */
+            provider?: string;
+            /** @example pt-BR-Standard-A */
+            voiceId?: string;
+            /** @example true */
+            isActive?: boolean;
+            /** @example https://cdn.example.com/voices/foto.png */
+            photoUri?: string;
+            /**
+             * @description Áudio de exemplo reproduzido no formulário de doação
+             * @example https://cdn.example.com/voices/amostra.wav
+             */
+            sampleUrl?: string;
+        };
+        PublicVoiceEntity: {
+            /** @example uuid-123 */
+            id: string;
+            /** @example Google Feminina PT-BR */
+            name: string;
+            /** @example google */
+            provider: string;
+            /**
+             * @description Áudio de exemplo reproduzido no formulário de doação
+             * @example https://cdn.example.com/voices/amostra.wav
+             */
+            sampleUrl: string | null;
         };
         CreatePixKeyDto: {
             /**
@@ -749,19 +1162,29 @@ export interface components {
             /** @example uuid-456 */
             pixId: string | null;
             /**
-             * @description Pix key value
+             * @description Decrypted Pix key value
              * @example johndoe@email.com
              */
-            pixValue: string;
+            key?: string;
+            /**
+             * @description Tipo da chave Pix (para formatação no cliente)
+             * @example phone
+             */
+            keyType?: string;
+            /**
+             * @description Valor mascarado da chave Pix
+             * @example joh***@email.com
+             */
+            keyMasked: string;
             /** @example 100 */
             amount: number;
             /**
-             * @description Amount after fees
+             * @description Valor após taxas
              * @example 96
              */
             netAmount: number;
             /**
-             * @description Fee amount
+             * @description Valor da taxa
              * @example 4
              */
             feeAmount: number;
@@ -776,6 +1199,9 @@ export interface components {
              */
             createdAt: string;
         };
+        VerifyUserDto: {
+            verified: boolean;
+        };
         UpdateDonationSettingsDto: {
             /** @example 250 */
             maxLength?: number;
@@ -783,10 +1209,55 @@ export interface components {
             minAudioAmount?: number;
             /** @example 1 */
             minTextAmount?: number;
+            /** @example false */
+            aiModeration?: boolean;
             /** @example true */
             filterProfanity?: boolean;
             /** @example true */
-            aiModeration?: boolean;
+            filterSpam?: boolean;
+            /** @example false */
+            filterHateSpeech?: boolean;
+            /** @example casino */
+            customRules?: string;
+            /**
+             * Format: uuid
+             * @example uuid-voice-id
+             */
+            defaultVoiceId?: string;
+        };
+        UpdateProfileDto: {
+            /** @example John Doe */
+            name?: string;
+        };
+        ChangeEmailDto: {
+            /**
+             * Format: email
+             * @example johndoe@email.com
+             */
+            email: string;
+            /** @example P@ssword123 */
+            password: string;
+        };
+        ChangePasswordDto: {
+            /** @example OldP@ssword123 */
+            currentPassword: string;
+            /**
+             * @description Nova senha (mín 8 caracteres, deve conter maiúscula, minúscula, número ou especial)
+             * @example NewP@ssword123
+             */
+            newPassword: string;
+        };
+        DeactivateAccountDto: {
+            /** @example P@ssword123 */
+            password: string;
+        };
+        Enable2faDto: {
+            /** @example 123456 */
+            token: string;
+        };
+        Disable2faDto: {
+            /** @example P@ssword123 */
+            password: string;
         };
     };
     responses: never;
@@ -810,21 +1281,21 @@ export interface operations {
             };
         };
         responses: {
-            /** @description User registered successfully. */
+            /** @description Usuário registrado com sucesso. */
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Invalid data (email already exists, format, etc). */
+            /** @description Dados inválidos (email já existe, formato, etc). */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Too many requests. */
+            /** @description Muitas solicitações. */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -846,7 +1317,51 @@ export interface operations {
             };
         };
         responses: {
-            /** @description User logged in successfully. */
+            /** @description Usuário autenticado com sucesso. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Credenciais inválidas. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Muitas solicitações. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_login2fa: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Login2faDto"];
+            };
+        };
+        responses: {
+            /** @description Usuário autenticado com sucesso. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -861,14 +1376,21 @@ export interface operations {
                     "application/json": string;
                 };
             };
-            /** @description Invalid credentials. */
+            /** @description 2FA não ativo nesta conta. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Credenciais inválidas, código inválido ou nonce expirado. */
             401: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Too many requests. */
+            /** @description Muitas solicitações. */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -890,28 +1412,28 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Email with password change link sent successfully. */
+            /** @description Email com link de redefinição de senha enviado com sucesso. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Invalid data (email format, etc). */
+            /** @description Dados inválidos (formato de email, etc). */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Invalid credentials (email not found, etc). */
+            /** @description Credenciais inválidas (email não encontrado, etc). */
             401: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Too many requests. */
+            /** @description Muitas solicitações. */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -933,28 +1455,28 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Password changed successfully. */
+            /** @description Senha alterada com sucesso. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Invalid data (password format, etc). */
+            /** @description Dados inválidos (formato de senha, etc). */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Invalid credentials (token expired, already used, etc). */
+            /** @description Credenciais inválidas (token expirado, já utilizado, etc). */
             401: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Too many requests. */
+            /** @description Muitas solicitações. */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -976,28 +1498,28 @@ export interface operations {
             };
         };
         responses: {
-            /** @description OTP verified successfully. */
+            /** @description OTP verificado com sucesso. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Invalid data (OTP format, etc). */
+            /** @description Dados inválidos (formato de OTP, etc). */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Invalid credentials (OTP expired, already used, etc). */
+            /** @description Credenciais inválidas (OTP expirado, já utilizado, etc). */
             401: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Too many requests. */
+            /** @description Muitas solicitações. */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -1015,7 +1537,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Logged out successfully. */
+            /** @description Sessão encerrada com sucesso. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1033,8 +1555,44 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Logged out from all devices. */
+            /** @description Sessão encerrada em todos os dispositivos. */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProfileController_changeUsername: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUsernameDto"];
+            };
+        };
+        responses: {
+            /** @description Nome de usuário alterado com sucesso. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Dados inválidos ou regras de negócio violadas. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Não autorizado. */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1051,7 +1609,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Stats returned successfully. */
+            /** @description Estatísticas retornadas com sucesso. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1060,7 +1618,7 @@ export interface operations {
                     "application/json": components["schemas"]["DashboardStatsEntity"];
                 };
             };
-            /** @description Unauthorized. */
+            /** @description Não autorizado. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -1072,8 +1630,12 @@ export interface operations {
     DashboardController_getHistory: {
         parameters: {
             query?: {
-                page?: number;
+                status?: "paid" | "displayed";
+                days?: "7" | "15" | "30";
+                search?: string;
+                searchBy?: "name" | "message";
                 limit?: number;
+                page?: number;
             };
             header?: never;
             path?: never;
@@ -1081,7 +1643,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description History returned successfully. */
+            /** @description Histórico retornado com sucesso. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1090,7 +1652,14 @@ export interface operations {
                     "application/json": components["schemas"]["DonationHistoryEntity"];
                 };
             };
-            /** @description Unauthorized. */
+            /** @description Parâmetros de query inválidos. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Não autorizado. */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -1110,7 +1679,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description User information received successfully. */
+            /** @description Informações do usuário recebidas com sucesso. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1119,8 +1688,15 @@ export interface operations {
                     "application/json": components["schemas"]["PublicUserEntity"];
                 };
             };
-            /** @description User not found */
+            /** @description Usuário não encontrado */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Muitas requisições. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1141,7 +1717,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Donation created, returns Pix code and donation informations. */
+            /** @description Doação criada, retorna código Pix e informações da doação. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -1150,14 +1726,14 @@ export interface operations {
                     "application/json": components["schemas"]["DonationEntity"];
                 };
             };
-            /** @description Invalid data (amount, userId, voiceId...) */
+            /** @description Dados inválidos (amount, userId, voiceId...) */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Too many requests (Rate Limited). */
+            /** @description Muitas requisições (Limite de taxa). */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -1166,26 +1742,35 @@ export interface operations {
             };
         };
     };
-    DonationsController_webhookPix: {
+    DonationsController_getDonation: {
         parameters: {
-            query: {
-                hmac: string;
-            };
+            query?: never;
             header?: never;
-            path?: never;
+            path: {
+                id: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Webhook received successfully. */
+            /** @description Doação encontrada com sucesso. */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DonationPublicEntity"];
+                };
+            };
+            /** @description Doação não encontrada */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Unauthorized (invalid HMAC) */
-            401: {
+            /** @description Muitas requisições. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1214,7 +1799,7 @@ export interface operations {
             };
         };
     };
-    WidgetsController_updateSettings: {
+    WidgetsController_upsertSettings: {
         parameters: {
             query?: never;
             header?: never;
@@ -1226,27 +1811,6 @@ export interface operations {
         requestBody?: never;
         responses: {
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WidgetEntity"];
-                };
-            };
-        };
-    };
-    WidgetsController_createSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                type: components["schemas"]["Object"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            201: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1372,6 +1936,25 @@ export interface operations {
             };
         };
     };
+    OverlayController_removeFromQueue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                donationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     OverlayController_replay: {
         parameters: {
             query?: never;
@@ -1391,6 +1974,167 @@ export interface operations {
             };
         };
     };
+    VoicesController_findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoiceEntity"][];
+                };
+            };
+        };
+    };
+    VoicesController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateVoiceDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoiceEntity"];
+                };
+            };
+            /** @description Dados inválidos */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    VoicesController_findById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoiceEntity"];
+                };
+            };
+            /** @description Voz não encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    VoicesController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Voz removida com sucesso */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Voz não encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    VoicesController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateVoiceDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoiceEntity"];
+                };
+            };
+            /** @description Voz não encontrada */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    VoicesPublicController_findActive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicVoiceEntity"][];
+                };
+            };
+        };
+    };
     PixKeysController_findAll: {
         parameters: {
             query?: never;
@@ -1400,7 +2144,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Pix keys returned successfully. */
+            /** @description Chaves Pix retornadas com sucesso. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1424,7 +2168,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Pix key registered successfully. */
+            /** @description Chave Pix registrada com sucesso. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -1433,14 +2177,14 @@ export interface operations {
                     "application/json": components["schemas"]["PixKeyEntity"];
                 };
             };
-            /** @description Invalid key format or limit reached. */
+            /** @description Formato de chave inválido ou limite atingido. */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Pix key already registered. */
+            /** @description Chave Pix já registrada. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -1458,7 +2202,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description List of masked pix keys. */
+            /** @description Lista de chaves Pix mascaradas. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1480,14 +2224,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Pix key deleted successfully. */
+            /** @description Chave Pix excluída com sucesso. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Pix key not found. */
+            /** @description Chave Pix não encontrada. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -1505,7 +2249,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Balance summary returned successfully. */
+            /** @description Resumo de saldo retornado com sucesso. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1514,7 +2258,7 @@ export interface operations {
                     "application/json": components["schemas"]["WalletBalancesEntity"];
                 };
             };
-            /** @description Wallet not found. */
+            /** @description Carteira não encontrada. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -1538,7 +2282,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description List of withdrawals returned successfully. */
+            /** @description Lista de saques retornada com sucesso. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1552,7 +2296,11 @@ export interface operations {
     WithdrawalsController_create: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                "idempotency-key": string;
+                /** @description Chave de idempotência gerada pelo cliente para evitar saques duplicados */
+                "Idempotency-Key"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -1562,7 +2310,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Withdrawal request submitted successfully. */
+            /** @description Saque solicitado com sucesso. */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -1571,14 +2319,14 @@ export interface operations {
                     "application/json": components["schemas"]["WithdrawalEntity"];
                 };
             };
-            /** @description Insufficient balance or invalid amount. */
+            /** @description Saldo insuficiente ou valor inválido. */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Pix key not found. */
+            /** @description Chave Pix não encontrada. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -1587,7 +2335,7 @@ export interface operations {
             };
         };
     };
-    WithdrawalsAdminController_approve: {
+    AdminController_approveWithdrawal: {
         parameters: {
             query?: never;
             header?: never;
@@ -1598,7 +2346,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Withdrawal approved successfully. */
+            /** @description Saque aprovado com sucesso. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1607,14 +2355,14 @@ export interface operations {
                     "application/json": components["schemas"]["WithdrawalEntity"];
                 };
             };
-            /** @description Withdrawal is not pending. */
+            /** @description O saque não está pendente. */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Withdrawal not found. */
+            /** @description Saque não encontrado. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -1623,7 +2371,7 @@ export interface operations {
             };
         };
     };
-    WithdrawalsAdminController_reject: {
+    AdminController_rejectWithdrawal: {
         parameters: {
             query?: never;
             header?: never;
@@ -1634,7 +2382,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Withdrawal rejected successfully. */
+            /** @description Saque rejeitado com sucesso. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1643,15 +2391,60 @@ export interface operations {
                     "application/json": components["schemas"]["WithdrawalEntity"];
                 };
             };
-            /** @description Withdrawal is not pending. */
+            /** @description O saque não está pendente. */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Withdrawal not found. */
+            /** @description Saque não encontrado. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminController_verifyUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyUserDto"];
+            };
+        };
+        responses: {
+            /** @description Status de verificação atualizado com sucesso. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Usuário não encontrado. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Não autorizado. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sem permissão. */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1668,7 +2461,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Donation settings retrieved successfully */
+            /** @description Configurações de doação recuperadas com sucesso */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1690,7 +2483,350 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Donation settings updated successfully */
+            /** @description Configurações de doação atualizadas com sucesso */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WebhooksController_webhookPix: {
+        parameters: {
+            query: {
+                hmac: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Webhook recebido com sucesso. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Lote de webhook excede o tamanho máximo permitido. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Não autorizado (HMAC inválido) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Muitas requisições. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AccountSettingsController_getSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Configurações da conta retornadas com sucesso. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Não autorizado. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AccountSettingsController_updateProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProfileDto"];
+            };
+        };
+        responses: {
+            /** @description Perfil atualizado com sucesso. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Dados inválidos. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Não autorizado. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AccountSettingsController_changeEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeEmailDto"];
+            };
+        };
+        responses: {
+            /** @description Email atualizado com sucesso. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Dados inválidos. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Credenciais inválidas. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Email já está em uso. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AccountSettingsController_changePassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordDto"];
+            };
+        };
+        responses: {
+            /** @description Senha alterada com sucesso. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Dados inválidos. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Credenciais inválidas. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AccountSettingsController_deactivateAccount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeactivateAccountDto"];
+            };
+        };
+        responses: {
+            /** @description Conta desativada com sucesso. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Credenciais inválidas. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AccountSettingsController_setup2fa: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Secret e otpauthUrl retornados para o frontend renderizar o QR. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description 2FA já está ativo. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Não autorizado. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AccountSettingsController_enable2fa: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Enable2faDto"];
+            };
+        };
+        responses: {
+            /** @description 2FA ativado com sucesso. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Código inválido ou setup expirado. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Não autorizado. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AccountSettingsController_disable2fa: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Disable2faDto"];
+            };
+        };
+        responses: {
+            /** @description 2FA desativado. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Credenciais inválidas. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    HealthController_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Aplicação saudável e aceitando conexões. */
             200: {
                 headers: {
                     [name: string]: unknown;

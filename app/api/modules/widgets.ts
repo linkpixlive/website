@@ -4,8 +4,21 @@ export interface OverlaySettings {
   volume: number; // 0-100
   speakNameAmount: boolean;
   defaultNarrator: string;
+  audioOnly: boolean;
   isPaused: boolean;
 }
+
+export interface QrCodeSettings {
+  color: string;
+  size: number;
+}
+
+export type WidgetType = "overlay" | "qrcode";
+
+export type WidgetSettingsMap = {
+  overlay: OverlaySettings;
+  qrcode: QrCodeSettings;
+};
 
 export interface Widget<T = OverlaySettings> {
   token: string;
@@ -16,18 +29,43 @@ export interface Widget<T = OverlaySettings> {
 }
 
 export const widgetsApi = {
-  getSettings: (token: string | null | undefined, type: string) =>
-    fetchApi<Widget>(createApiClient(token).get(`/widgets/${type}`)),
+  getSettings: <T extends WidgetType>(
+    token: string | null | undefined,
+    type: T,
+  ) => fetchApi<Widget<WidgetSettingsMap[T]>>(createApiClient(token).get(`/widgets/${type}`)),
 
-  getPublicSettings: (type: string, widgetToken: string) =>
-    fetchApi<Widget>(createApiClient().get(`/widgets/public/${type}/${widgetToken}`)),
+  getPublicSettings: <T extends WidgetType = "overlay">(
+    widgetToken: string,
+  ) => fetchApi<Widget<WidgetSettingsMap[T]>>(createApiClient().get(`/widgets/public/${widgetToken}`)),
 
-  createSettings: (token: string | null | undefined, type: string, body: Partial<OverlaySettings>) =>
-    fetchApi<Widget>(createApiClient(token).post(`/widgets/${type}`, body)),
+  /**
+   * Cria ou atualiza (upsert). O PUT substitui o objeto `settings` inteiro,
+   * então updates devem enviar o objeto completo. Sem body, o backend
+   * aplica os defaults do tipo.
+   */
+  upsertSettings: <T extends WidgetType>(
+    token: string | null | undefined,
+    type: T,
+    body?: Partial<WidgetSettingsMap[T]>,
+  ) =>
+    fetchApi<Widget<WidgetSettingsMap[T]>>(
+      createApiClient(token).put(`/widgets/${type}`, body),
+    ),
 
-  updateSettings: (token: string | null | undefined, type: string, body: Partial<OverlaySettings>) =>
-    fetchApi<Widget>(createApiClient(token).put(`/widgets/${type}`, body)),
-
+  /**
+   * Garante que o widget existe: lê e, se ainda não foi criado (404),
+   * cria com os defaults do backend via PUT sem body. A criação é
+   * implícita — o usuário nunca percebe o estado "não configurado".
+   */
+  ensureSettings: async <T extends WidgetType>(
+    token: string | null | undefined,
+    type: T,
+  ) => {
+    const res = await widgetsApi.getSettings(token, type);
+    if (res.success) return res;
+    if (res.error.code !== 404) return res;
+    return widgetsApi.upsertSettings(token, type);
+  },
   testAlert: (token: string | null | undefined) =>
     fetchApi<void>(createApiClient(token).post("/overlay/test")),
 

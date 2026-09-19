@@ -5,13 +5,11 @@ import type { OverlayDonationEntity } from "~/types/queue";
 
 interface UseQueueSocketReturn {
   queue: OverlayDonationEntity[];
-  isOverlayOnline: boolean;
   isPaused: boolean;
 }
 
 export function useQueueSocket(token: string | null): UseQueueSocketReturn {
   const [queue, setQueue] = useState<OverlayDonationEntity[]>([]);
-  const [isOverlayOnline, setIsOverlayOnline] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
@@ -26,7 +24,6 @@ export function useQueueSocket(token: string | null): UseQueueSocketReturn {
     });
 
     socket.on("overlay_status", (data: { online: boolean; isPaused?: boolean }) => {
-      setIsOverlayOnline(data.online);
       if (data.isPaused !== undefined) {
         setIsPaused(data.isPaused);
       }
@@ -37,5 +34,5 @@ export function useQueueSocket(token: string | null): UseQueueSocketReturn {
     };
   }, [token]);
 
-  return { queue, isOverlayOnline, isPaused };
+  return { queue, isPaused };
 }

@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useFetcher } from "react-router";
 import type { PixKey } from "~/api/modules/pix-keys";
@@ -11,68 +11,18 @@ import { SubmitButton } from "~/components/ui/SubmitButton";
 import { useToast } from "~/components/ui/useToast";
 import { Icon } from "~/components/ui/Icon";
 import { pixKeySchema } from "~/validators/wallet-validator";
+import {
+  formatByType,
+  formatPixKeyValue,
+  getTypeName,
+  normalizeByType,
+  type PixKeyType,
+} from "./pixKeyFormat";
 
 interface PixKeysModalProps {
   isOpen: boolean;
   onClose: () => void;
   pixKeys: PixKey[];
-}
-
-type PixKeyType = "cpf" | "cnpj" | "email" | "phone" | "random";
-
-// ─── Formatters ────────────────────────────────────────────────────────────────
-
-function formatCpf(value: string) {
-  return value
-    .replace(/\D/g, "")
-    .slice(0, 11)
-    .replace(/^(\d{3})(\d)/, "$1.$2")
-    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
-    .replace(/\.(\d{3})(\d)/, ".$1-$2");
-}
-
-function formatCnpj(value: string) {
-  // New CNPJ format (IN RFB 2.043/2024) supports alphanumeric characters
-  // Mask: XX.XXX.XXX/XXXX-XX  (X = digit or uppercase letter)
-  const clean = value
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, "")
-    .slice(0, 14);
-  return clean
-    .replace(/^([A-Z0-9]{2})([A-Z0-9])/, "$1.$2")
-    .replace(/^([A-Z0-9]{2})\.([A-Z0-9]{3})([A-Z0-9])/, "$1.$2.$3")
-    .replace(/\.([A-Z0-9]{3})([A-Z0-9])/, ".$1/$2")
-    .replace(/([A-Z0-9]{4})([A-Z0-9])/, "$1-$2");
-}
-
-function formatPhone(value: string) {
-  const digits = value.replace(/\D/g, "").slice(0, 11);
-  const formatted = digits.replace(/^(\d{2})(\d)/, "($1) $2");
-  if (digits.length <= 10) {
-    return formatted.replace(/(\d{4})(\d)/, "$1-$2");
-  }
-  return formatted.replace(/(\d{5})(\d)/, "$1-$2");
-}
-
-function formatByType(value: string, type: PixKeyType | ""): string {
-  if (!type || !value) return value;
-  if (type === "cpf") return formatCpf(value);
-  if (type === "cnpj") return formatCnpj(value);
-  if (type === "phone") return formatPhone(value);
-  return value;
-}
-
-// ─── Normalizers (value sent to server) ────────────────────────────────────────
-
-function normalizeByType(raw: string, type: PixKeyType | ""): string {
-  if (!type) return raw;
-  if (type === "cpf") return raw.replace(/\D/g, "");
-  // CNPJ: strip formatting but keep alphanumeric (new format)
-  if (type === "cnpj") return raw.toUpperCase().replace(/[^A-Z0-9]/g, "");
-  if (type === "phone") {
-    return raw.replace(/\D/g, "");
-  }
-  return raw.trim();
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -96,16 +46,9 @@ function getPlaceholder(type: PixKeyType | ""): string {
   return type ? map[type] : "";
 }
 
-export function getTypeName(type: string) {
-  const types: Record<string, string> = {
-    cpf: "CPF",
-    cnpj: "CNPJ",
-    email: "E-mail",
-    phone: "Telefone",
-    random: "Aleatória",
-  };
-  return types[type.toLowerCase()] || type;
-}
+// Re-export para compatibilidade com imports existentes
+// (ex. PixKeysCard importa getTypeName daqui).
+export { getTypeName } from "./pixKeyFormat";
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 
@@ -118,7 +61,7 @@ export function PixKeysModal({
   const { toast } = useToast();
   const loading = fetcher.state === "submitting";
 
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmingKey, setConfirmingKey] = useState<PixKey | null>(null);
   const [selectedType, setSelectedType] = useState<PixKeyType | "">("");
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -144,14 +87,21 @@ export function PixKeysModal({
     if (isOpen) {
       reset({ key: "", alias: "" });
       setSelectedType("");
-      setDeletingId(null);
+      setConfirmingKey(null);
       setLocalError(null);
     }
   }, [isOpen, reset]);
 
+  // Guarda o último resultado já tratado para exibir o toast uma única vez
+  // por submissão. Sem isso, qualquer re-render com nova identidade de `toast`
+  // (ou de callbacks) refaria o efeito com o mesmo `fetcher.data` e chamaria
+  // `manager.add()` em loop -> "Maximum update depth exceeded".
+  const lastHandledResult = useRef<unknown>(null);
+
   // Handle fetcher results (toast feedback & error)
   useEffect(() => {
-    if (!fetcher.data) return;
+    if (!fetcher.data || fetcher.data === lastHandledResult.current) return;
+    lastHandledResult.current = fetcher.data;
 
     if (fetcher.data.success) {
       if (fetcher.data.action === "createPixKey") {
@@ -160,6 +110,7 @@ export function PixKeysModal({
         setSelectedType("");
       } else if (fetcher.data.action === "deletePixKey") {
         toast("Chave Pix excluída com sucesso!", "success");
+        setConfirmingKey(null);
       }
     } else if (fetcher.data.error) {
       setLocalError(fetcher.data.error);
@@ -198,10 +149,11 @@ export function PixKeysModal({
     formData.append("intent", "deletePixKey");
     formData.append("id", id);
     fetcher.submit(formData, { method: "post" });
-    setDeletingId(null);
+    setConfirmingKey(null);
   };
 
   return (
+    <>
     <Modal isOpen={isOpen} onClose={onClose} title="Gerenciar Chaves Pix">
       <div className="space-y-6">
         {localError && <AlertMessage variant="error" message={localError} />}
@@ -221,8 +173,7 @@ export function PixKeysModal({
           ) : (
             <div className="divide-y divide-line max-h-60 overflow-y-auto scrollbar-thin pr-1">
               {pixKeys.map((pk) => (
-                <div key={pk.id} className="py-3 flex flex-col gap-2 first:pt-1 last:pb-1">
-                  <div className="flex items-start justify-between gap-3">
+                <div key={pk.id} className="py-3 flex items-start justify-between gap-3 first:pt-1 last:pb-1">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] font-extrabold uppercase tracking-wide px-1.5 py-0.5 rounded-full bg-wash text-ink-secondary">
@@ -235,46 +186,17 @@ export function PixKeysModal({
                         )}
                       </div>
                       <p className="text-xs text-ink-secondary mt-1 break-all font-mono font-medium">
-                        {pk.keyMasked}
+                        {formatPixKeyValue(pk.key ?? pk.keyMasked, pk.keyType)}
                       </p>
                     </div>
 
-                    {deletingId !== pk.id && (
                       <button
                         type="button"
-                        onClick={() => setDeletingId(pk.id)}
+                        onClick={() => setConfirmingKey(pk)}
                         className="p-1.5 rounded-full text-chrome-icon hover:text-error hover:bg-danger-wash transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95"
                       >
                         <Icon name="trash-bin-minimalistic" size={16} strokeWidth={1.9} />
                       </button>
-                    )}
-                  </div>
-
-                  {/* Inline Delete Confirmation */}
-                  {deletingId === pk.id && (
-                    <div className="bg-error/5 border border-error/20 p-3 rounded-xl space-y-2 mt-1 animate-fade-in">
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-error">
-                        <Icon name="danger-circle" size={14} strokeWidth={2} />
-                        <span>Excluir esta chave Pix permanentemente?</span>
-                      </div>
-                      <div className="flex flex-col gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => onDeleteConfirm(pk.id)}
-                          className="w-full px-3 py-1.5 rounded-full bg-error text-white text-[11px] font-bold hover:bg-error-hover active:scale-[0.98] transition-all duration-150 cursor-pointer outline-none"
-                        >
-                          Sim, excluir
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeletingId(null)}
-                          className="w-full px-3 py-1.5 rounded-full bg-wash text-[11px] font-bold text-ink-body hover:bg-wash-hover active:scale-[0.98] transition-all duration-150 cursor-pointer outline-none"
-                        >
-                          Não, manter
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
@@ -336,5 +258,54 @@ export function PixKeysModal({
         </div>
       </div>
     </Modal>
+
+    {/* Delete confirmation — modal separado para não ficar cortado pelo scroll da lista */}
+    <Modal
+      isOpen={confirmingKey !== null}
+      onClose={() => setConfirmingKey(null)}
+      title="Excluir chave Pix"
+      size="sm"
+    >
+      <div className="space-y-4">
+        <div className="flex items-start gap-2.5 bg-error/5 border border-error/20 rounded-2xl p-3.5">
+          <Icon
+            name="danger-circle"
+            size={16}
+            strokeWidth={2}
+            className="text-error shrink-0 mt-0.5"
+          />
+          <div className="min-w-0">
+            <p className="text-[13px] font-semibold text-ink-body leading-snug">
+              Excluir esta chave Pix permanentemente?
+            </p>
+            {confirmingKey && (
+              <p className="mt-1 text-xs text-ink-secondary font-mono font-medium break-all">
+                {confirmingKey.alias
+                  ? `${confirmingKey.alias} • ${formatPixKeyValue(confirmingKey.key ?? confirmingKey.keyMasked, confirmingKey.keyType)}`
+                  : formatPixKeyValue(confirmingKey.key ?? confirmingKey.keyMasked, confirmingKey.keyType)}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={() => confirmingKey && onDeleteConfirm(confirmingKey.id)}
+            className="w-full px-3 py-2 rounded-full bg-error text-white text-xs font-bold hover:bg-error-hover active:scale-[0.98] transition-all duration-150 cursor-pointer outline-none"
+          >
+            Sim, excluir
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirmingKey(null)}
+            className="w-full px-3 py-2 rounded-full bg-wash text-xs font-bold text-ink-body hover:bg-wash-hover active:scale-[0.98] transition-all duration-150 cursor-pointer outline-none"
+          >
+            Não, manter
+          </button>
+        </div>
+      </div>
+    </Modal>
+    </>
   );
 }

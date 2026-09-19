@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   useActionData,
   useLoaderData,
@@ -9,10 +9,10 @@ import { pixKeysApi, type PixKey } from "~/api/modules/pix-keys";
 import { walletsApi } from "~/api/modules/wallets";
 import { withdrawalsApi, type Withdrawal } from "~/api/modules/withdrawals";
 import { PageHeader } from "~/components/dashboard/PageHeader";
-import { Button } from "~/components/ui/Button";
+import { Icon } from "~/components/ui/Icon";
 import { Pagination } from "~/components/ui/Pagination";
 import { useToast } from "~/components/ui/useToast";
-import { formatCurrency, BalanceCard } from "~/components/wallet/BalanceCard";
+import { BalanceCard } from "~/components/wallet/BalanceCard";
 import { PixKeysCard } from "~/components/wallet/PixKeysCard";
 import { PixKeysModal } from "~/components/wallet/PixKeysModal";
 import { WithdrawalFilters } from "~/components/wallet/WithdrawalFilters";
@@ -131,6 +131,55 @@ export async function action({ request }: Route.ActionArgs) {
 
 import { redirect } from "react-router";
 
+const STREAMER_WARNING_KEY = "linkpix:hide-streamer-warning";
+
+function StreamerPrivacyNotice() {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem(STREAMER_WARNING_KEY) === "1") {
+        setVisible(false);
+      }
+    } catch {
+      // localStorage indisponível: mantém o aviso visível.
+    }
+  }, []);
+
+  if (!visible) return null;
+
+  const dismiss = () => {
+    try {
+      window.localStorage.setItem(STREAMER_WARNING_KEY, "1");
+    } catch {
+      // Ignora falha de persistência e só oculta na sessão atual.
+    }
+    setVisible(false);
+  };
+
+  return (
+    <div
+      role="note"
+      className="mb-5 flex items-start gap-3 rounded-xl border border-info/20 bg-info/10 px-4 py-3 text-info animate-slide-down"
+    >
+      <Icon name="info-circle" size={16} strokeWidth={1.9} className="shrink-0 mt-0.5" />
+      <p className="flex-1 text-[13px] font-medium">
+        Vai mostrar essa tela em live? Oculte os valores com o ícone de olho —
+        saldos e chaves Pix são informações sensíveis.
+      </p>
+      <button
+        type="button"
+        onClick={dismiss}
+        aria-label="Dispensar aviso"
+        title="Dispensar aviso"
+        className="rounded-full p-1 hover:bg-info/10 transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95"
+      >
+        <Icon name="close-circle" size={16} strokeWidth={1.9} />
+      </button>
+    </div>
+  );
+}
+
 export default function WalletPage() {
   const { balances, pixKeys, withdrawals, page, totalPages } =
     useLoaderData<typeof loader>();
@@ -143,12 +192,14 @@ export default function WalletPage() {
   const [isPixKeysOpen, setIsPixKeysOpen] = useState(false);
 
   const [withdrawalError, setWithdrawalError] = useState<string | null>(null);
+  const lastHandledAction = useRef<unknown>(null);
 
   const loadingData = navigation.state === "loading";
 
   // Handle action results (toast feedbacks & modal closing)
   useEffect(() => {
-    if (!actionData) return;
+    if (!actionData || actionData === lastHandledAction.current) return;
+    lastHandledAction.current = actionData;
 
     if (actionData.success) {
       if (actionData.action === "createWithdrawal") {
@@ -177,27 +228,10 @@ export default function WalletPage() {
       {/* Title block */}
       <PageHeader
         title="Carteira"
-        subtitle={
-          <>
-            Você tem{" "}
-            <span className="font-bold text-ink-heading">
-              {formatCurrency(balances.available)}
-            </span>{" "}
-            disponível para saque em{" "}
-            <span className="font-bold text-ink-heading">
-              {pixKeys.length === 1
-                ? "1 chave Pix"
-                : `${pixKeys.length} chaves Pix`}
-            </span>
-            .
-          </>
-        }
-        actions={
-          <Button variant="secondary" onClick={() => setIsPixKeysOpen(true)}>
-            Chaves Pix
-          </Button>
-        }
+        subtitle="Acompanhe seu saldo disponível e o histórico de saques."
       />
+
+      <StreamerPrivacyNotice />
 
       {/* Primary + secondary columns */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">

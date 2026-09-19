@@ -9,3 +9,8 @@ export const popupClasses =
 /** Shared row style for menu items inside header popups. */
 export const menuRowClasses =
   "flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-ink-body outline-none transition-colors duration-150 data-[highlighted]:bg-wash data-[highlighted]:text-ink-heading";
+
+/** Destructive menu row (e.g. logout). Own color token — appending text-error
+ *  to menuRowClasses loses to text-ink-body in the cascade. */
+export const menuRowDangerClasses =
+  "flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-error outline-none transition-colors duration-150 data-[highlighted]:bg-danger-wash";

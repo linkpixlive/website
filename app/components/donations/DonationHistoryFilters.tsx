@@ -11,7 +11,7 @@ const statusOptions = [
 ];
 
 const daysOptions = [
-  { value: "all", label: "Todos os períodos" },
+  { value: "today", label: "Hoje" },
   { value: "7", label: "Últimos 7 dias" },
   { value: "15", label: "Últimos 15 dias" },
   { value: "30", label: "Últimos 30 dias" },
@@ -27,7 +27,8 @@ export function DonationHistoryFilters() {
   const [isOpen, setIsOpen] = useState(false);
 
   const status = searchParams.get("status") || "all";
-  const days = searchParams.get("days") || "all";
+  // Padrão = últimos 30 dias (teto de retenção, alinhado ao lifecycle do R2).
+  const days = searchParams.get("days") || "30";
   const searchBy = searchParams.get("searchBy") || "name";
   const searchParam = searchParams.get("search") || "";
 
@@ -44,7 +45,8 @@ export function DonationHistoryFilters() {
 
   const handleDaysChange = (value: string) => {
     const params = new URLSearchParams(searchParams);
-    if (value && value !== "all") {
+    // "30" é o padrão: não precisa ir para a URL.
+    if (value && value !== "30") {
       params.set("days", value);
     } else {
       params.delete("days");
@@ -83,9 +85,10 @@ export function DonationHistoryFilters() {
     setSearchParams(params);
   };
 
+  const daysParam = searchParams.get("days");
   const hasActiveFilters =
     searchParams.has("status") ||
-    searchParams.has("days") ||
+    (daysParam !== null && daysParam !== "30") ||
     searchParams.has("search");
 
   return (
@@ -134,7 +137,7 @@ export function DonationHistoryFilters() {
           />
         </div>
 
-        <div className="w-full sm:flex-1 sm:min-w-[280px]">
+        <div className="w-full sm:w-[320px] sm:flex-none sm:shrink-0">
           <FilterSearchField
             label="Buscar"
             options={searchByOptions}

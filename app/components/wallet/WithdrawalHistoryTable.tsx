@@ -3,6 +3,7 @@ import type { Withdrawal } from "~/api/modules/withdrawals";
 import { Icon } from "~/components/ui/Icon";
 import { Badge } from "~/components/ui/Badge";
 import { Skeleton } from "~/components/ui/Skeleton";
+import { formatPixKeyValue, displayMaskedKey } from "./pixKeyFormat";
 
 interface WithdrawalHistoryTableProps {
   items: Withdrawal[];
@@ -22,14 +23,27 @@ export function WithdrawalHistoryTable({
     }).format(value);
   };
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("pt-BR", {
+  const formatDate = (dateStr: string | undefined | null) => {
+    if (!dateStr) return "—";
+    const date = new Date(dateStr);
+    if (Number.isNaN(date.getTime())) return "—";
+    return date.toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const getPixDisplay = (item: Withdrawal, showFull: boolean) => {
+    if (showFull) {
+      const full = item.key ?? item.keyMasked ?? "—";
+      // Sem keyType (chave excluída ou backend antigo): exibe o valor como veio.
+      if (!item.key || !item.keyType) return full;
+      return formatPixKeyValue(item.key, item.keyType);
+    }
+    return displayMaskedKey(item.keyMasked ?? item.pixValue ?? "—");
   };
 
   if (loading) {
@@ -62,7 +76,7 @@ export function WithdrawalHistoryTable({
         <table className="w-full min-w-[640px] border-collapse text-left">
           <thead>
             <tr className="border-b border-line">
-              <th className="px-3 py-3 text-[11px] font-extrabold uppercase tracking-wider text-ink-label first:pl-0">
+              <th className="px-3 py-3 text-[11px] font-extrabold uppercase tracking-wider text-ink-label first:pl-3">
                 Data
               </th>
               <th className="px-3 py-3 text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
@@ -72,7 +86,8 @@ export function WithdrawalHistoryTable({
                     type="button"
                     onClick={() => setShowPix((v) => !v)}
                     className="p-0.5 rounded-full text-chrome-icon hover:text-ink-heading transition-colors duration-150 cursor-pointer outline-none"
-                    title={showPix ? "Ocultar chaves" : "Mostrar chaves"}
+                    title={showPix ? "Ocultar chave completa" : "Revelar chave completa"}
+                    aria-label={showPix ? "Ocultar chave completa" : "Revelar chave completa"}
                   >
                     <Icon
                       name={showPix ? "eye-closed" : "eye"}
@@ -85,7 +100,7 @@ export function WithdrawalHistoryTable({
               <th className="px-3 py-3 text-right text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
                 Valor
               </th>
-              <th className="px-3 py-3 text-right text-[11px] font-extrabold uppercase tracking-wider text-ink-label last:pr-0">
+              <th className="px-3 py-3 text-right text-[11px] font-extrabold uppercase tracking-wider text-ink-label last:pr-3">
                 Status
               </th>
             </tr>
@@ -93,20 +108,16 @@ export function WithdrawalHistoryTable({
           <tbody className="divide-y divide-line">
             {items.map((item) => (
               <tr key={item.id} className="transition-colors duration-100 hover:bg-wash/70">
-                <td className="px-3 py-3.5 text-[13px] font-medium text-ink-secondary whitespace-nowrap first:pl-0">
+                <td className="px-3 py-3.5 text-[13px] font-medium text-ink-secondary whitespace-nowrap first:pl-3">
                   {formatDate(item.createdAt)}
                 </td>
-                <td
-                  className={`px-3 py-3.5 max-w-[220px] text-[13px] font-mono font-medium text-ink-body truncate ${
-                    !showPix ? "blur-sm select-none" : ""
-                  }`}
-                >
-                  {item.pixValue}
+                <td className="px-3 py-3.5 max-w-[220px] text-[13px] font-mono font-medium text-ink-body truncate">
+                  {getPixDisplay(item, showPix)}
                 </td>
                 <td className="px-3 py-3.5 text-right text-sm font-bold text-ink-heading whitespace-nowrap">
                   {formatCurrency(item.netAmount)}
                 </td>
-                <td className="px-3 py-3.5 text-right last:pr-0">
+                <td className="px-3 py-3.5 text-right last:pr-3">
                   <Badge status={item.status} />
                 </td>
               </tr>
@@ -118,7 +129,7 @@ export function WithdrawalHistoryTable({
       {/* Mobile view */}
       <div className="md:hidden divide-y divide-line">
         {items.map((item) => (
-          <div key={item.id} className="py-4 space-y-3">
+          <div key={item.id} className="py-4 px-3 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-semibold text-ink-label">
                 {formatDate(item.createdAt)}
@@ -135,7 +146,8 @@ export function WithdrawalHistoryTable({
                   type="button"
                   onClick={() => setShowPix((v) => !v)}
                   className="p-0.5 rounded-full text-chrome-icon hover:text-ink-heading transition-colors duration-150 cursor-pointer outline-none"
-                  title={showPix ? "Ocultar chaves" : "Mostrar chaves"}
+                  title={showPix ? "Ocultar chave completa" : "Revelar chave completa"}
+                  aria-label={showPix ? "Ocultar chave completa" : "Revelar chave completa"}
                 >
                   <Icon
                     name={showPix ? "eye-closed" : "eye"}
@@ -144,12 +156,8 @@ export function WithdrawalHistoryTable({
                   />
                 </button>
               </div>
-              <p
-                className={`text-[13px] font-mono font-medium text-ink-body break-all ${
-                  !showPix ? "blur-sm select-none" : ""
-                }`}
-              >
-                {item.pixValue}
+              <p className="text-[13px] font-mono font-medium text-ink-body break-all">
+                {getPixDisplay(item, showPix)}
               </p>
             </div>
 

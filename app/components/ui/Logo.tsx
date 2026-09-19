@@ -1,34 +1,103 @@
 import { Link } from "react-router";
 
 interface LogoTileProps {
-  /** When provided, renders the tile as a link (e.g. back to home). */
+  /** When provided, renders the logo as a link (e.g. back to home). */
   href?: string;
+  /** Extra classes for the outer wrapper (layout / spacing). */
   className?: string;
+  /** Extra classes for the icon <img> (e.g. height overrides). */
+  imgClassName?: string;
+  /** Extra classes for the wordmark (e.g. size overrides). */
+  textClassName?: string;
+  /**
+   * Which artwork to use:
+   * - "light": white icon + white wordmark for dark surfaces (sidebar).
+   * - "dark": shell icon + shell wordmark for light surfaces (donations).
+   * - "auto": "dark" in light mode, "light" in dark mode.
+   */
+  variant?: "light" | "dark" | "auto";
 }
 
-export function LogoTile({ href, className = "" }: LogoTileProps) {
-  const classes = `inline-flex w-12 h-12 items-center justify-center rounded-2xl bg-brand shadow-lg shadow-brand/20 shrink-0 ${className}`;
+const ICON_SRC = {
+  light: "/icon-dark.svg",
+  dark: "/icon.svg",
+} as const;
 
-  const glyph = (
-    <svg viewBox="0 0 55 55" className="w-6 h-6" aria-hidden="true">
-      <path
-        d="M25.2121 53.7976L24.9131 53.5906V45.7724C24.9131 38.7714 24.8902 37.9074 24.6895 37.4895C24.4174 36.9206 23.7573 36.5708 23.2104 36.7056C22.9517 36.7684 21.5373 38.0717 18.8943 40.6795C15.2127 44.3116 14.9392 44.5532 14.5836 44.4691C14.3465 44.4144 13.607 43.7868 12.6209 42.8067C11.3263 41.5194 11.0381 41.1616 11.0367 40.8424C11.0367 40.5073 11.6025 39.8997 15.0443 36.5401C17.2495 34.3875 19.3577 32.4286 19.7308 32.187C20.9782 31.3778 21.8458 31.1307 23.4313 31.1334C25.0182 31.1361 26.112 31.4205 27.2179 32.1188C28.1703 32.7197 29.3181 33.995 29.7693 34.951C30.5426 36.5881 30.5655 36.8966 30.5682 45.5L30.5708 53.3503L30.2408 53.6787C29.9162 53.9992 29.8663 54.0059 27.711 54.0059C25.9382 54.0059 25.4533 53.9658 25.2121 53.7976ZM39.6179 42.8774C33.6341 37.0902 32.5107 35.9165 32.0203 34.943C31.7522 34.4129 31.4613 33.6331 31.3724 33.2098C31.1595 32.2003 31.2875 30.2414 31.6243 29.3508C32.4096 27.2757 34.34 25.5625 36.5762 24.9549C37.2726 24.7666 38.4284 24.7399 45.6582 24.7453L53.9428 24.752L54.1786 25.039C54.382 25.2874 54.4143 25.6319 54.4143 27.5721V29.8168L54.06 30.0945C53.7098 30.3669 53.5926 30.3709 45.8482 30.3709C40.4868 30.3709 37.8909 30.4163 37.6714 30.5165C37.2861 30.6901 36.9022 31.295 36.9035 31.7263C36.9035 31.8985 37.0099 32.195 37.1393 32.3846C37.2686 32.5729 38.9901 34.3061 40.9663 36.2356C42.9412 38.1638 44.6291 39.913 44.7166 40.1214C44.8082 40.3417 44.8271 40.5834 44.7611 40.6995C44.6991 40.809 43.9717 41.5862 43.1446 42.4274C42.1302 43.4583 41.5186 43.9791 41.2613 44.0271C40.9246 44.0912 40.7346 43.9577 39.6179 42.8774ZM1.65156 30.2735C1.0548 30.168 1.00226 29.937 1.01035 27.476C1.01708 25.5839 1.05615 25.1192 1.22319 24.9536C1.40235 24.776 2.33049 24.7506 8.42202 24.7546C16.7767 24.76 17.6994 24.7146 18.1359 24.2819C18.3595 24.0603 18.4471 23.8199 18.4471 23.43C18.4471 22.7864 18.3555 22.6822 13.9033 18.245C12.3097 16.656 10.9195 15.2272 10.8158 15.0696C10.6824 14.868 10.6636 14.6904 10.7511 14.4647C10.8751 14.1509 13.6285 11.3521 14.038 11.1251C14.1606 11.057 14.3815 11.0584 14.5634 11.1291C14.7358 11.1959 16.6729 13.044 18.8687 15.2352C22.456 18.8178 22.91 19.3213 23.3585 20.2079C23.9944 21.4644 24.2826 22.7984 24.1695 23.9561C23.8893 26.831 22.2 28.9648 19.4399 29.9329L18.3797 30.3042L10.1625 30.3148C5.64298 30.3202 1.81321 30.3015 1.65156 30.2735ZM30.3378 23.9027C28.4654 23.454 26.4811 21.9291 25.6701 20.3201C24.9427 18.8753 24.9225 18.5962 24.9185 9.65629C24.9131 2.16655 24.9333 1.41076 25.1354 1.24385C25.2997 1.10898 25.9517 1.04889 27.5992 1.01685C29.6737 0.975451 29.865 0.99281 30.1721 1.23851L30.5035 1.50423L30.5708 9.50139C30.6328 16.9137 30.6557 17.5239 30.8807 17.8644C31.1703 18.3011 31.697 18.5267 32.182 18.4213C32.4096 18.3718 33.785 17.1006 36.0319 14.8627C39.5101 11.4002 40.3952 10.6084 40.7831 10.6084C41.0741 10.6084 44.1387 13.6489 44.2371 14.0348C44.2815 14.2124 44.268 14.4487 44.2047 14.5595C44.1428 14.6704 42.269 16.5799 40.0422 18.8032C36.3216 22.5166 35.9134 22.8825 35.0001 23.3272C33.4684 24.0709 31.8614 24.2686 30.3378 23.9027Z"
-        fill="#111216"
+function Wordmark({
+  tone,
+  iconClassName,
+  textClassName,
+}: {
+  tone: "light" | "dark";
+  iconClassName: string;
+  textClassName: string;
+}) {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <img
+        src={ICON_SRC[tone]}
+        alt=""
+        aria-hidden="true"
+        draggable={false}
+        className={`h-8 w-auto select-none ${iconClassName}`}
       />
-    </svg>
+      <span
+        className={`font-display text-[22px] font-semibold leading-none tracking-tight ${
+          tone === "light" ? "text-white" : "text-shell"
+        } ${textClassName}`}
+      >
+        LinkPix
+      </span>
+    </span>
   );
+}
+
+export function LogoTile({
+  href,
+  className = "",
+  imgClassName = "",
+  textClassName = "",
+  variant = "light",
+}: LogoTileProps) {
+  const wrapperClasses = `inline-flex items-center justify-center shrink-0 ${className}`;
+
+  const lockup =
+    variant === "auto" ? (
+      <>
+        <span className="dark:hidden">
+          <Wordmark
+            tone="dark"
+            iconClassName={imgClassName}
+            textClassName={textClassName}
+          />
+        </span>
+        <span className="hidden dark:block">
+          <Wordmark
+            tone="light"
+            iconClassName={imgClassName}
+            textClassName={textClassName}
+          />
+        </span>
+      </>
+    ) : (
+      <Wordmark
+        tone={variant}
+        iconClassName={imgClassName}
+        textClassName={textClassName}
+      />
+    );
 
   if (href) {
     return (
       <Link
         to={href}
         aria-label="LinkPix"
-        className={`${classes} transition-transform duration-150 hover:scale-105 cursor-pointer outline-none`}
+        className={`${wrapperClasses} outline-none transition-opacity duration-150 hover:opacity-90 cursor-pointer`}
       >
-        {glyph}
+        {lockup}
       </Link>
     );
   }
 
-  return <span className={classes}>{glyph}</span>;
+  return <span className={wrapperClasses}>{lockup}</span>;
 }

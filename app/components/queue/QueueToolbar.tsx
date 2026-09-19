@@ -58,7 +58,7 @@ export function QueueToolbar({
       </Button>
 
       <Button
-        variant="danger"
+        variant="danger-soft"
         size="sm"
         onClick={onClear}
         loading={loading.clear}

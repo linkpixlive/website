@@ -12,7 +12,7 @@ export function AuthCard({ title, subtitle, children }: AuthCardProps) {
     <div className="min-h-screen bg-canvas flex flex-col justify-center items-center p-4">
       <div className="w-full max-w-[420px] bg-card border border-line rounded-[26px] shadow-xs p-6 sm:p-8 animate-scale-in">
         <div className="mb-6 flex flex-col items-center text-center">
-          <LogoTile className="mb-5" />
+          <LogoTile variant="auto" className="mb-5" imgClassName="h-8" textClassName="text-[22px]" />
           <h1 className="text-lg font-extrabold tracking-tight text-ink-heading">
             {title}
           </h1>

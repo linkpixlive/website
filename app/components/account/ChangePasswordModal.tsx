@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useFetcher } from "react-router";
 import { AlertMessage } from "~/components/ui/AlertMessage";
@@ -25,6 +25,7 @@ export function ChangePasswordModal({
   const loading = fetcher.state === "submitting";
   const { toast } = useToast();
   const [localError, setLocalError] = useState<string | null>(null);
+  const lastHandledResult = useRef<unknown>(null);
 
   const {
     register,
@@ -52,7 +53,8 @@ export function ChangePasswordModal({
   }, [isOpen, reset]);
 
   useEffect(() => {
-    if (!fetcher.data) return;
+    if (!fetcher.data || fetcher.data === lastHandledResult.current) return;
+    lastHandledResult.current = fetcher.data;
 
     if (fetcher.data.success) {
       toast(fetcher.data.message ?? "Senha alterada com sucesso.", "success");

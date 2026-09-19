@@ -1,5 +1,27 @@
 import { Outlet } from "react-router";
+import { Icon } from "~/components/ui/Icon";
+import { useTheme } from "~/components/ui/useTheme";
+import { roundButtonClasses } from "~/components/dashboard/header-styles";
 
 export default function PublicLayoutRoute() {
-  return <Outlet />;
+  const { theme, toggleTheme } = useTheme();
+
+  return (
+    <div className="min-h-dvh flex flex-col">
+      <div className="flex justify-end px-4 pt-4">
+        <button
+          type="button"
+          aria-label={theme === "dark" ? "Ativar tema claro" : "Ativar tema escuro"}
+          title={theme === "dark" ? "Ativar tema claro" : "Ativar tema escuro"}
+          onClick={toggleTheme}
+          className={roundButtonClasses}
+        >
+          <Icon name={theme === "dark" ? "sun" : "moon"} size={20} strokeWidth={1.9} />
+        </button>
+      </div>
+      <div className="flex flex-1 flex-col">
+        <Outlet />
+      </div>
+    </div>
+  );
 }

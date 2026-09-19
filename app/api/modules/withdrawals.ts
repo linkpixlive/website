@@ -16,7 +16,13 @@ export interface WithdrawalFilters {
 export interface Withdrawal {
   id: string;
   pixId: string | null;
-  pixValue: string;
+  /** Chave Pix completa (descriptografada). Ausente quando o backend ainda não a expõe. */
+  key?: string;
+  /** Tipo da chave (para formatação). Ausente se a chave foi excluída. */
+  keyType?: string;
+  keyMasked: string;
+  /** @deprecated Backend agora expõe `keyMasked`. Mantido para compat transitória. */
+  pixValue?: string;
   amount: number;
   netAmount: number;
   feeAmount: number;
