@@ -1,7 +1,12 @@
 import type { PixKey } from "~/api/modules/pix-keys";
 import { Button } from "~/components/ui/Button";
 import { Icon } from "~/components/ui/Icon";
-import { displayMaskedKey, getTypeName } from "./pixKeyFormat";
+import { displayMaskedKey, getTypeName } from "./pix-key-format";
+import {
+  CARD_CLASS,
+  ICON_TILE_CLASS,
+  SECTION_HEADING_CLASS,
+} from "~/components/ui/classes";
 
 interface PixKeysCardProps {
   pixKeys: PixKey[];
@@ -12,9 +17,9 @@ export function PixKeysCard({ pixKeys, onManage }: PixKeysCardProps) {
   const preview = pixKeys.slice(0, 4);
 
   return (
-    <div className="h-full rounded-[26px] bg-card border border-line shadow-xs p-5 flex flex-col">
+    <div className={`h-full ${CARD_CLASS} flex flex-col`}>
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+        <span className={SECTION_HEADING_CLASS}>
           Chaves Pix
         </span>
         <span className="text-[11px] font-semibold text-ink-label">
@@ -32,7 +37,7 @@ export function PixKeysCard({ pixKeys, onManage }: PixKeysCardProps) {
         <div className="divide-y divide-line">
           {preview.map((pk) => (
             <div key={pk.id} className="py-2.5 first:pt-0 last:pb-0 flex items-center gap-2.5 min-w-0">
-              <span className="w-8 h-8 rounded-[12px] bg-tile flex items-center justify-center text-chrome-icon shrink-0">
+              <span className={ICON_TILE_CLASS}>
                 <Icon name="key-minimalistic-square" size={16} strokeWidth={1.9} />
               </span>
               <div className="min-w-0">

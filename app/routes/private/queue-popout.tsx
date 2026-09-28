@@ -3,8 +3,10 @@ import type { Route } from "./+types/queue-popout";
 import { getAuthToken } from "~/util/session.server";
 import { requireValidAuth } from "~/util/auth.server";
 import { dashboardApi, type DonationHistory } from "~/api/modules/dashboard";
+import type { PaginatedResponse } from "~/api/modules/withdrawals";
+import { DEFAULT_HISTORY_DAYS } from "~/util/history-filters";
 import { ToastProvider } from "~/components/ui/ToastProvider";
-import { DonationsLivePanel } from "~/components/donations/DonationsLivePanel";
+import { DonationsLivePanel } from "~/components/queue/DonationsLivePanel";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -19,10 +21,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   await requireValidAuth(request);
   const token = getAuthToken(request);
 
-  let history: {
-    items: DonationHistory[];
-    meta: { total: number; page: number; limit: number; totalPages: number };
-  } = {
+  let history: PaginatedResponse<DonationHistory> = {
     items: [],
     meta: {
       total: 0,
@@ -36,7 +35,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     const res = await dashboardApi.getHistory(token, {
       page: 1,
       limit: POPOUT_HISTORY_LIMIT,
-      days: "30",
+      days: DEFAULT_HISTORY_DAYS,
     });
     if (res.success) {
       history = res.data;

@@ -1,17 +1,30 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigation, useSubmit } from "react-router";
 import type { PixKey } from "~/api/modules/pix-keys";
+import { OtpField } from "~/components/auth/OtpField";
+import { PasswordField } from "~/components/auth/PasswordField";
 import { AlertMessage } from "~/components/ui/AlertMessage";
 import { FormField } from "~/components/ui/FormField";
 import { Modal } from "~/components/ui/Modal";
-import { SelectField } from "~/components/ui/SelectField";
 import { SubmitButton } from "~/components/ui/SubmitButton";
 import { Icon } from "~/components/ui/Icon";
 import { Button } from "~/components/ui/Button";
-import { withdrawalSchema } from "~/validators/wallet-validator";
-import { formatPixKeyValue } from "./pixKeyFormat";
+import { WithdrawalDestination } from "./WithdrawalDestination";
+import {
+  MAX_WITHDRAWAL_AMOUNT,
+  MIN_WITHDRAWAL_AMOUNT,
+  WITHDRAWAL_FEE_PERCENTAGE,
+  createWithdrawalSchema,
+} from "~/validators/wallet-validator";
+import {
+  clampCents,
+  formatBRLReais,
+  maskCurrencyInput,
+  parseCurrencyToCents,
+} from "~/util/currency";
+import { useResetOnOpen } from "~/hooks/useResetOnOpen";
 
 interface WithdrawalModalProps {
   isOpen: boolean;
@@ -19,6 +32,8 @@ interface WithdrawalModalProps {
   pixKeys: PixKey[];
   onOpenManageKeys: () => void;
   error?: string | null;
+  /** Com 2FA ativo o backend exige senha + TOTP no saque. */
+  has2fa?: boolean;
 }
 
 export function WithdrawalModal({
@@ -27,56 +42,59 @@ export function WithdrawalModal({
   pixKeys,
   onOpenManageKeys,
   error,
+  has2fa,
 }: WithdrawalModalProps) {
   const submit = useSubmit();
   const navigation = useNavigation();
   const loading = navigation.state === "submitting";
 
-  const feePercentage = Number(
-    import.meta.env.VITE_WITHDRAWAL_FEE_PERCENTAGE || "4",
-  );
-  const minAmount = Number(import.meta.env.VITE_MIN_WITHDRAWAL_AMOUNT || "10");
-  const maxAmount = 100000;
+  const feePercentage = WITHDRAWAL_FEE_PERCENTAGE;
+  const minAmount = MIN_WITHDRAWAL_AMOUNT;
+  const maxAmount = MAX_WITHDRAWAL_AMOUNT;
 
-  const [netAmount, setNetAmount] = useState(0);
-  const [feeAmount, setFeeAmount] = useState(0);
   const [amountDisplay, setAmountDisplay] = useState("");
+
+  // Chave de idempotência presa ao payload: reenviar a MESMA tentativa (timeout
+  // de rede, duplo clique) reaproveita a chave e o backend devolve o mesmo saque
+  // em vez de criar outro. Mudar valor ou chave Pix exige uma chave nova.
+  const idempotencyRef = useRef<{
+    key: string;
+    amount: number;
+    pixId: string;
+  } | null>(null);
 
   const {
     handleSubmit,
     setValue,
     watch,
+    register,
     formState: { errors },
     reset,
   } = useForm({
-    resolver: zodResolver(withdrawalSchema),
+    resolver: zodResolver(
+      createWithdrawalSchema(MIN_WITHDRAWAL_AMOUNT, MAX_WITHDRAWAL_AMOUNT),
+    ),
     defaultValues: {
       amount: "",
       pixId: "",
+      password: "",
     },
   });
 
   const amountWatch = watch("amount");
   const pixIdWatch = watch("pixId");
+  const totpWatch = watch("totp");
 
-  // Currency mask helpers
+  // Currency mask helpers (centavos → "R$ 1.234,56"), com teto do saque.
 
-  const getLimitedCents = (value: string): number | null => {
-    const onlyDigits = value.replace(/\D/g, "");
-    if (!onlyDigits) return null;
-    const cents = parseInt(onlyDigits, 10);
-    return Math.min(cents, maxAmount * 100);
-  };
+  const getLimitedCents = (value: string): number | null =>
+    clampCents(parseCurrencyToCents(value), maxAmount * 100);
 
   /** Formats a raw numeric string (e.g. "123456") into "R$ 1.234,56" */
   const maskCurrency = (digits: string): string => {
     const cents = getLimitedCents(digits);
     if (cents === null) return "";
-    const formatted = (cents / 100).toLocaleString("pt-BR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-    return `R$ ${formatted}`;
+    return `R$ ${maskCurrencyInput(String(cents))}`;
   };
 
   /** Converts a masked display value ("R$ 1.234,56") to a plain numeric string ("1234.56") */
@@ -95,51 +113,43 @@ export function WithdrawalModal({
     });
   };
 
-  // Calculate fees on the fly
-  useEffect(() => {
+  // Taxa derivada do valor (sem useEffect+setState para valor derivado).
+  const { feeAmount, netAmount } = useMemo(() => {
     const val = Number(amountWatch);
-    if (!isNaN(val) && val > 0) {
-      const fee = +(val * (feePercentage / 100)).toFixed(2);
-      setFeeAmount(fee);
-      setNetAmount(+(val - fee).toFixed(2));
-    } else {
-      setFeeAmount(0);
-      setNetAmount(0);
-    }
+    if (isNaN(val) || val <= 0) return { feeAmount: 0, netAmount: 0 };
+    const fee = +(val * (feePercentage / 100)).toFixed(2);
+    return { feeAmount: fee, netAmount: +(val - fee).toFixed(2) };
   }, [amountWatch, feePercentage]);
 
   // Clean form values on modal open — destinatário sempre começa vazio
   // para exigir seleção manual (evita saque na chave errada por padrão).
-  useEffect(() => {
-    if (isOpen) {
-      reset({ amount: "", pixId: "" });
-      setAmountDisplay("");
-    }
-  }, [isOpen, reset]);
+  useResetOnOpen(isOpen, () => {
+    reset({ amount: "", pixId: "", password: "" });
+    setAmountDisplay("");
+    idempotencyRef.current = null;
+  });
 
-  const onSubmit = (data: { amount: number; pixId: string }) => {
+  const onSubmit = (data: {
+    amount: number;
+    pixId: string;
+    password: string;
+    totp?: string;
+  }) => {
+    const cached = idempotencyRef.current;
+    const attempt =
+      cached && cached.amount === data.amount && cached.pixId === data.pixId
+        ? cached
+        : { key: crypto.randomUUID(), amount: data.amount, pixId: data.pixId };
+    idempotencyRef.current = attempt;
+
     const formData = new FormData();
     formData.append("intent", "createWithdrawal");
     formData.append("amount", data.amount.toString());
     formData.append("pixId", data.pixId);
+    formData.append("password", data.password);
+    if (data.totp) formData.append("totp", data.totp);
+    formData.append("idempotencyKey", attempt.key);
     submit(formData, { method: "post" });
-  };
-
-  const pixKeyOptions = pixKeys.map((pk) => {
-    // Valor completo (sem máscara) para o usuário confirmar o destino exato.
-    // Fallback para keyMasked caso a chave descriptografada não venha na listagem.
-    const displayValue = formatPixKeyValue(pk.key ?? pk.keyMasked, pk.keyType);
-    return {
-      value: pk.id,
-      label: pk.alias ? `${pk.alias} (${displayValue})` : displayValue,
-    };
-  });
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value);
   };
 
   return (
@@ -159,46 +169,35 @@ export function WithdrawalModal({
           disabled={loading}
         />
 
-        <div className="space-y-1">
-          {pixKeys.length === 0 ? (
-            <div className="text-center p-4 bg-wash rounded-2xl">
-              <p className="text-[13px] font-medium text-ink-secondary mb-1">
-                Sem chaves Pix cadastradas
-              </p>
-              <button
-                type="button"
-                onClick={onOpenManageKeys}
-                className="text-xs font-semibold text-info hover:text-blue-700 underline cursor-pointer outline-none"
-              >
-                Cadastrar Chave Pix
-              </button>
-            </div>
-          ) : (
-            <SelectField
-              label="Destinatário (Chave Pix)"
-              options={pixKeyOptions}
-              value={pixIdWatch}
-              onChange={(val) =>
-                setValue("pixId", val, { shouldValidate: true })
-              }
-              placeholder="Selecione a chave Pix..."
-              error={errors.pixId?.message}
-              disabled={loading}
-            />
-          )}
+        <WithdrawalDestination
+          pixKeys={pixKeys}
+          value={pixIdWatch}
+          onChange={(val) =>
+            setValue("pixId", val, { shouldValidate: true })
+          }
+          error={errors.pixId?.message}
+          disabled={loading}
+          onManageKeys={onOpenManageKeys}
+        />
 
-          {pixKeys.length > 0 && (
-            <div className="flex justify-end pt-1">
-              <button
-                type="button"
-                onClick={onOpenManageKeys}
-                className="text-xs font-semibold text-info hover:text-blue-700 underline transition-colors duration-150 cursor-pointer outline-none"
-              >
-                Gerenciar chaves Pix
-              </button>
-            </div>
-          )}
-        </div>
+        <PasswordField
+          label="Senha"
+          icon="lock"
+          autoComplete="current-password"
+          error={errors.password?.message}
+          disabled={loading}
+          {...register("password")}
+        />
+
+        {has2fa && (
+          <OtpField
+            label="Código do autenticador"
+            isOpen={isOpen}
+            disabled={loading}
+            error={Boolean(error) && !totpWatch}
+            onChange={(code) => setValue("totp", code)}
+          />
+        )}
 
         <div className="flex items-start gap-2.5 bg-wash rounded-2xl p-3.5">
           <Icon
@@ -211,7 +210,7 @@ export function WithdrawalModal({
             <p>
               Valor mínimo para saques:{" "}
               <span className="text-ink-body font-bold">
-                {formatCurrency(minAmount)}
+                {formatBRLReais(minAmount)}
               </span>
             </p>
             <p className="mt-1">
@@ -226,7 +225,7 @@ export function WithdrawalModal({
             <div className="flex justify-between text-[13px] font-medium text-ink-secondary">
               <span>Desconto da taxa ({feePercentage}%)</span>
               <span className="text-error font-semibold">
-                -{formatCurrency(feeAmount)}
+                -{formatBRLReais(feeAmount)}
               </span>
             </div>
             <div className="flex justify-between pt-2 border-t border-line">
@@ -234,7 +233,7 @@ export function WithdrawalModal({
                 Você receberá
               </span>
               <span className="text-sm font-bold text-ink-heading">
-                {formatCurrency(netAmount)}
+                {formatBRLReais(netAmount)}
               </span>
             </div>
           </div>
@@ -251,7 +250,11 @@ export function WithdrawalModal({
           </Button>
           <SubmitButton
             loading={loading}
-            disabled={pixKeys.length === 0 || loading}
+            disabled={
+              pixKeys.length === 0 ||
+              loading ||
+              (has2fa && totpWatch?.length !== 6)
+            }
             className="flex-1"
           >
             Confirmar Saque

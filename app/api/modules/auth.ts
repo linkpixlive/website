@@ -7,14 +7,13 @@ export type ForgotPasswordPayload = components["schemas"]["ForgotPasswordDto"];
 export type ResetPasswordPayload = components["schemas"]["ResetPasswordDto"];
 export type VerifyOtpPayload = components["schemas"]["VerifyOtpDto"];
 
-export type LoginResult = string | { requires2fa: true; nonce: string };
+// O `oneOf` do schema não gera `content` utilizável; a união espelha o
+// runtime (JWT ou { requires2fa, nonce }) a partir dos dois ramos.
+export type LoginResult =
+  | string
+  | components["schemas"]["Pending2faDto"];
 
-export interface Login2faPayload {
-  email: string;
-  password: string;
-  totp: string;
-  nonce: string;
-}
+export type Login2faPayload = components["schemas"]["Login2faDto"];
 
 export const authApi = {
   register: (body: RegisterPayload) =>

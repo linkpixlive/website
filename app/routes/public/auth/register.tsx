@@ -9,10 +9,9 @@ import { PasswordField } from "~/components/auth/PasswordField";
 import { AlertMessage } from "~/components/ui/AlertMessage";
 import { FormField } from "~/components/ui/FormField";
 import { SubmitButton } from "~/components/ui/SubmitButton";
-import {
-  getPasswordStrength,
-  registerSchema,
-} from "~/validators/auth-validator";
+import { formatCpf } from "~/util/cpf";
+import { registerSchema } from "~/validators/auth-validator";
+import { getPasswordStrength } from "~/validators/password";
 import type { Route } from "./+types/register";
 
 export function meta({}: Route.MetaArgs) {
@@ -20,15 +19,6 @@ export function meta({}: Route.MetaArgs) {
 }
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
-
-function formatCpf(value: string) {
-  const digits = value.replace(/\D/g, "").slice(0, 11);
-
-  return digits
-    .replace(/^(\d{3})(\d)/, "$1.$2")
-    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
-    .replace(/\.(\d{3})(\d)/, ".$1-$2");
-}
 
 export default function Register() {
   const navigate = useNavigate();

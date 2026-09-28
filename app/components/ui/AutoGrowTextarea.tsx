@@ -1,8 +1,6 @@
 import { forwardRef, useEffect, useRef, useState } from "react";
-
-function cn(...classes: (string | undefined | null | false)[]): string {
-  return classes.filter(Boolean).join(" ");
-}
+import { cn } from "~/util/cn";
+import { mergeRefs } from "~/util/merge-refs";
 
 export interface AutoGrowTextareaProps
   extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, "rows" | "onChange"> {
@@ -76,11 +74,7 @@ export const AutoGrowTextarea = forwardRef<HTMLTextAreaElement, AutoGrowTextarea
       onChange?.(newValue, height);
     };
 
-    const combinedRef = (el: HTMLTextAreaElement | null) => {
-      textareaRef.current = el;
-      if (typeof ref === "function") ref(el);
-      else if (ref) ref.current = el;
-    };
+    const combinedRef = mergeRefs(textareaRef, ref);
 
     // Filter out onChange from props to avoid TypeScript error
     const restProps = Object.fromEntries(

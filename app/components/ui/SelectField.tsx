@@ -1,6 +1,8 @@
 import { Select } from "@base-ui/react/select";
 import { Icon } from "./Icon";
 import { FieldError } from "./FieldError";
+import { MENU_ITEM_CLASS } from "./classes";
+import { popupClasses } from "./header-styles";
 
 interface Option {
   value: string;
@@ -85,7 +87,7 @@ export function SelectField({
             className="z-50 outline-hidden select-none"
           >
             <Select.Popup
-              className="max-h-60 min-w-[var(--anchor-width)] overflow-y-auto rounded-[20px] bg-card border border-line p-2 shadow-lg outline-none origin-[var(--transform-origin)] transition-[opacity,scale] duration-150 ease-out data-starting-style:opacity-0 data-starting-style:scale-[0.96] data-ending-style:opacity-0 data-ending-style:scale-[0.96]"
+              className={`max-h-60 min-w-[var(--anchor-width)] overflow-y-auto p-2 ${popupClasses}`}
             >
               {options.length === 0 ? (
                 <div className="py-2 px-3.5 text-[13px] font-medium text-ink-muted">
@@ -96,11 +98,10 @@ export function SelectField({
                   <Select.Item
                     key={option.value}
                     value={option.value}
-                    className="
-                      relative cursor-default select-none rounded-xl py-2.5 px-3.5 text-[13px] outline-none
-                      text-ink-body font-semibold data-highlighted:bg-wash
+                    className={`
+                      ${MENU_ITEM_CLASS} px-3.5
                       data-selected:font-bold data-selected:text-ink-heading
-                    "
+                    `}
                   >
                     <Select.ItemText className="block truncate">{option.label}</Select.ItemText>
                     <Select.ItemIndicator className="absolute inset-y-0 right-3 h-4 w-4 my-auto text-yellow-ink">

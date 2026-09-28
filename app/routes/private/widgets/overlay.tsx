@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react";
 import { useLoaderData, useActionData } from "react-router";
 import type { Route } from "./+types/overlay";
 import { getAuthToken } from "~/util/session.server";
@@ -6,6 +5,7 @@ import { widgetsApi, type Widget } from "~/api/modules/widgets";
 import { listVoices } from "~/api/modules/public-donations";
 import type { TtsVoice } from "~/types/donation";
 import { useToast } from "~/components/ui/useToast";
+import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
 import { Button } from "~/components/ui/Button";
 import { Icon } from "~/components/ui/Icon";
 import { OverlayWidgetConfig } from "~/components/widgets/OverlayWidgetConfig";
@@ -104,24 +104,24 @@ export default function OverlayRoute() {
   const { overlayWidget, voices } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const { toast } = useToast();
-  const lastHandledAction = useRef<unknown>(null);
 
-  useEffect(() => {
-    if (!actionData || actionData === lastHandledAction.current) return;
-    lastHandledAction.current = actionData;
-
-    if (actionData.success) {
-      if (actionData.action === "saveOverlay") {
-        toast("Configurações salvas com sucesso!", "success");
-      } else if (actionData.action === "testAlert") {
-        toast("Alerta de teste enviado!", "success");
-      } else if (actionData.action === "resetToken") {
-        toast("Token resetado com sucesso!", "success");
+  useFetcherFeedback({
+    data: actionData,
+    state: "idle",
+    onResult: (result: any) => {
+      if (result.success) {
+        if (result.action === "saveOverlay") {
+          toast("Configurações salvas com sucesso!", "success");
+        } else if (result.action === "testAlert") {
+          toast("Alerta de teste enviado!", "success");
+        } else if (result.action === "resetToken") {
+          toast("Token resetado com sucesso!", "success");
+        }
+      } else if (result.error) {
+        toast(result.error, "error");
       }
-    } else if (actionData.error) {
-      toast(actionData.error, "error");
-    }
-  }, [actionData, toast]);
+    },
+  });
 
   if (!overlayWidget) {
     return (
@@ -148,7 +148,7 @@ export default function OverlayRoute() {
   // e o form remonta exibindo a nova URL.
   return (
     <OverlayWidgetConfig
-      key={overlayWidget.token}
+      key={`${overlayWidget.token}-${overlayWidget.updatedAt}`}
       widget={overlayWidget}
       voices={voices}
     />

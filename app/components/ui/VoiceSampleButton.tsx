@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Icon } from "./Icon";
-
-const activePlayers = new Set<() => void>();
+import { useExclusiveAudio } from "~/hooks/useExclusiveAudio";
 
 interface VoiceSampleButtonProps {
   src: string;
@@ -13,15 +12,7 @@ export function VoiceSampleButton({ src, voiceName }: VoiceSampleButtonProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [broken, setBroken] = useState(false);
-
-  useEffect(() => {
-    const pause = () => audioRef.current?.pause();
-    activePlayers.add(pause);
-    return () => {
-      activePlayers.delete(pause);
-      audioRef.current?.pause();
-    };
-  }, []);
+  const pauseAll = useExclusiveAudio(audioRef);
 
   if (broken) return null;
 
@@ -35,7 +26,7 @@ export function VoiceSampleButton({ src, voiceName }: VoiceSampleButtonProps) {
       audio.pause();
       return;
     }
-    for (const pause of activePlayers) pause();
+    pauseAll();
     audio.play().catch(() => setBroken(true));
   }
 

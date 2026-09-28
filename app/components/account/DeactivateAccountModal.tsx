@@ -1,17 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
+import { useResetOnOpen } from "~/hooks/useResetOnOpen";
 import { useForm } from "react-hook-form";
 import { Form, useNavigation, useSubmit } from "react-router";
 import { PasswordField } from "~/components/auth/PasswordField";
 import { AlertMessage } from "~/components/ui/AlertMessage";
+import { ConfirmButtons } from "~/components/ui/ConfirmButtons";
 import { Modal } from "~/components/ui/Modal";
-import { z } from "zod";
-
-export const deactivateAccountSchema = z.object({
-  password: z.string().min(1, "Confirme com sua senha"),
-});
-
-type DeactivateAccountValues = z.infer<typeof deactivateAccountSchema>;
+import {
+  deactivateAccountSchema,
+  type DeactivateAccountValues,
+} from "~/validators/account-validator";
 
 interface DeactivateAccountModalProps {
   isOpen: boolean;
@@ -42,11 +41,9 @@ export function DeactivateAccountModal({
     defaultValues: { password: "" } as DeactivateAccountValues,
   });
 
-  useEffect(() => {
-    if (isOpen) {
-      reset({ password: "" });
-    }
-  }, [isOpen, reset]);
+  useResetOnOpen(isOpen, () => {
+    reset({ password: "" });
+  });
 
   return (
     <Modal
@@ -81,22 +78,14 @@ export function DeactivateAccountModal({
           {...register("password")}
         />
 
-        <div className="flex flex-col gap-1.5 pt-1">
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full px-3 py-2.5 rounded-full bg-error text-white text-[11px] font-bold hover:bg-error-hover active:scale-[0.98] transition-all duration-150 cursor-pointer outline-none disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {loading ? "Desativando..." : "Desativar conta"}
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={loading}
-            className="w-full px-3 py-2.5 rounded-full bg-wash text-[11px] font-bold text-ink-body hover:bg-wash-hover active:scale-[0.98] transition-all duration-150 cursor-pointer outline-none disabled:opacity-60"
-          >
-            Não, manter minha conta
-          </button>
+        <div className="pt-1">
+          <ConfirmButtons
+            confirmLabel="Desativar conta"
+            loadingLabel="Desativando..."
+            cancelLabel="Não, manter minha conta"
+            onCancel={onClose}
+            loading={loading}
+          />
         </div>
       </Form>
     </Modal>

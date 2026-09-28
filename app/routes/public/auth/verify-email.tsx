@@ -11,6 +11,7 @@ import { authApi } from "~/api/modules/auth";
 import { AuthCard } from "~/components/auth/AuthCard";
 import { OtpInput } from "~/components/auth/OtpInput";
 import { AlertMessage } from "~/components/ui/AlertMessage";
+import { Spinner } from "~/components/ui/Spinner";
 import { createAuthCookie } from "~/util/session.server";
 import { verifyEmailSchema } from "~/validators/auth-validator";
 import type { Route } from "./+types/verify-email";
@@ -104,7 +105,7 @@ export default function VerifyEmail({ actionData }: Route.ComponentProps) {
 
         {loading && (
           <div className="flex justify-center">
-            <span className="w-5 h-5 border-2 border-brand-button/30 border-t-brand-button rounded-full animate-[spin_0.6s_linear_infinite]" />
+            <Spinner size="md" tone="brand" />
           </div>
         )}
 

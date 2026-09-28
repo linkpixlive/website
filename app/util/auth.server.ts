@@ -1,8 +1,9 @@
 import { redirect } from "react-router";
+import type { components } from "~/api/generated/api-schema";
 import { createApiClient } from "~/api/http/client";
 import { clearAuthCookie, getAuthToken } from "./session.server";
 
-function redirectToLogin(clearCookie = false) {
+function redirectToLogin(clearCookie = false): never {
   throw redirect("/auth/login", {
     headers: clearCookie ? { "Set-Cookie": clearAuthCookie() } : undefined,
   });
@@ -20,7 +21,9 @@ export async function requireValidAuth(request: Request) {
     const response = await client.get("/auth/me");
 
     // O backend envolve as respostas no envelope { success, data, ... }.
-    const user = response.data?.data ?? response.data;
+    const user = (response.data?.data ?? response.data) as
+      | components["schemas"]["SafeUser"]
+      | undefined;
 
     if (!user?.id) {
       redirectToLogin(true);
@@ -28,21 +31,8 @@ export async function requireValidAuth(request: Request) {
 
     return user;
   } catch {
-    // Fallback: decode JWT payload to prevent auth loop if /auth/me is missing in the backend during dev
-    try {
-      const tokenParts = token!.split(".");
-      if (tokenParts.length === 3) {
-        const payload = JSON.parse(
-          Buffer.from(tokenParts[1], "base64").toString("utf-8")
-        );
-        return {
-          id: payload.sub,
-          name: "Streamer",
-          email: "streamer@linkpix.com",
-        };
-      }
-    } catch {}
-    
-    redirectToLogin(true);
+    // API fora do ar (ou sessão inválida): vai para a página de
+    // indisponibilidade SEM apagar o cookie — o retry decide o destino.
+    throw redirect("/indisponivel");
   }
 }

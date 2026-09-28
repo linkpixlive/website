@@ -1,8 +1,61 @@
-export function formatBRL(cents: number): string {
+/** Centavos (int) → "R$ 10,00". Nome explícito: não confundir com
+ *  formatBRLReais (reais float do backend) — trocar um pelo outro é bug 100×. */
+export function formatCentsBRL(cents: number): string {
   return (cents / 100).toLocaleString("pt-BR", {
     style: "currency",
     currency: "BRL",
   });
+}
+
+/** Backend retorna reais como float (ex. 16.50): formata direto, sem /100. */
+export function formatBRLReais(value: number): string {
+  if (!Number.isFinite(value)) return "—";
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+}
+
+/** "14:32" a partir de ISO. Usado nas linhas de fila. */
+export function formatTimestamp(dateString: string): string {
+  return new Date(dateString).toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+/** "20/09/2026, 14:32" a partir de ISO; "—" quando inválido. */
+export function formatDateTime(dateStr: string | undefined | null): string {
+  if (!dateStr) return "—";
+  const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+interface DownloadableDonation {
+  name: string;
+  id: string;
+  approvedAt: string | null;
+  voiceUrl: string | null;
+}
+
+export function buildDownloadName(item: DownloadableDonation): string {
+  const slug =
+    item.name
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "") || "doacao";
+  const stamp = item.approvedAt ? new Date(item.approvedAt).getTime() : item.id;
+  const ext = item.voiceUrl?.toLowerCase().endsWith(".mp3") ? "mp3" : "wav";
+  return `doacao-${slug}-${stamp}.${ext}`;
 }
 
 export function formatCentsToInput(cents: number): string {
@@ -22,4 +75,10 @@ export function maskCurrencyInput(raw: string): string {
 export function parseCurrencyToCents(raw: string): number {
   const digits = raw.replace(/\D/g, "");
   return digits ? Number(digits) : 0;
+}
+
+/** Limita centavos ao teto (ex.: valor máximo de saque). */
+export function clampCents(cents: number, maxCents: number): number | null {
+  if (!cents) return null;
+  return Math.min(cents, maxCents);
 }

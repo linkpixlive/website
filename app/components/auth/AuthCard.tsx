@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { LogoTile } from "~/components/ui/Logo";
+import { LogoTile } from "~/components/ui/LogoTile";
 
 interface AuthCardProps {
   title: string;

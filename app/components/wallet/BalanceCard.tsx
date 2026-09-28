@@ -3,7 +3,10 @@ import { Popover } from "@base-ui/react/popover";
 import { Icon } from "~/components/ui/Icon";
 import { Button } from "~/components/ui/Button";
 import { Skeleton } from "~/components/ui/Skeleton";
-import { popupClasses } from "~/components/dashboard/header-styles";
+import { popupClasses } from "~/components/ui/header-styles";
+import { EyeToggleButton } from "~/components/ui/EyeToggleButton";
+import { CARD_CLASS, ICON_TILE_CLASS, SECTION_HEADING_CLASS } from "~/components/ui/classes";
+import { formatBRLReais } from "~/util/currency";
 
 interface BalanceCardProps {
   balances: {
@@ -13,13 +16,6 @@ interface BalanceCardProps {
   };
   loading?: boolean;
   onWithdraw?: () => void;
-}
-
-export function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(value);
 }
 
 export function BalanceCard({ balances, loading = false, onWithdraw }: BalanceCardProps) {
@@ -43,19 +39,18 @@ export function BalanceCard({ balances, loading = false, onWithdraw }: BalanceCa
   ];
 
   return (
-    <div className="h-full rounded-[26px] bg-card border border-line shadow-xs p-5 flex flex-col">
+    <div className={`h-full ${CARD_CLASS} flex flex-col`}>
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+        <span className={SECTION_HEADING_CLASS}>
           Saldo disponível
         </span>
-        <button
-          type="button"
-          onClick={() => setShowBalance((v) => !v)}
-          className="p-1 rounded-full text-chrome-icon hover:bg-wash transition-colors duration-150 cursor-pointer outline-none active:scale-95 shrink-0"
-          title={showBalance ? "Ocultar valores" : "Mostrar valores"}
-        >
-          <Icon name={showBalance ? "eye-closed" : "eye"} size={18} strokeWidth={1.9} />
-        </button>
+        <EyeToggleButton
+          visible={showBalance}
+          onToggle={() => setShowBalance((v) => !v)}
+          iconSize={18}
+          showLabel="Mostrar valores"
+          hideLabel="Ocultar valores"
+        />
       </div>
 
       {loading ? (
@@ -66,7 +61,7 @@ export function BalanceCard({ balances, loading = false, onWithdraw }: BalanceCa
             !showBalance ? "blur-sm select-none" : ""
           }`}
         >
-          {formatCurrency(balances.available)}
+          {formatBRLReais(balances.available)}
         </span>
       )}
 
@@ -74,7 +69,7 @@ export function BalanceCard({ balances, loading = false, onWithdraw }: BalanceCa
         <div className="divide-y divide-line">
           {secondaryRows.map((row) => (
             <div key={row.key} className="flex items-center gap-3 py-2.5 first:pt-1 last:pb-0">
-              <span className="w-8 h-8 rounded-[12px] bg-tile flex items-center justify-center text-chrome-icon shrink-0">
+              <span className={ICON_TILE_CLASS}>
                 <Icon name={row.icon} size={16} strokeWidth={2} />
               </span>
               <span className="inline-flex items-center gap-1 text-[13px] font-medium text-ink-secondary">
@@ -111,7 +106,7 @@ export function BalanceCard({ balances, loading = false, onWithdraw }: BalanceCa
                     !showBalance ? "blur-sm select-none" : ""
                   }`}
                 >
-                  {formatCurrency(row.value)}
+                  {formatBRLReais(row.value)}
                 </span>
               )}
             </div>

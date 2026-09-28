@@ -1,5 +1,6 @@
 import { Button } from "@base-ui/react/button";
 import type { ReactNode } from "react";
+import { Spinner } from "./Spinner";
 
 interface SubmitButtonProps {
   children: ReactNode;
@@ -44,9 +45,7 @@ export function SubmitButton({
         ${className}
       `}
     >
-      {loading && (
-        <span className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-[spin_0.6s_linear_infinite]" />
-      )}
+      {loading && <Spinner />}
       {children}
     </Button>
   );

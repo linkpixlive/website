@@ -9,7 +9,7 @@ export interface MenuItem {
 
 /** Itens internos, fonte única para rail desktop e drawer mobile. */
 export const menuItems: MenuItem[] = [
-  { label: "Dashboard", to: "/", icon: "widget-2", end: true },
+  { label: "Dashboard", to: "/dashboard", icon: "widget-2", end: true },
   { label: "Carteira", to: "/carteira", icon: "wallet" },
   { label: "Integrações", to: "/widgets", icon: "link-minimalistic" },
   { label: "Doações", to: "/doacoes", icon: "list" },

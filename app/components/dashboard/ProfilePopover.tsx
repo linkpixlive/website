@@ -2,7 +2,7 @@ import { Menu } from "@base-ui/react/menu";
 import { Form, Link, useRouteLoaderData } from "react-router";
 import { Icon, type IconName } from "~/components/ui/Icon";
 import { useTheme } from "~/components/ui/useTheme";
-import { menuRowClasses, menuRowDangerClasses } from "./header-styles";
+import { menuRowClasses, menuRowDangerClasses } from "~/components/ui/header-styles";
 import { getPublicPageUrl } from "./menu";
 
 export interface LayoutUser {

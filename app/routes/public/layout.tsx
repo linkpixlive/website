@@ -1,7 +1,7 @@
 import { Outlet } from "react-router";
 import { Icon } from "~/components/ui/Icon";
 import { useTheme } from "~/components/ui/useTheme";
-import { roundButtonClasses } from "~/components/dashboard/header-styles";
+import { roundButtonClasses } from "~/components/ui/header-styles";
 
 export default function PublicLayoutRoute() {
   const { theme, toggleTheme } = useTheme();

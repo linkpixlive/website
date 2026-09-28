@@ -1,11 +1,11 @@
 import { Toast } from "@base-ui/react/toast";
 import { Icon } from "./Icon";
-import type { IconName } from "./Icon";
+import { variantIconNames, type FeedbackVariant } from "./variant-icons";
 
-const iconNames: Record<string, Extract<IconName, "check-circle" | "danger-circle" | "info-circle">> = {
-  success: "check-circle",
-  error: "danger-circle",
-  info: "info-circle",
+const iconNames: Record<string, (typeof variantIconNames)[FeedbackVariant]> = {
+  success: variantIconNames.success,
+  error: variantIconNames.error,
+  info: variantIconNames.info,
 };
 
 const variantStyles: Record<string, string> = {

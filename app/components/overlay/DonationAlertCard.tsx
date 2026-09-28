@@ -1,11 +1,6 @@
 import type { OverlayDonationEntity } from "~/types/queue";
-
-function formatAmount(amount: number) {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(amount);
-}
+import { formatBRLReais } from "~/util/currency";
+import { TestBadge } from "~/components/ui/QueueBadges";
 
 interface DonationAlertCardProps {
   donation: OverlayDonationEntity;
@@ -27,8 +22,8 @@ export function DonationAlertCard({ donation }: DonationAlertCardProps) {
       `}</style>
 
       {isTest && (
-        <span className="inline-flex items-center rounded-full bg-[#fff7d6] text-[#b58a00] text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 mb-3">
-          Teste
+        <span className="mb-3 block w-fit">
+          <TestBadge size="sm" />
         </span>
       )}
 
@@ -43,8 +38,8 @@ export function DonationAlertCard({ donation }: DonationAlertCardProps) {
           <p className="text-lg font-extrabold text-[#11151e] leading-tight truncate">
             {name}
           </p>
-          <p className="text-sm font-extrabold text-[#b58a00] leading-snug">
-            {formatAmount(amount)}
+          <p className="text-sm font-extrabold text-yellow-ink leading-snug">
+            {formatBRLReais(amount)}
           </p>
         </div>
       </div>

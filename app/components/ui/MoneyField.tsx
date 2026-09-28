@@ -1,5 +1,5 @@
 import { useId, useState } from "react";
-import { FieldError } from "./FieldError";
+import { MoneyInputBase } from "./MoneyInputBase";
 import {
   formatCentsToInput,
   maskCurrencyInput,
@@ -55,54 +55,35 @@ export function MoneyField({
   const normalized = cents ? (cents / 100).toFixed(2) : "";
 
   return (
-    <div className="flex flex-col gap-1.5 w-full">
-      <label
-        htmlFor={generatedId}
-        className="text-[13px] font-medium text-ink-secondary"
-      >
-        {label}
-      </label>
-      <div className="relative flex items-center">
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute left-4 text-sm font-medium text-ink-secondary"
-        >
-          R$
-        </span>
-        <input
-          id={generatedId}
-          type="text"
-          inputMode="numeric"
-          autoComplete="off"
-          placeholder={placeholder}
-          value={masked}
-          onChange={(event) => {
-            const next = maskCurrencyInput(event.target.value);
-            setMasked(next);
-            onChange?.(next, parseCurrencyToCents(next));
-          }}
-          onBlur={onBlur}
-          disabled={disabled}
-          aria-invalid={error ? true : undefined}
-          className={`
-            w-full bg-wash rounded-full py-2.5 pl-10 pr-4 text-sm font-medium text-ink-heading placeholder:text-ink-placeholder
-            border transition-colors duration-150 outline-none
-            ${
-              error
-                ? "border-error focus:border-error focus:ring-2 focus:ring-error/20"
-                : "border-line-input focus:border-border-focus focus:ring-2 focus:ring-brand/30"
-            }
-            ${disabled ? "opacity-50 cursor-not-allowed" : ""}
-          `}
-        />
-      </div>
-      <input type="hidden" name={name} value={normalized} />
-      {hint && (
-        <p className="text-xs font-medium text-ink-muted leading-snug">
-          {hint}
-        </p>
+    <MoneyInputBase
+      id={generatedId}
+      label={label}
+      hint={hint}
+      error={error}
+      disabled={disabled}
+    >
+      {(inputClassName) => (
+        <>
+          <input
+            id={generatedId}
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder={placeholder}
+            value={masked}
+            onChange={(event) => {
+              const next = maskCurrencyInput(event.target.value);
+              setMasked(next);
+              onChange?.(next, parseCurrencyToCents(next));
+            }}
+            onBlur={onBlur}
+            disabled={disabled}
+            aria-invalid={error ? true : undefined}
+            className={inputClassName}
+          />
+          <input type="hidden" name={name} value={normalized} />
+        </>
       )}
-      <FieldError message={error} />
-    </div>
+    </MoneyInputBase>
   );
 }

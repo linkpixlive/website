@@ -1,10 +1,8 @@
 import { forwardRef, useRef } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { maskCurrencyInput, parseCurrencyToCents } from "~/util/currency";
-
-function cn(...classes: (string | undefined | null | false)[]): string {
-  return classes.filter(Boolean).join(" ");
-}
+import { mergeRefs } from "~/util/merge-refs";
+import { MoneyInputBase } from "./MoneyInputBase";
 
 export interface CurrencyInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value"> {
@@ -17,16 +15,15 @@ export interface CurrencyInputProps
   disabled?: boolean;
 }
 
-const PREFIX = "R$ ";
-
 export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
-  ({ name, value, onChange, minCents, placeholder = "0,00", error, disabled, className, ...props }, ref) => {
+  ({ name, value, onChange, minCents, placeholder = "0,00", error, disabled, ...props }, ref) => {
     const { control, formState: { errors }, setValue, watch } = useFormContext();
     const inputRef = useRef<HTMLInputElement>(null);
     const isControlled = value !== undefined;
 
     const currentValue = isControlled ? value : watch(name) ?? "";
-    const currentError = error ?? errors[name]?.message;
+    const rhfError = errors[name]?.message;
+    const currentError = error ?? (typeof rhfError === "string" ? rhfError : undefined);
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const raw = event.target.value;
@@ -53,14 +50,11 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
       }
     };
 
-    const combinedRef = (el: HTMLInputElement | null) => {
-      inputRef.current = el;
-      if (typeof ref === "function") ref(el);
-      else if (ref) ref.current = el;
-    };
+    const combinedRef = mergeRefs(inputRef, ref);
 
     const displayValue = currentValue || "";
 
+    // Sem label próprio: o formulário RHF rotula por fora.
     return (
       <Controller
         name={name}
@@ -68,34 +62,31 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
         render={({ field }) => {
           const { ref: _fieldRef, ...fieldProps } = field;
           return (
-            <div className="relative flex items-center">
-              <span className="absolute left-4 text-sm font-medium text-ink-secondary pointer-events-none">
-                {PREFIX}
-              </span>
-              <input
-                ref={combinedRef}
-                {...fieldProps}
-                {...props}
-                type="text"
-                inputMode="numeric"
-                autoComplete="off"
-                placeholder={placeholder}
-                value={displayValue}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                disabled={disabled}
-                aria-invalid={currentError ? true : undefined}
-                aria-describedby={currentError ? `${name}-error` : undefined}
-                className={cn(
-                  "w-full bg-wash rounded-full py-2.5 pl-10 pr-4 text-sm font-medium text-ink-heading placeholder:text-ink-placeholder border transition-colors duration-150 outline-none",
-                  currentError
-                    ? "border-error focus:border-error focus:ring-2 focus:ring-error/20"
-                    : "border-line-input focus:border-border-focus focus:ring-2 focus:ring-brand/30",
-                  disabled && "opacity-50 cursor-not-allowed",
-                  className,
-                )}
-              />
-            </div>
+            <MoneyInputBase
+              id={name}
+              error={currentError}
+              disabled={disabled}
+            >
+              {(inputClassName) => (
+                <input
+                  ref={combinedRef}
+                  {...fieldProps}
+                  {...props}
+                  id={name}
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  placeholder={placeholder}
+                  value={displayValue}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  disabled={disabled}
+                  aria-invalid={currentError ? true : undefined}
+                  aria-describedby={currentError ? `${name}-error` : undefined}
+                  className={inputClassName}
+                />
+              )}
+            </MoneyInputBase>
           );
         }}
       />

@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Icon } from "~/components/ui/Icon";
 import { useToast } from "~/components/ui/useToast";
-
-const activePlayers = new Set<() => void>();
+import { useExclusiveAudio } from "~/hooks/useExclusiveAudio";
 
 interface AudioPlayerProps {
   src: string;
@@ -29,15 +28,7 @@ export function AudioPlayer({
   const [duration, setDuration] = useState(0);
   const [hasError, setHasError] = useState(false);
   const [downloading, setDownloading] = useState(false);
-
-  useEffect(() => {
-    const pause = () => audioRef.current?.pause();
-    activePlayers.add(pause);
-    return () => {
-      activePlayers.delete(pause);
-      audioRef.current?.pause();
-    };
-  }, []);
+  const pauseAll = useExclusiveAudio(audioRef);
 
   const handleToggle = () => {
     const audio = audioRef.current;
@@ -46,7 +37,7 @@ export function AudioPlayer({
       audio.pause();
       return;
     }
-    for (const pause of activePlayers) pause();
+    pauseAll();
     audio.play().catch(() => setHasError(true));
   };
 

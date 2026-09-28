@@ -9,7 +9,8 @@ import {
   YAxis,
 } from "recharts";
 import type { DashboardSeriesPoint } from "~/api/modules/dashboard";
-import { formatCurrency, formatLongDate, formatShortDate } from "./format";
+import { formatLongDate, formatShortDate } from "./format";
+import { formatBRLReais } from "~/util/currency";
 
 export type ChartMode = "amount" | "count";
 
@@ -37,7 +38,7 @@ function ChartTooltip({
         {formatLongDate(label)}
       </p>
       <p className="text-sm font-extrabold text-ink-heading">
-        {mode === "amount" ? formatCurrency(raw) : `${raw} ${raw === 1 ? "doação" : "doações"}`}
+        {mode === "amount" ? formatBRLReais(raw) : `${raw} ${raw === 1 ? "doação" : "doações"}`}
       </p>
     </div>
   );
@@ -62,18 +63,18 @@ export function RevenueAreaChart({ series, mode }: RevenueAreaChartProps) {
       >
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={series} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
-            <CartesianGrid stroke="#eceef3" vertical={false} />
+            <CartesianGrid stroke="var(--color-line)" vertical={false} />
             <XAxis
               dataKey="date"
               tickFormatter={formatShortDate}
-              tick={{ fontSize: 11, fill: "#9ca3af", fontWeight: 600 }}
+              tick={{ fontSize: 11, fill: "var(--color-ink-label)", fontWeight: 600 }}
               axisLine={false}
               tickLine={false}
               minTickGap={28}
             />
             <YAxis
               width={48}
-              tick={{ fontSize: 11, fill: "#9ca3af", fontWeight: 600 }}
+              tick={{ fontSize: 11, fill: "var(--color-ink-label)", fontWeight: 600 }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v: number) =>
@@ -86,26 +87,26 @@ export function RevenueAreaChart({ series, mode }: RevenueAreaChartProps) {
             />
             <Tooltip
               content={<ChartTooltip mode={mode} />}
-              cursor={{ stroke: "#dfe3ea", strokeWidth: 1 }}
+              cursor={false}
             />
             <Area
               type="monotone"
               dataKey={dataKey}
-              stroke="#11151e"
+              stroke="var(--color-ink-heading)"
               strokeWidth={2}
-              fill="#eceef3"
+              fill="var(--color-wash)"
               fillOpacity={1}
-              activeDot={{ r: 4, fill: "#fed130", stroke: "#11151e", strokeWidth: 2 }}
+              activeDot={{ r: 4, fill: "var(--color-brand-button)", stroke: "var(--color-on-brand)", strokeWidth: 2 }}
               dot={false}
             />
             {maxPoint && maxPoint[dataKey] > 0 && (
               <ReferenceDot
                 x={maxPoint.date}
-                y={maxPoint[dataKey]}
-                r={4}
-                fill="#fed130"
-                stroke="#11151e"
-                strokeWidth={2}
+                 y={maxPoint[dataKey]}
+                 r={4}
+                 fill="var(--color-brand-button)"
+                 stroke="var(--color-on-brand)"
+                 strokeWidth={2}
               />
             )}
           </AreaChart>

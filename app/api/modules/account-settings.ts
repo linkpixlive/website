@@ -1,79 +1,67 @@
+import type { components } from "../generated/api-schema";
 import { createApiClient, fetchApi } from "../http/client";
 
-export interface AccountSettings {
+export type AccountSettings = components["schemas"]["AccountEntity"] & {
+  // `id` existe no runtime (@Expose), mas fica fora do Swagger (@ApiHideProperty).
   id: string;
-  email: string;
-  has2fa: boolean;
-  active: boolean;
-  usernameChangedAt: string | null;
-  verifiedEmail?: boolean;
-}
+};
 
-export interface ChangePasswordPayload {
-  currentPassword: string;
-  newPassword: string;
-}
+export type ChangePasswordPayload =
+  components["schemas"]["ChangePasswordDto"];
 
-export interface ChangeEmailPayload {
-  email: string;
-  password: string;
-}
+export type ChangeEmailPayload = components["schemas"]["ChangeEmailDto"];
 
-export interface DeactivateAccountPayload {
-  password: string;
-}
+export type DeactivateAccountPayload =
+  components["schemas"]["DeactivateAccountDto"];
 
-export interface Enable2faPayload {
-  token: string;
-}
+export type Enable2faPayload = components["schemas"]["Enable2faDto"];
 
-export interface Disable2faPayload {
-  password: string;
-  token: string;
-}
+export type Disable2faPayload = components["schemas"]["Disable2faDto"];
 
-export interface Setup2faResponse {
-  otpauthUrl: string;
-  secret: string;
-}
+export type Setup2faPayload = components["schemas"]["Setup2faDto"];
 
-export interface UpdateProfilePayload {
-  name: string;
-}
+export type Setup2faResponse = components["schemas"]["Setup2faEntity"];
 
-export interface MessageResponse {
-  message: string;
-}
+export type ConfirmEmailChangePayload =
+  components["schemas"]["ConfirmEmailChangeDto"];
+
+export type UpdateProfilePayload = components["schemas"]["UpdateProfileDto"];
+
+export type MessageResponse = components["schemas"]["MessageDto"];
 
 export const accountSettingsApi = {
   getSettings: (token?: string | null) =>
-    fetchApi<AccountSettings>(createApiClient(token).get("/account-settings")),
+    fetchApi<AccountSettings>(createApiClient(token).get("/account")),
   updateProfile: (token: string | null, body: UpdateProfilePayload) =>
-    fetchApi<{ name: string }>(
-      createApiClient(token).patch("/account-settings/profile", body),
+    fetchApi<components["schemas"]["UpdateProfileResponseDto"]>(
+      createApiClient(token).patch("/account/profile", body),
     ),
   changePassword: (token: string | null, body: ChangePasswordPayload) =>
     fetchApi<MessageResponse>(
-      createApiClient(token).patch("/account-settings/password", body),
+      createApiClient(token).patch("/account/password", body),
     ),
   changeEmail: (token: string | null, body: ChangeEmailPayload) =>
     fetchApi<MessageResponse>(
-      createApiClient(token).patch("/account-settings/email", body),
+      createApiClient(token).patch("/account/email", body),
     ),
   deactivateAccount: (token: string | null, body: DeactivateAccountPayload) =>
     fetchApi<MessageResponse>(
-      createApiClient(token).patch("/account-settings/deactivate", body),
+      createApiClient(token).patch("/account/deactivate", body),
     ),
-  setup2fa: (token: string | null) =>
+  setup2fa: (token: string | null, body: Setup2faPayload) =>
     fetchApi<Setup2faResponse>(
-      createApiClient(token).post("/account-settings/2fa/setup"),
+      createApiClient(token).post("/account/2fa/setup", body),
     ),
   enable2fa: (token: string | null, body: Enable2faPayload) =>
     fetchApi<MessageResponse>(
-      createApiClient(token).post("/account-settings/2fa/enable", body),
+      createApiClient(token).post("/account/2fa/enable", body),
     ),
   disable2fa: (token: string | null, body: Disable2faPayload) =>
     fetchApi<MessageResponse>(
-      createApiClient(token).post("/account-settings/2fa/disable", body),
+      createApiClient(token).post("/account/2fa/disable", body),
+    ),
+  confirmEmailChange: (token: string | null, body: ConfirmEmailChangePayload) =>
+    fetchApi<MessageResponse>(
+      createApiClient(token).post("/account/email/verify", body),
     ),
 };

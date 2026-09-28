@@ -1,5 +1,10 @@
 import { Link } from "react-router";
 import { Icon, type IconName } from "~/components/ui/Icon";
+import {
+  CARD_CLASS,
+  ICON_TILE_CLASS,
+  SECTION_HEADING_CLASS,
+} from "~/components/ui/classes";
 
 export interface AccountChecklist {
   pixCount: number;
@@ -26,8 +31,8 @@ interface Row {
 export function AccountStatusCard({ checklist }: AccountStatusCardProps) {
   if (!checklist) {
     return (
-      <div className="h-full rounded-[26px] bg-card border border-line shadow-xs p-5">
-        <span className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+      <div className={`h-full ${CARD_CLASS}`}>
+        <span className={SECTION_HEADING_CLASS}>
           Status da conta
         </span>
         <p className="mt-3 text-sm font-medium text-ink-secondary">
@@ -107,9 +112,9 @@ export function AccountStatusCard({ checklist }: AccountStatusCardProps) {
   const allDone = doneCount === rows.length;
 
   return (
-    <div className="h-full rounded-[26px] bg-card border border-line shadow-xs p-5 flex flex-col">
+    <div className={`h-full ${CARD_CLASS} flex flex-col`}>
       <div className="flex items-center justify-between mb-1">
-        <span className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+        <span className={SECTION_HEADING_CLASS}>
           Status da conta
         </span>
         <span className="text-[11px] font-semibold text-ink-label">
@@ -132,7 +137,7 @@ export function AccountStatusCard({ checklist }: AccountStatusCardProps) {
                 to={row.to}
                 className="flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-left hover:bg-wash transition-colors duration-150 outline-none"
               >
-                <span className="w-8 h-8 rounded-[12px] bg-tile flex items-center justify-center text-chrome-icon shrink-0">
+                <span className={ICON_TILE_CLASS}>
                   <Icon name={row.icon} size={16} strokeWidth={2} />
                 </span>
                 <span className="flex-1 min-w-0">

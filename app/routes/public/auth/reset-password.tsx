@@ -9,10 +9,9 @@ import { PasswordField } from "~/components/auth/PasswordField";
 import { AlertMessage } from "~/components/ui/AlertMessage";
 import { Button } from "~/components/ui/Button";
 import { SubmitButton } from "~/components/ui/SubmitButton";
-import {
-  getPasswordStrength,
-  resetPasswordSchema,
-} from "~/validators/auth-validator";
+import { resetPasswordSchema } from "~/validators/auth-validator";
+import { getPasswordStrength } from "~/validators/password";
+import { LINK_CLASS } from "~/components/ui/classes";
 import type { Route } from "./+types/reset-password";
 
 export function meta({}: Route.MetaArgs) {
@@ -70,7 +69,7 @@ export default function ResetPassword() {
           <div className="text-center">
             <Link
               to="/auth/forgot-password"
-              className="text-[13px] font-semibold text-info hover:text-blue-700 underline transition-colors duration-150"
+              className={`text-[13px] font-semibold ${LINK_CLASS} transition-colors duration-150`}
             >
               Request a new link
             </Link>

@@ -1,7 +1,7 @@
 import { Icon } from "./Icon";
-import type { IconName } from "./Icon";
+import { variantIconNames, type FeedbackVariant } from "./variant-icons";
 
-type AlertVariant = "success" | "error" | "info";
+type AlertVariant = FeedbackVariant;
 
 interface AlertMessageProps {
   variant: AlertVariant;
@@ -14,11 +14,7 @@ const variantStyles = {
   info: "bg-info/10 border-info/20 text-info",
 };
 
-const iconNames: Record<AlertVariant, Extract<IconName, "check-circle" | "danger-circle" | "info-circle">> = {
-  success: "check-circle",
-  error: "danger-circle",
-  info: "info-circle",
-};
+const iconNames: Record<AlertVariant, (typeof variantIconNames)[AlertVariant]> = variantIconNames;
 
 export function AlertMessage({ variant, message }: AlertMessageProps) {
   return (

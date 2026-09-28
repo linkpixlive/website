@@ -1,6 +1,9 @@
 import { Popover } from "@base-ui/react/popover";
 import { useState } from "react";
+import { FieldError } from "./FieldError";
 import { Icon } from "./Icon";
+import { SECTION_HEADING_CLASS } from "./classes";
+import { popupClasses } from "./header-styles";
 
 interface DatePickerProps {
   label: string;
@@ -29,6 +32,37 @@ const MONTHS = [
 
 const DAYS_OF_WEEK = ["D", "S", "T", "Q", "Q", "S", "S"];
 
+interface CalendarDay {
+  date: Date;
+  isCurrentMonth: boolean;
+}
+
+/** Grade 6×7 do mês (com dias dos meses vizinhos). Pura — sem estado. */
+function buildCalendarDays(month: number, year: number): CalendarDay[] {
+  const startOffset = new Date(year, month, 1).getDay();
+  const start = new Date(year, month, 1 - startOffset);
+  const days: CalendarDay[] = [];
+  for (let i = 0; i < 42; i++) {
+    const date = new Date(
+      start.getFullYear(),
+      start.getMonth(),
+      start.getDate() + i,
+    );
+    days.push({ date, isCurrentMonth: date.getMonth() === month });
+  }
+  return days;
+}
+
+function isSameDay(a: Date | null, b: Date | null): boolean {
+  return (
+    !!a &&
+    !!b &&
+    a.getDate() === b.getDate() &&
+    a.getMonth() === b.getMonth() &&
+    a.getFullYear() === b.getFullYear()
+  );
+}
+
 export function DatePicker({
   label,
   value,
@@ -45,15 +79,8 @@ export function DatePicker({
   const viewMonth = viewDate.getMonth();
   const viewYear = viewDate.getFullYear();
 
-  // Get total days in month
-  const getDaysInMonth = (month: number, year: number) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
-
-  // Get weekday of 1st day of month (0 = Sun, 6 = Sat)
-  const getFirstDayOfWeek = (month: number, year: number) => {
-    return new Date(year, month, 1).getDay();
-  };
+  // Generate calendar days grid
+  const calendarDays = buildCalendarDays(viewMonth, viewYear);
 
   const handlePrevMonth = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -65,56 +92,11 @@ export function DatePicker({
     setViewDate(new Date(viewYear, viewMonth + 1, 1));
   };
 
-  const handleDaySelect = (day: number, isCurrentMonth: boolean) => {
-    let selectedDate: Date;
-    if (isCurrentMonth) {
-      selectedDate = new Date(viewYear, viewMonth, day);
-    } else if (day > 15) {
-      // Clicked on previous month padding day
-      selectedDate = new Date(viewYear, viewMonth - 1, day);
-    } else {
-      // Clicked on next month padding day
-      selectedDate = new Date(viewYear, viewMonth + 1, day);
-    }
-    onChange(selectedDate);
-    setViewDate(selectedDate);
+  const handleDaySelect = (date: Date) => {
+    onChange(date);
+    setViewDate(date);
     setOpen(false);
   };
-
-  // Generate calendar days grid
-  const daysInMonth = getDaysInMonth(viewMonth, viewYear);
-  const firstDayOfWeek = getFirstDayOfWeek(viewMonth, viewYear);
-
-  const prevMonth = viewMonth === 0 ? 11 : viewMonth - 1;
-  const prevYear = viewMonth === 0 ? viewYear - 1 : viewYear;
-  const daysInPrevMonth = getDaysInMonth(prevMonth, prevYear);
-
-  const calendarDays: { day: number; isCurrentMonth: boolean }[] = [];
-
-  // Previous month padding days
-  for (let i = firstDayOfWeek - 1; i >= 0; i--) {
-    calendarDays.push({
-      day: daysInPrevMonth - i,
-      isCurrentMonth: false,
-    });
-  }
-
-  // Current month days
-  for (let i = 1; i <= daysInMonth; i++) {
-    calendarDays.push({
-      day: i,
-      isCurrentMonth: true,
-    });
-  }
-
-  // Next month padding days to complete grid rows
-  const remainingSlots = 42 - calendarDays.length; // 6 rows * 7 columns
-  for (let i = 1; i <= remainingSlots; i++) {
-    calendarDays.push({
-      day: i,
-      isCurrentMonth: false,
-    });
-  }
 
   const formatDateLabel = (date: Date | null) => {
     if (!date) return placeholder;
@@ -125,17 +107,7 @@ export function DatePicker({
     });
   };
 
-  const isSelected = (day: number, isCurrentMonth: boolean) => {
-    if (!value) return false;
-    const targetMonth = isCurrentMonth ? viewMonth : day > 15 ? viewMonth - 1 : viewMonth + 1;
-    const targetYear = viewMonth === 0 && day > 15 && !isCurrentMonth ? viewYear - 1 : viewMonth === 11 && day < 15 && !isCurrentMonth ? viewYear + 1 : viewYear;
-
-    return (
-      value.getDate() === day &&
-      value.getMonth() === targetMonth &&
-      value.getFullYear() === targetYear
-    );
-  };
+  const isSelected = (date: Date) => isSameDay(value, date);
 
   return (
     <div className={`flex flex-col gap-1.5 w-full ${className}`}>
@@ -174,7 +146,7 @@ export function DatePicker({
         <Popover.Portal>
           <Popover.Positioner side="bottom" align="start" sideOffset={8} className="z-50">
             <Popover.Popup
-              className="w-72 rounded-[20px] bg-card border border-line p-4 shadow-lg focus:outline-none origin-[var(--transform-origin)] transition-[opacity,scale] duration-150 ease-out data-starting-style:opacity-0 data-starting-style:scale-[0.96] data-ending-style:opacity-0 data-ending-style:scale-[0.96]"
+              className={`w-72 p-4 ${popupClasses}`}
             >
               <div className="flex flex-col select-none">
                 {/* Calendar Header */}
@@ -203,7 +175,7 @@ export function DatePicker({
                   {DAYS_OF_WEEK.map((day, idx) => (
                     <span
                       key={idx}
-                      className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label py-1"
+                      className={`py-1 ${SECTION_HEADING_CLASS}`}
                     >
                       {day}
                     </span>
@@ -216,11 +188,11 @@ export function DatePicker({
                     <button
                       key={idx}
                       type="button"
-                      onClick={() => handleDaySelect(cell.day, cell.isCurrentMonth)}
+                      onClick={() => handleDaySelect(cell.date)}
                       className={`
                           w-8 h-8 mx-auto my-0.5 inline-flex items-center justify-center rounded-full text-xs font-medium transition-colors duration-100 cursor-pointer active:scale-95
                           ${
-                            isSelected(cell.day, cell.isCurrentMonth)
+                            isSelected(cell.date)
                               ? "bg-brand-button text-on-brand font-extrabold"
                               : cell.isCurrentMonth
                               ? "text-ink-body hover:bg-wash"
@@ -228,7 +200,7 @@ export function DatePicker({
                           }
                         `}
                     >
-                      {cell.day}
+                      {cell.date.getDate()}
                     </button>
                   ))}
                 </div>
@@ -251,11 +223,7 @@ export function DatePicker({
           </Popover.Positioner>
         </Popover.Portal>
       </Popover.Root>
-      {error && (
-        <span className="text-error text-xs font-medium animate-[shake_0.4s_ease-in-out]">
-          {error}
-        </span>
-      )}
+      <FieldError message={error} />
     </div>
   );
 }

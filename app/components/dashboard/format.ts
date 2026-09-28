@@ -1,11 +1,3 @@
-export function formatCurrency(value: number) {
-  if (!Number.isFinite(value)) return "—";
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(value);
-}
-
 /** +13,7% / −20% em pt-BR, com sinal. Null quando não há base de comparação. */
 export function formatDeltaPct(value: number | null): string | null {
   if (value === null || !Number.isFinite(value)) return null;
@@ -16,16 +8,23 @@ export function formatDeltaPct(value: number | null): string | null {
   return `${sign}${abs}%`;
 }
 
-export function formatShortDate(isoDate: string) {
+/** "YYYY-MM-DD" como data local (evita o shift de fuso do `new Date(iso)`). */
+function parseLocalDate(isoDate: string): Date | null {
   const [y, m, d] = isoDate.split("-").map(Number);
-  if (!y || !m || !d) return isoDate;
-  return `${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}`;
+  if (!y || !m || !d) return null;
+  return new Date(y, m - 1, d);
+}
+
+export function formatShortDate(isoDate: string) {
+  const date = parseLocalDate(isoDate);
+  if (!date) return isoDate;
+  return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
 export function formatLongDate(isoDate: string) {
-  const [y, m, d] = isoDate.split("-").map(Number);
-  if (!y || !m || !d) return isoDate;
-  return new Date(y, m - 1, d).toLocaleDateString("pt-BR", {
+  const date = parseLocalDate(isoDate);
+  if (!date) return isoDate;
+  return date.toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "short",
   });

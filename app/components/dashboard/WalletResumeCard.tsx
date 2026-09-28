@@ -3,7 +3,9 @@ import { Link } from "react-router";
 import type { Withdrawal } from "~/api/modules/withdrawals";
 import { Icon } from "~/components/ui/Icon";
 import { Skeleton } from "~/components/ui/Skeleton";
-import { formatCurrency } from "./format";
+import { formatBRLReais } from "~/util/currency";
+import { EyeToggleButton } from "~/components/ui/EyeToggleButton";
+import { CARD_CLASS, SECTION_HEADING_CLASS } from "~/components/ui/classes";
 
 interface WalletResumeCardProps {
   balances: { available: number; pending: number; blocked: number } | null;
@@ -23,20 +25,18 @@ export function WalletResumeCard({ balances, lastWithdrawal, loading = false }: 
   const [showValues, setShowValues] = useState(false);
 
   return (
-    <div className="h-full rounded-[26px] bg-card border border-line shadow-xs p-5 flex flex-col">
+    <div className={`h-full ${CARD_CLASS} flex flex-col`}>
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+        <span className={SECTION_HEADING_CLASS}>
           Carteira
         </span>
-        <button
-          type="button"
-          onClick={() => setShowValues((v) => !v)}
-          className="p-1 rounded-full text-chrome-icon hover:bg-wash transition-colors duration-150 cursor-pointer outline-none active:scale-95 shrink-0"
-          title={showValues ? "Ocultar valores" : "Mostrar valores"}
-          aria-label={showValues ? "Ocultar valores" : "Mostrar valores"}
-        >
-          <Icon name={showValues ? "eye-closed" : "eye"} size={18} strokeWidth={1.9} />
-        </button>
+        <EyeToggleButton
+          visible={showValues}
+          onToggle={() => setShowValues((v) => !v)}
+          iconSize={18}
+          showLabel="Mostrar valores"
+          hideLabel="Ocultar valores"
+        />
       </div>
 
       {loading || !balances ? (
@@ -47,14 +47,14 @@ export function WalletResumeCard({ balances, lastWithdrawal, loading = false }: 
             !showValues ? "blur-sm select-none" : ""
           }`}
         >
-          {formatCurrency(balances.available)}
+          {formatBRLReais(balances.available)}
         </span>
       )}
       <p className="mt-1 text-xs font-medium text-ink-muted">
         {loading || !balances ? (
           <Skeleton className="h-4 w-32 rounded-md" />
         ) : (
-          <>Pendente {formatCurrency(balances.pending)} · pronto para saque</>
+          <>Pendente {formatBRLReais(balances.pending)} · pronto para saque</>
         )}
       </p>
 
@@ -63,7 +63,7 @@ export function WalletResumeCard({ balances, lastWithdrawal, loading = false }: 
           <p className="text-[13px] font-medium text-ink-secondary leading-snug">
             Último saque:{" "}
             <strong className="font-bold text-ink-heading">
-              {formatCurrency(lastWithdrawal.netAmount ?? lastWithdrawal.amount)}
+              {formatBRLReais(lastWithdrawal.netAmount ?? lastWithdrawal.amount)}
             </strong>{" "}
             {withdrawalLabel(lastWithdrawal.status)}
           </p>

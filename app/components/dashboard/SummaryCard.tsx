@@ -3,7 +3,10 @@ import { Link } from "react-router";
 import type { DashboardStats } from "~/api/modules/dashboard";
 import { Icon } from "~/components/ui/Icon";
 import { Skeleton } from "~/components/ui/Skeleton";
-import { formatCurrency, formatDeltaPct } from "./format";
+import { formatDeltaPct } from "./format";
+import { formatBRLReais } from "~/util/currency";
+import { SegmentedControl } from "~/components/ui/SegmentedControl";
+import { CARD_CLASS, ICON_TILE_CLASS, SECTION_HEADING_CLASS } from "~/components/ui/classes";
 import type { ChartMode } from "./RevenueAreaChart";
 
 const RevenueAreaChart = lazy(() =>
@@ -50,37 +53,21 @@ export function SummaryCard({ stats, mode, onModeChange, loading = false }: Summ
     stats?.range === "15" ? "15 dias" : stats?.range === "30" ? "30 dias" : "7 dias";
 
   return (
-    <div className="h-full rounded-[26px] bg-card border border-line shadow-xs p-5 flex flex-col">
+    <div className={`h-full ${CARD_CLASS} flex flex-col`}>
       <div className="flex items-center justify-between gap-3 mb-3">
-        <span className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+        <span className={SECTION_HEADING_CLASS}>
           Recebido · últimos {rangeLabel}
         </span>
-        <div
-          role="group"
-          aria-label="Métrica do gráfico"
-          className="inline-flex items-center gap-1 rounded-full bg-wash p-1"
-        >
-          {(
-            [
-              { value: "amount", label: "Valor" },
-              { value: "count", label: "Qtd" },
-            ] as const
-          ).map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => onModeChange(opt.value)}
-              aria-pressed={mode === opt.value}
-              className={`rounded-full px-3 h-8 text-[11px] font-extrabold outline-none transition-all duration-150 cursor-pointer active:scale-[0.98] ${
-                mode === opt.value
-                  ? "bg-inverse text-white shadow-xs"
-                  : "text-ink-secondary hover:text-ink-heading"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          options={[
+            { value: "amount", label: "Valor" },
+            { value: "count", label: "Qtd" },
+          ]}
+          value={mode}
+          onChange={onModeChange}
+          label="Métrica do gráfico"
+          size="sm"
+        />
       </div>
 
       {loading || !stats ? (
@@ -96,7 +83,7 @@ export function SummaryCard({ stats, mode, onModeChange, loading = false }: Summ
         <>
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-[26px] leading-tight font-extrabold tracking-tight text-ink-heading">
-              {formatCurrency(stats.totalAmount)}
+              {formatBRLReais(stats.totalAmount)}
             </span>
             <DeltaPill
               value={mode === "amount" ? stats.deltaAmountPct : stats.deltaCountPct}
@@ -112,18 +99,18 @@ export function SummaryCard({ stats, mode, onModeChange, loading = false }: Summ
 
           <div className="mt-4 pt-4 divide-y divide-line border-t border-line">
             <div className="flex items-center gap-3 py-2.5">
-              <span className="w-8 h-8 rounded-[12px] bg-tile flex items-center justify-center text-chrome-icon shrink-0">
+              <span className={ICON_TILE_CLASS}>
                 <Icon name="list" size={16} strokeWidth={2} />
               </span>
               <span className="text-[13px] font-medium text-ink-secondary">
                 Doações no período
               </span>
               <span className="ml-auto text-sm font-semibold text-ink-body">
-                {stats.totalCount} · ticket médio {formatCurrency(stats.average)}
+                {stats.totalCount} · ticket médio {formatBRLReais(stats.average)}
               </span>
             </div>
             <div className="flex items-center gap-3 py-2.5">
-              <span className="w-8 h-8 rounded-[12px] bg-tile flex items-center justify-center text-chrome-icon shrink-0">
+              <span className={ICON_TILE_CLASS}>
                 <Icon name="graph" size={16} strokeWidth={2} />
               </span>
               <span className="text-[13px] font-medium text-ink-secondary">
@@ -131,7 +118,7 @@ export function SummaryCard({ stats, mode, onModeChange, loading = false }: Summ
               </span>
               <span className="ml-auto text-sm font-semibold text-ink-body">
                 {stats.largest
-                  ? `${formatCurrency(stats.largest.amount)} · ${stats.largest.donorName}`
+                  ? `${formatBRLReais(stats.largest.amount)} · ${stats.largest.donorName}`
                   : "—"}
               </span>
             </div>

@@ -1,3 +1,4 @@
+import type { components } from "../generated/api-schema";
 import { client, fetchApi } from "../http/client";
 import type {
   DonationPayment,
@@ -25,6 +26,8 @@ export function reaisToCents(amount: number): number {
   return Math.round(amount * 100);
 }
 
+// Espelha DonationEntity, mas `amount` chega serializado como número
+// (o `Decimal2` do schema não é utilizável) — ver `reaisToCents`.
 interface DonationApiResponse {
   id: string;
   amount: number;
@@ -44,19 +47,8 @@ export function mapDonationPayment(data: DonationApiResponse): DonationPayment {
   };
 }
 
-interface DonationViewApiResponse {
-  id: string;
-  status: DonationStatus;
-  amount: number;
-  donorName: string;
-  message: string | null;
-  streamerName: string;
-  /** Backends antigos podem omitir; a confirmação resolve o destino com fallback. */
-  streamerUsername?: string;
-  voiceName: string | null;
-  createdAt: string;
-  expiredAt: string | null;
-}
+type DonationViewApiResponse =
+  components["schemas"]["DonationStatusEntity"];
 
 export function mapDonationView(data: DonationViewApiResponse): DonationView {
   return {
@@ -66,7 +58,7 @@ export function mapDonationView(data: DonationViewApiResponse): DonationView {
     donorName: data.donorName,
     message: data.message,
     streamerName: data.streamerName,
-    streamerUsername: data.streamerUsername ?? "",
+    streamerUsername: data.streamerUsername,
     voiceName: data.voiceName,
     createdAt: Date.parse(data.createdAt),
     expiredAt: data.expiredAt ? Date.parse(data.expiredAt) : 0,
@@ -85,28 +77,19 @@ export function resolveStatus(view: DonationView): DonationStatus {
   return view.status;
 }
 
-interface StreamerProfileApiResponse {
-  name: string;
-  username: string;
-  /** Campo novo no backend; respostas antigas podem omitir. */
-  verified?: boolean;
-  profileImageUrl: string | null;
-  overlayActive: boolean;
-  minAudioAmount: number;
-  minTextAmount: number;
-  maxLength: number;
-}
+type StreamerProfileApiResponse =
+  components["schemas"]["PublicUserEntity"];
 
 export function mapStreamerProfile(data: StreamerProfileApiResponse): StreamerProfile {
   return {
     name: data.name,
     username: data.username,
-    verified: data.verified ?? false,
+    verified: data.verified,
     profileImageUrl: data.profileImageUrl,
     overlayActive: data.overlayActive,
     minAudioAmount: data.minAudioAmount,
     minTextAmount: data.minTextAmount,
-    maxLength: data.maxLength,
+    maxLength: Math.min(data.maxLength, 250),
   };
 }
 
@@ -114,19 +97,18 @@ export async function getStreamerByUsername(
   username: string,
 ): Promise<StreamerProfile | null> {
   const res = await fetchApi<StreamerProfileApiResponse>(
-    client.get(`/user/${encodeURIComponent(username)}`),
+    client.get(`/donations/user/${encodeURIComponent(username)}`),
   );
   return res.success ? mapStreamerProfile(res.data) : null;
 }
 
-interface PublicVoiceApiResponse {
-  id: string;
-  name: string;
-  provider?: string | null;
-  sampleUrl: string | null;
-  /** Foto do personagem retornada pelo GET /voices. */
-  photoUrl?: string | null;
-}
+// `provider` não existe no schema, mas o runtime pode voltar a enviá-lo;
+// tolerar mantém as tags de voz funcionando sem quebrar o contrato.
+type PublicVoiceApiResponse =
+  components["schemas"]["PublicVoiceEntity"] & {
+    provider?: string | null;
+    photoUrl?: string | null;
+  };
 
 export async function listVoices(): Promise<TtsVoice[]> {
   const res = await fetchApi<PublicVoiceApiResponse[]>(client.get("/voices"));
@@ -141,7 +123,7 @@ export async function listVoices(): Promise<TtsVoice[]> {
 }
 
 export interface CreateDonationInput {
-  name: string;
+  name?: string;
   message: string;
   /** Valor em centavos. */
   amount: number;
@@ -150,8 +132,10 @@ export interface CreateDonationInput {
 
 /** `voiceId` fica de fora do corpo quando nulo (doação "Voz padrão do streamer"). */
 export function buildDonationBody(input: CreateDonationInput, username: string) {
+  const name = input.name?.trim();
+
   return {
-    name: input.name,
+    ...(name ? { name } : {}),
     message: input.message,
     amount: input.amount / 100,
     username,
@@ -164,7 +148,7 @@ export async function createDonation(
   username: string,
 ): Promise<DonationPayment> {
   const res = await fetchApi<DonationApiResponse>(
-    client.post("/donation", buildDonationBody(input, username)),
+    client.post("/donations/donation", buildDonationBody(input, username)),
   );
   if (!res.success) {
     throw new Error(res.error?.message || DEFAULT_ERROR_MESSAGE);
@@ -174,7 +158,7 @@ export async function createDonation(
 
 /** `null` = doação não encontrada (404); outras falhas lançam. */
 export async function getDonationView(id: string): Promise<DonationView | null> {
-  const res = await fetchApi<DonationViewApiResponse>(client.get(`/donation/${id}`));
+  const res = await fetchApi<DonationViewApiResponse>(client.get(`/donations/donation/${id}`));
   if (!res.success) {
     if (res.error?.code === 404) return null;
     throw new Error(res.error?.message || DEFAULT_ERROR_MESSAGE);

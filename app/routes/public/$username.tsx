@@ -1,9 +1,9 @@
 import { useLoaderData, useParams } from "react-router";
 import type { Route } from "./+types/$username";
-import { LogoTile } from "~/components/ui/Logo";
+import { LogoTile } from "~/components/ui/LogoTile";
 import { createDonation, getStreamerByUsername, listVoices } from "~/api/modules/public-donations";
-import { UnifiedDonationCard } from "~/components/donation/UnifiedDonationCard";
-import { NotFoundState } from "~/components/donation/NotFoundState";
+import { UnifiedDonationCard } from "~/components/donate/UnifiedDonationCard";
+import { NotFoundState } from "~/components/donate/NotFoundState";
 import type { DonationFormValues } from "~/validators/donation-validator";
 
 export function meta({ loaderData }: Route.MetaArgs) {

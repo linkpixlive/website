@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router";
-import { DatePicker } from "../ui/DatePicker";
-import { Icon } from "../ui/Icon";
-import { SelectField } from "../ui/SelectField";
+import { DatePicker } from "~/components/ui/DatePicker";
+import { SelectField } from "~/components/ui/SelectField";
+import { FilterShell } from "~/components/ui/FilterShell";
+import { updateParams, setParamOrDelete } from "~/util/search-params";
 
 const statusOptions = [
   { value: "all", label: "Todos os status" },
@@ -24,113 +25,73 @@ export function WithdrawalFilters() {
     : null;
 
   const handleStatusChange = (value: string) => {
-    const params = new URLSearchParams(searchParams);
-    if (value && value !== "all") {
-      params.set("status", value);
-    } else {
-      params.delete("status");
-    }
-    params.set("page", "1");
-    setSearchParams(params);
+    updateParams(searchParams, setSearchParams, (params) => {
+      setParamOrDelete(params, "status", value, "all");
+    });
   };
 
   const handleStartDateChange = (date: Date | null) => {
-    const params = new URLSearchParams(searchParams);
-    if (date) {
-      params.set("startDate", date.toISOString().split("T")[0]);
-    } else {
-      params.delete("startDate");
-    }
-    params.set("page", "1");
-    setSearchParams(params);
+    updateParams(searchParams, setSearchParams, (params) => {
+      if (date) {
+        params.set("startDate", date.toISOString().split("T")[0]);
+      } else {
+        params.delete("startDate");
+      }
+    });
   };
 
   const handleEndDateChange = (date: Date | null) => {
-    const params = new URLSearchParams(searchParams);
-    if (date) {
-      params.set("endDate", date.toISOString().split("T")[0]);
-    } else {
-      params.delete("endDate");
-    }
-    params.set("page", "1");
-    setSearchParams(params);
+    updateParams(searchParams, setSearchParams, (params) => {
+      if (date) {
+        params.set("endDate", date.toISOString().split("T")[0]);
+      } else {
+        params.delete("endDate");
+      }
+    });
   };
 
   const handleClearFilters = () => {
-    const params = new URLSearchParams(searchParams);
-    params.delete("status");
-    params.delete("startDate");
-    params.delete("endDate");
-    params.set("page", "1");
-    setSearchParams(params);
+    updateParams(searchParams, setSearchParams, (params) => {
+      params.delete("status");
+      params.delete("startDate");
+      params.delete("endDate");
+    });
   };
 
   const hasActiveFilters =
     searchParams.has("status") || searchParams.has("startDate") || searchParams.has("endDate");
 
   return (
-    <div>
-      <div className="flex md:hidden items-center justify-between">
-        <button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 text-[13px] font-semibold text-ink-body hover:text-ink-heading cursor-pointer outline-none"
-        >
-          <Icon name="filter" size={16} strokeWidth={1.9} className="text-chrome-icon" />
-          {isOpen ? "Ocultar filtros" : "Filtros"}
-          {hasActiveFilters && <span className="w-2 h-2 rounded-full bg-brand" />}
-        </button>
-        {hasActiveFilters && !isOpen && (
-          <button
-            type="button"
-            onClick={handleClearFilters}
-            className="text-xs font-semibold text-info hover:text-blue-700 underline cursor-pointer outline-none"
-          >
-            Limpar filtros
-          </button>
-        )}
+    <FilterShell
+      hasActiveFilters={hasActiveFilters}
+      onClearFilters={handleClearFilters}
+      isOpen={isOpen}
+      onToggleOpen={() => setIsOpen(!isOpen)}
+    >
+      <div className="w-full sm:w-44">
+        <SelectField
+          label="Status"
+          options={statusOptions}
+          value={status}
+          onChange={handleStatusChange}
+        />
       </div>
 
-      <div
-        className={`mt-4 gap-4 flex-col sm:flex-row sm:flex-wrap sm:items-end ${
-          isOpen ? "flex" : "hidden md:flex"
-        }`}
-      >
-        <div className="w-full sm:w-44">
-          <SelectField
-            label="Status"
-            options={statusOptions}
-            value={status}
-            onChange={handleStatusChange}
-          />
-        </div>
-
-        <div className="w-full sm:w-48">
-          <DatePicker
-            label="Data de Início"
-            value={startDate}
-            onChange={handleStartDateChange}
-          />
-        </div>
-
-        <div className="w-full sm:w-48">
-          <DatePicker
-            label="Data Final"
-            value={endDate}
-            onChange={handleEndDateChange}
-          />
-        </div>
-
-        {hasActiveFilters && (
-          <button
-            type="button"
-            onClick={handleClearFilters}
-            className="hidden md:block self-end pb-2.5 text-xs font-semibold text-info hover:text-blue-700 underline cursor-pointer outline-none"
-          >
-            Limpar filtros
-          </button>
-        )}
+      <div className="w-full sm:w-48">
+        <DatePicker
+          label="Data de Início"
+          value={startDate}
+          onChange={handleStartDateChange}
+        />
       </div>
-    </div>
+
+      <div className="w-full sm:w-48">
+        <DatePicker
+          label="Data Final"
+          value={endDate}
+          onChange={handleEndDateChange}
+        />
+      </div>
+    </FilterShell>
   );
 }

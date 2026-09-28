@@ -1,29 +1,14 @@
+import type { components } from "../generated/api-schema";
 import { createApiClient, fetchApi } from "../http/client";
 
-export interface DonationSettings {
-  id: string;
-  maxLength: number;
-  minAudioAmount: number;
-  minTextAmount: number;
-  aiModeration: boolean;
-  filterProfanity: boolean;
-  filterSpam: boolean;
-  filterHateSpeech: boolean;
-  customRules: string;
-  defaultVoiceId: string | null;
-  updatedAt: string;
-}
+// `userId` existe no payload do banco, mas não pertence ao modelo de UI.
+export type DonationSettings = Omit<
+  components["schemas"]["DonationSettingsEntity"],
+  "userId"
+>;
 
-export interface UpdateDonationSettingsPayload {
-  maxLength?: number;
-  minAudioAmount?: number;
-  minTextAmount?: number;
-  aiModeration?: boolean;
-  filterProfanity?: boolean;
-  filterSpam?: boolean;
-  filterHateSpeech?: boolean;
-  customRules?: string;
-}
+export type UpdateDonationSettingsPayload =
+  components["schemas"]["UpdateDonationSettingsDto"];
 
 export const donationSettingsApi = {
   getSettings: (token?: string | null) =>

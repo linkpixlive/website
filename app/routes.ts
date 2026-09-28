@@ -4,16 +4,16 @@ export default [
   layout("routes/public/layout.tsx", [
     route(":username", "routes/public/$username.tsx"),
     route("doacao/:id", "routes/public/donation-confirmation.tsx"),
-    layout("routes/public/auth/layout.tsx", [
-      route("auth/login", "routes/public/auth/login.tsx"),
-      route("auth/register", "routes/public/auth/register.tsx"),
-      route("auth/forgot-password", "routes/public/auth/forgot-password.tsx"),
-      route("auth/reset-password", "routes/public/auth/reset-password.tsx"),
-      route("auth/verify-email", "routes/public/auth/verify-email.tsx"),
-    ]),
+    route("indisponivel", "routes/public/indisponivel.tsx"),
+    route("auth/login", "routes/public/auth/login.tsx"),
+    route("auth/register", "routes/public/auth/register.tsx"),
+    route("auth/forgot-password", "routes/public/auth/forgot-password.tsx"),
+    route("auth/reset-password", "routes/public/auth/reset-password.tsx"),
+    route("auth/verify-email", "routes/public/auth/verify-email.tsx"),
   ]),
   layout("routes/private/layout.tsx", [
-    index("routes/private/home.tsx"),
+    index("routes/private/index.tsx"),
+    route("dashboard", "routes/private/dashboard.tsx"),
     route("carteira", "routes/private/wallet/index.tsx"),
     route("widgets", "routes/private/widgets/layout.tsx", [
       index("routes/private/widgets/index.tsx"),

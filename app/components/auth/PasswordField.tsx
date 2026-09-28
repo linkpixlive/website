@@ -1,4 +1,5 @@
 import { forwardRef, useId, useState } from "react";
+import { FieldError } from "~/components/ui/FieldError";
 import { Icon } from "~/components/ui/Icon";
 import type { IconName } from "~/components/ui/Icon";
 
@@ -42,13 +43,12 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
             aria-invalid={error ? true : undefined}
             className={`
               w-full bg-wash rounded-full py-2.5 text-sm font-medium text-ink-heading placeholder:text-ink-placeholder
-              border border-line-input transition-colors duration-150 outline-none
-              focus:border-border-focus focus:ring-2 focus:ring-brand/30
+              border transition-colors duration-150 outline-none
               ${icon ? "pl-10" : "pl-4"} pr-11
               ${
                 error
-                  ? "!border-error focus:!border-error focus:!ring-error/20"
-                  : ""
+                  ? "border-error focus:border-error focus:ring-2 focus:ring-error/20"
+                  : "border-line-input focus:border-border-focus focus:ring-2 focus:ring-brand/30"
               }
               ${disabled ? "opacity-50 cursor-not-allowed" : ""}
               ${className || ""}
@@ -90,11 +90,7 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
           </div>
         )}
 
-        {error && (
-          <span className="text-error text-xs font-medium animate-[shake_0.4s_ease-in-out]">
-            {error}
-          </span>
-        )}
+        <FieldError message={error} />
       </div>
     );
   }

@@ -1,12 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useFetcher } from "react-router";
 import { AlertMessage } from "~/components/ui/AlertMessage";
 import { Modal } from "~/components/ui/Modal";
 import { PasswordField } from "~/components/auth/PasswordField";
+import { OtpField } from "~/components/auth/OtpField";
 import { SubmitButton } from "~/components/ui/SubmitButton";
 import { useToast } from "~/components/ui/useToast";
+import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
+import { useResetOnOpen } from "~/hooks/useResetOnOpen";
 import {
   changePasswordSchema,
   type ChangePasswordValues,
@@ -15,22 +18,26 @@ import {
 interface ChangePasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
+  /** Com 2FA ativo o backend exige a senha atual + TOTP. */
+  has2fa?: boolean;
 }
 
 export function ChangePasswordModal({
   isOpen,
   onClose,
+  has2fa,
 }: ChangePasswordModalProps) {
   const fetcher = useFetcher();
   const loading = fetcher.state === "submitting";
   const { toast } = useToast();
   const [localError, setLocalError] = useState<string | null>(null);
-  const lastHandledResult = useRef<unknown>(null);
 
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(changePasswordSchema),
@@ -41,40 +48,37 @@ export function ChangePasswordModal({
     } as ChangePasswordValues,
   });
 
-  useEffect(() => {
-    if (isOpen) {
-      reset({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
-      setLocalError(null);
-    }
-  }, [isOpen, reset]);
+  const totp = watch("totp");
 
-  useEffect(() => {
-    if (!fetcher.data || fetcher.data === lastHandledResult.current) return;
-    lastHandledResult.current = fetcher.data;
+  useResetOnOpen(isOpen, () => {
+    reset({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+    setLocalError(null);
+  });
 
-    if (fetcher.data.success) {
-      toast(fetcher.data.message ?? "Senha alterada com sucesso.", "success");
-      onClose();
-    } else if (fetcher.data.error) {
-      setLocalError(fetcher.data.error);
-    }
-  }, [fetcher.data, toast, onClose]);
-
-  useEffect(() => {
-    if (fetcher.state === "submitting") {
-      setLocalError(null);
-    }
-  }, [fetcher.state]);
+  useFetcherFeedback({
+    data: fetcher.data,
+    state: fetcher.state,
+    onResult: (result: any) => {
+      if (result.success) {
+        toast(result.message ?? "Senha alterada com sucesso.", "success");
+        onClose();
+      } else if (result.error) {
+        setLocalError(result.error);
+      }
+    },
+    onSubmitting: () => setLocalError(null),
+  });
 
   const onSubmit = (values: ChangePasswordValues) => {
     const formData = new FormData();
     formData.append("intent", "changePassword");
     formData.append("currentPassword", values.currentPassword);
     formData.append("newPassword", values.newPassword);
+    if (values.totp) formData.append("totp", values.totp);
     fetcher.submit(formData, { method: "post" });
   };
 
@@ -110,7 +114,21 @@ export function ChangePasswordModal({
           {...register("confirmPassword")}
         />
 
-        <SubmitButton loading={loading} disabled={loading} className="mt-1">
+        {has2fa && (
+          <OtpField
+            label="Código do autenticador"
+            isOpen={isOpen}
+            disabled={loading}
+            error={Boolean(localError) && !totp}
+            onChange={(code) => setValue("totp", code, { shouldValidate: false })}
+          />
+        )}
+
+        <SubmitButton
+          loading={loading}
+          disabled={loading || (has2fa && totp?.length !== 6)}
+          className="mt-1"
+        >
           Salvar
         </SubmitButton>
       </form>

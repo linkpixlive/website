@@ -1,14 +1,16 @@
-import { useLoaderData, useNavigation, useSearchParams } from "react-router";
-import { dashboardApi, type DonationHistory } from "~/api/modules/dashboard";
+import { useLoaderData, useNavigation } from "react-router";
+import { dashboardApi, toHistoryQuery, type DonationHistory } from "~/api/modules/dashboard";
 import { PageHeader } from "~/components/dashboard/PageHeader";
-import { DonationHistoryFilters } from "~/components/donations/DonationHistoryFilters";
-import { DonationHistoryList } from "~/components/donations/DonationHistoryList";
-import { DonationQueuePopover } from "~/components/donations/DonationQueuePopover";
-import { QueueToolbar } from "~/components/queue/QueueToolbar";
+import { DonationHistoryFilters } from "~/components/history/DonationHistoryFilters";
+import { DonationHistoryList } from "~/components/history/DonationHistoryList";
+import { QueueControlsSection } from "~/components/queue/QueueControlsSection";
 import { Pagination } from "~/components/ui/Pagination";
-import { useDonationHistorySocket } from "~/hooks/useDonationHistorySocket";
-import { useQueueActions } from "~/hooks/useQueueActions";
-import { useQueueSocket } from "~/hooks/useQueueSocket";
+import { DonationsSubtitle } from "~/components/queue/DonationsSubtitle";
+import { useDonationsPage } from "~/components/queue/useDonationsPage";
+import { usePageParam } from "~/hooks/usePageParam";
+import { CARD_CLASS, SECTION_HEADING_CLASS } from "~/components/ui/classes";
+import { DEFAULT_HISTORY_DAYS } from "~/util/history-filters";
+import { getPageParam } from "~/util/search-params";
 import { getAuthToken } from "~/util/session.server";
 import type { Route } from "./+types/donations";
 
@@ -22,11 +24,11 @@ export function meta({}: Route.MetaArgs) {
 export async function loader({ request }: Route.LoaderArgs) {
   const token = getAuthToken(request);
   const url = new URL(request.url);
-  const page = Number(url.searchParams.get("page") || "1");
-  const limit = Number(url.searchParams.get("limit") || "10");
+  const page = getPageParam(url);
+  const limit = getPageParam(url, "limit", 10);
   const status = url.searchParams.get("status") || undefined;
   // Padrão = últimos 30 dias (teto de retenção, alinhado ao lifecycle do R2).
-  const days = url.searchParams.get("days") || "30";
+  const days = url.searchParams.get("days") || DEFAULT_HISTORY_DAYS;
   const search = url.searchParams.get("search") || undefined;
   const searchBy = url.searchParams.get("searchBy") || undefined;
 
@@ -39,14 +41,10 @@ export async function loader({ request }: Route.LoaderArgs) {
   };
 
   try {
-    const res = await dashboardApi.getHistory(token, {
-      page,
-      limit,
-      status,
-      days,
-      search,
-      searchBy,
-    });
+    const res = await dashboardApi.getHistory(
+      token,
+      toHistoryQuery({ page, limit, status, days, search, searchBy }),
+    );
     if (res.success) {
       history = res.data;
     }
@@ -59,22 +57,21 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export default function Donations() {
   const { token, history, page, totalPages } = useLoaderData<typeof loader>();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, handlePageChange } = usePageParam();
   const navigation = useNavigation();
-  const { queue, isPaused } = useQueueSocket(token);
   const filters = {
     status: searchParams.get("status") || undefined,
-    days: searchParams.get("days") || "30",
+    days: searchParams.get("days") || DEFAULT_HISTORY_DAYS,
     search: searchParams.get("search") || undefined,
     searchBy: searchParams.get("searchBy") || undefined,
   };
-  const { items: liveItems, total: liveTotal } = useDonationHistorySocket(
-    token,
-    history,
-    page,
-    filters,
-  );
   const {
+    queue,
+    isPaused,
+    liveItems,
+    liveTotal,
+    pendingCount,
+    currentId,
     actionLoading,
     replayLoading,
     handleTogglePause,
@@ -82,19 +79,11 @@ export default function Donations() {
     handleClear,
     handleTest,
     handleReplay,
-  } = useQueueActions(token, isPaused);
+  } = useDonationsPage({ token, history, page, filters });
 
   const loadingData = navigation.state === "loading";
-  const pendingCount = queue.filter((d) => !d.isCurrent).length;
   const displayItems = liveItems;
   const displayTotal = liveTotal;
-  const currentId = queue.find((d) => d.isCurrent)?.id ?? null;
-
-  const handlePageChange = (newPage: number) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("page", String(newPage));
-    setSearchParams(params);
-  };
 
   const handleOpenPopup = () => {
     window.open(
@@ -109,66 +98,33 @@ export default function Donations() {
       <PageHeader
         title="Doações"
         subtitle={
-          displayTotal > 0 ? (
-            <>
-              Você tem{" "}
-              <strong className="font-bold text-ink-heading">
-                {displayTotal} {displayTotal === 1 ? "doação" : "doações"}
-              </strong>{" "}
-              no histórico.
-              {pendingCount > 0 && (
-                <>
-                  {" "}
-                  <strong className="font-bold text-ink-heading">
-                    {pendingCount} na fila
-                  </strong>
-                </>
-              )}
-            </>
-          ) : queue.length > 0 ? (
-            <>
-              Você tem{" "}
-              <strong className="font-bold text-ink-heading">
-                {queue.length} {queue.length === 1 ? "alerta" : "alertas"}
-              </strong>{" "}
-              na fila de exibição.
-            </>
-          ) : (
-            "Nenhuma doação recebida ainda."
-          )
+          <DonationsSubtitle
+            total={displayTotal}
+            queueLength={queue.length}
+            pendingCount={pendingCount}
+          />
         }
       />
 
       <div className="flex flex-col gap-5">
-        <section
-          aria-label="Controles da fila"
-          className="rounded-[26px] bg-card border border-line shadow-xs p-5"
-        >
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-            <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label shrink-0">
-              Controles
-            </h2>
-            <div className="flex flex-wrap items-center gap-2">
-              <DonationQueuePopover queue={queue} token={token} />
-              <QueueToolbar
-                isPaused={isPaused}
-                onTogglePause={handleTogglePause}
-                onSkip={handleSkip}
-                onClear={handleClear}
-                onTest={handleTest}
-                onOpenPopup={handleOpenPopup}
-                loading={actionLoading}
-              />
-            </div>
-          </div>
-        </section>
+        <QueueControlsSection
+          queue={queue}
+          token={token}
+          isPaused={isPaused}
+          actionLoading={actionLoading}
+          onTogglePause={handleTogglePause}
+          onSkip={handleSkip}
+          onClear={handleClear}
+          onTest={handleTest}
+          onOpenPopup={handleOpenPopup}
+        />
 
         <section
           aria-label="Histórico de doações"
-          className="rounded-[26px] bg-card border border-line shadow-xs p-5"
+          className={CARD_CLASS}
         >
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+            <h2 className={SECTION_HEADING_CLASS}>
               Histórico
             </h2>
             {displayTotal > 0 && (

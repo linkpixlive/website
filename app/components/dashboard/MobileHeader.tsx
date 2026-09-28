@@ -1,5 +1,5 @@
 import { Icon } from "~/components/ui/Icon";
-import { LogoTile } from "~/components/ui/Logo";
+import { LogoTile } from "~/components/ui/LogoTile";
 
 interface MobileHeaderProps {
   onOpenMenu: () => void;
@@ -16,7 +16,7 @@ export function MobileHeader({ onOpenMenu }: MobileHeaderProps) {
       >
         <Icon name="hamburger-menu" size={22} strokeWidth={1.9} />
       </button>
-      <LogoTile href="/" imgClassName="h-7" textClassName="text-xl" />
+      <LogoTile href="/dashboard" imgClassName="h-7" textClassName="text-xl" />
     </header>
   );
 }

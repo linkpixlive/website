@@ -1,24 +1,29 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
+  redirect,
   useActionData,
   useLoaderData,
   useNavigation,
-  useSearchParams,
 } from "react-router";
-import { pixKeysApi, type PixKey } from "~/api/modules/pix-keys";
+import { accountSettingsApi } from "~/api/modules/account-settings";
+import { pixKeysApi } from "~/api/modules/pix-keys";
 import { walletsApi } from "~/api/modules/wallets";
-import { withdrawalsApi, type Withdrawal } from "~/api/modules/withdrawals";
+import { toWithdrawalStatus, withdrawalsApi } from "~/api/modules/withdrawals";
 import { PageHeader } from "~/components/dashboard/PageHeader";
-import { Icon } from "~/components/ui/Icon";
 import { Pagination } from "~/components/ui/Pagination";
 import { useToast } from "~/components/ui/useToast";
 import { BalanceCard } from "~/components/wallet/BalanceCard";
 import { PixKeysCard } from "~/components/wallet/PixKeysCard";
 import { PixKeysModal } from "~/components/wallet/PixKeysModal";
+import { StreamerPrivacyNotice } from "~/components/wallet/StreamerPrivacyNotice";
 import { WithdrawalFilters } from "~/components/wallet/WithdrawalFilters";
 import { WithdrawalHistoryTable } from "~/components/wallet/WithdrawalHistoryTable";
 import { WithdrawalModal } from "~/components/wallet/WithdrawalModal";
 import { clearAuthCookie, getAuthToken } from "~/util/session.server";
+import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
+import { usePageParam } from "~/hooks/usePageParam";
+import { getPageParam } from "~/util/search-params";
+import { CARD_CLASS, SECTION_HEADING_CLASS } from "~/components/ui/classes";
 import type { Route } from "./+types/index";
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -26,43 +31,106 @@ export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
 
   // Search parameters for filters and pagination
-  const page = Number(url.searchParams.get("page") || "1");
-  const limit = Number(url.searchParams.get("limit") || "10");
-  const status = url.searchParams.get("status") || undefined;
-  const startDate = url.searchParams.get("startDate") || undefined;
-  const endDate = url.searchParams.get("endDate") || undefined;
+  const page = getPageParam(url);
+  const limit = getPageParam(url, "limit", 10);
 
-  let balances = { available: 0, pending: 0, blocked: 0 };
-  let pixKeys: PixKey[] = [];
-  let withdrawals: {
-    items: Withdrawal[];
-    meta: { total: number; page: number; limit: number; totalPages: number };
-  } = {
-    items: [],
-    meta: { total: 0, page: 1, limit: 10, totalPages: 1 },
-  };
+  const walletPage = await walletsApi.getWalletPage(token, {
+    page,
+    limit,
+    status: toWithdrawalStatus(url.searchParams.get("status")),
+    startDate: url.searchParams.get("startDate") || undefined,
+    endDate: url.searchParams.get("endDate") || undefined,
+  });
 
-  try {
-    const [balRes, keysRes, withRes] = await Promise.all([
-      walletsApi.getBalances(token),
-      pixKeysApi.list(token),
-      withdrawalsApi.list(token, { page, limit, status, startDate, endDate }),
-    ]);
-
-    if (balRes.success) balances = balRes.data;
-    if (keysRes.success) pixKeys = keysRes.data;
-    if (withRes.success) withdrawals = withRes.data;
-  } catch (err) {
-    console.error("Loader fetch error:", err);
-  }
+  // `has2fa` decide se o saque pede só a senha ou senha + TOTP no formulário.
+  const account = await accountSettingsApi.getSettings(token);
 
   return {
-    balances,
-    pixKeys,
-    withdrawals,
+    ...walletPage,
     page,
-    totalPages: withdrawals.meta.totalPages,
+    totalPages: walletPage.withdrawals.meta.totalPages,
+    has2fa: account.success ? account.data.has2fa : false,
   };
+}
+
+type WalletActionResult = {
+  success: boolean;
+  action: string;
+  error?: string;
+};
+
+async function createWithdrawalAction(
+  token: string | null,
+  formData: FormData,
+): Promise<WalletActionResult> {
+  const amount = Number(formData.get("amount"));
+  const pixId = formData.get("pixId") as string;
+  const password = String(formData.get("password") ?? "");
+  const totp = formData.get("totp") ? String(formData.get("totp")) : undefined;
+  const idempotencyKey = String(formData.get("idempotencyKey") ?? "");
+
+  if (!idempotencyKey) {
+    return {
+      success: false,
+      action: "createWithdrawal",
+      error: "Falha interna: chave de idempotência ausente.",
+    };
+  }
+
+  const res = await withdrawalsApi.create(
+    token,
+    { amount, pixId, password, totp },
+    idempotencyKey,
+  );
+
+  if (!res.success) {
+    return {
+      success: false,
+      action: "createWithdrawal",
+      error: res.error.message,
+    };
+  }
+
+  return { success: true, action: "createWithdrawal" };
+}
+
+async function createPixKeyAction(
+  token: string | null,
+  formData: FormData,
+): Promise<WalletActionResult> {
+  const key = formData.get("key") as string;
+  const alias = (formData.get("alias") as string) || undefined;
+
+  const res = await pixKeysApi.create(token, { key, alias });
+
+  if (!res.success) {
+    return {
+      success: false,
+      action: "createPixKey",
+      error: res.error.message,
+    };
+  }
+
+  return { success: true, action: "createPixKey" };
+}
+
+async function deletePixKeyAction(
+  token: string | null,
+  formData: FormData,
+): Promise<WalletActionResult> {
+  const id = formData.get("id") as string;
+
+  const res = await pixKeysApi.delete(token, id);
+
+  if (!res.success) {
+    return {
+      success: false,
+      action: "deletePixKey",
+      error: res.error.message,
+    };
+  }
+
+  return { success: true, action: "deletePixKey" };
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -77,150 +145,54 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   if (intent === "createWithdrawal") {
-    const amount = Number(formData.get("amount"));
-    const pixId = formData.get("pixId") as string;
-
-    const res = await withdrawalsApi.create(token, { amount, pixId });
-
-    if (!res.success) {
-      return {
-        success: false,
-        action: "createWithdrawal",
-        error: res.error.message,
-      };
-    }
-
-    return { success: true, action: "createWithdrawal" };
+    return createWithdrawalAction(token, formData);
   }
 
   if (intent === "createPixKey") {
-    const key = formData.get("key") as string;
-    const alias = (formData.get("alias") as string) || undefined;
-
-    const res = await pixKeysApi.create(token, { key, alias });
-
-    if (!res.success) {
-      return {
-        success: false,
-        action: "createPixKey",
-        error: res.error.message,
-      };
-    }
-
-    return { success: true, action: "createPixKey" };
+    return createPixKeyAction(token, formData);
   }
 
   if (intent === "deletePixKey") {
-    const id = formData.get("id") as string;
-
-    const res = await pixKeysApi.delete(token, id);
-
-    if (!res.success) {
-      return {
-        success: false,
-        action: "deletePixKey",
-        error: res.error.message,
-      };
-    }
-
-    return { success: true, action: "deletePixKey" };
+    return deletePixKeyAction(token, formData);
   }
 
   return null;
 }
 
-import { redirect } from "react-router";
-
-const STREAMER_WARNING_KEY = "linkpix:hide-streamer-warning";
-
-function StreamerPrivacyNotice() {
-  const [visible, setVisible] = useState(true);
-
-  useEffect(() => {
-    try {
-      if (window.localStorage.getItem(STREAMER_WARNING_KEY) === "1") {
-        setVisible(false);
-      }
-    } catch {
-      // localStorage indisponível: mantém o aviso visível.
-    }
-  }, []);
-
-  if (!visible) return null;
-
-  const dismiss = () => {
-    try {
-      window.localStorage.setItem(STREAMER_WARNING_KEY, "1");
-    } catch {
-      // Ignora falha de persistência e só oculta na sessão atual.
-    }
-    setVisible(false);
-  };
-
-  return (
-    <div
-      role="note"
-      className="mb-5 flex items-start gap-3 rounded-xl border border-info/20 bg-info/10 px-4 py-3 text-info animate-slide-down"
-    >
-      <Icon name="info-circle" size={16} strokeWidth={1.9} className="shrink-0 mt-0.5" />
-      <p className="flex-1 text-[13px] font-medium">
-        Vai mostrar essa tela em live? Oculte os valores com o ícone de olho —
-        saldos e chaves Pix são informações sensíveis.
-      </p>
-      <button
-        type="button"
-        onClick={dismiss}
-        aria-label="Dispensar aviso"
-        title="Dispensar aviso"
-        className="rounded-full p-1 hover:bg-info/10 transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95"
-      >
-        <Icon name="close-circle" size={16} strokeWidth={1.9} />
-      </button>
-    </div>
-  );
-}
-
 export default function WalletPage() {
-  const { balances, pixKeys, withdrawals, page, totalPages } =
+  const { balances, pixKeys, withdrawals, page, totalPages, has2fa } =
     useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { handlePageChange } = usePageParam();
   const navigation = useNavigation();
   const { toast } = useToast();
 
-  const [isWithdrawalOpen, setIsWithdrawalOpen] = useState(false);
-  const [isPixKeysOpen, setIsPixKeysOpen] = useState(false);
+  const [modal, setModal] = useState<"withdraw" | "pixKeys" | null>(null);
 
   const [withdrawalError, setWithdrawalError] = useState<string | null>(null);
-  const lastHandledAction = useRef<unknown>(null);
 
   const loadingData = navigation.state === "loading";
 
   // Handle action results (toast feedbacks & modal closing)
-  useEffect(() => {
-    if (!actionData || actionData === lastHandledAction.current) return;
-    lastHandledAction.current = actionData;
-
-    if (actionData.success) {
-      if (actionData.action === "createWithdrawal") {
-        toast("Saque solicitado com sucesso!", "success");
-        setIsWithdrawalOpen(false);
-        setWithdrawalError(null);
+  useFetcherFeedback({
+    data: actionData,
+    state: navigation.state,
+    onResult: (result: any) => {
+      if (result.success) {
+        if (result.action === "createWithdrawal") {
+          toast("Saque solicitado com sucesso!", "success");
+          setModal(null);
+          setWithdrawalError(null);
+        }
+      } else if (result.error && result.action === "createWithdrawal") {
+        setWithdrawalError(result.error);
       }
-    } else if (actionData.error && actionData.action === "createWithdrawal") {
-      setWithdrawalError(actionData.error);
-    }
-  }, [actionData, toast]);
-
-  const handlePageChange = (newPage: number) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("page", String(newPage));
-    setSearchParams(params);
-  };
+    },
+  });
 
   const openWithdrawal = () => {
     setWithdrawalError(null);
-    setIsWithdrawalOpen(true);
+    setModal("withdraw");
   };
 
   return (
@@ -245,15 +217,15 @@ export default function WalletPage() {
         <aside className="lg:col-span-5 xl:col-span-4">
           <PixKeysCard
             pixKeys={pixKeys}
-            onManage={() => setIsPixKeysOpen(true)}
+            onManage={() => setModal("pixKeys")}
           />
         </aside>
       </div>
 
       {/* History card */}
-      <section className="mt-5 rounded-[26px] bg-card border border-line shadow-xs p-5">
+      <section className={`mt-5 ${CARD_CLASS}`}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+          <h2 className={SECTION_HEADING_CLASS}>
             Histórico de saques
           </h2>
           {withdrawals.meta.total > 0 && (
@@ -279,19 +251,17 @@ export default function WalletPage() {
 
       {/* Modals */}
       <WithdrawalModal
-        isOpen={isWithdrawalOpen}
-        onClose={() => setIsWithdrawalOpen(false)}
+        isOpen={modal === "withdraw"}
+        onClose={() => setModal(null)}
         pixKeys={pixKeys}
-        onOpenManageKeys={() => {
-          setIsWithdrawalOpen(false);
-          setIsPixKeysOpen(true);
-        }}
+        onOpenManageKeys={() => setModal("pixKeys")}
         error={withdrawalError}
+        has2fa={has2fa}
       />
 
       <PixKeysModal
-        isOpen={isPixKeysOpen}
-        onClose={() => setIsPixKeysOpen(false)}
+        isOpen={modal === "pixKeys"}
+        onClose={() => setModal(null)}
         pixKeys={pixKeys}
       />
     </div>

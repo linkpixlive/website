@@ -17,52 +17,28 @@ export function useQueueActions(
   );
   const [replayLoading, setReplayLoading] = useState<string | null>(null);
 
-  const handleTogglePause = async () => {
-    setActionLoading((prev) => ({ ...prev, togglePause: true }));
-    const res = await overlayApi.togglePause(token);
-    setActionLoading((prev) => ({ ...prev, togglePause: false }));
+  const runAction = async (key: string, fn: () => Promise<{ success: boolean; error?: { message: string } }>, okMsg: string) => {
+    setActionLoading((prev) => ({ ...prev, [key]: true }));
+    const res = await fn();
+    setActionLoading((prev) => ({ ...prev, [key]: false }));
     if (res.success) {
-      toast(isPaused ? "Fila retomada!" : "Fila pausada!", "success");
+      toast(okMsg, "success");
     } else {
-      toast(res.error.message, "error");
+      toast(res.error?.message ?? "Tente novamente.", "error");
     }
   };
 
-  const handleSkip = async () => {
-    setActionLoading((prev) => ({ ...prev, skip: true }));
-    const res = await overlayApi.skipAlert(token);
-    setActionLoading((prev) => ({ ...prev, skip: false }));
-    if (res.success) {
-      toast(
-        isPaused ? "Mensagem removida da fila!" : "Alerta pulado!",
-        "success",
-      );
-    } else {
-      toast(res.error.message, "error");
-    }
-  };
+  const handleTogglePause = () =>
+    runAction("togglePause", () => overlayApi.togglePause(token), isPaused ? "Fila retomada!" : "Fila pausada!");
 
-  const handleClear = async () => {
-    setActionLoading((prev) => ({ ...prev, clear: true }));
-    const res = await overlayApi.clearQueue(token);
-    setActionLoading((prev) => ({ ...prev, clear: false }));
-    if (res.success) {
-      toast("Fila limpa!", "success");
-    } else {
-      toast(res.error.message, "error");
-    }
-  };
+  const handleSkip = () =>
+    runAction("skip", () => overlayApi.skipAlert(token), isPaused ? "Mensagem removida da fila!" : "Alerta pulado!");
 
-  const handleTest = async () => {
-    setActionLoading((prev) => ({ ...prev, test: true }));
-    const res = await overlayApi.testAlert(token);
-    setActionLoading((prev) => ({ ...prev, test: false }));
-    if (res.success) {
-      toast("Alerta de teste enviado!", "success");
-    } else {
-      toast(res.error.message, "error");
-    }
-  };
+  const handleClear = () =>
+    runAction("clear", () => overlayApi.clearQueue(token), "Fila limpa!");
+
+  const handleTest = () =>
+    runAction("test", () => overlayApi.testAlert(token), "Alerta de teste enviado!");
 
   const handleReplay = async (donationId: string) => {
     setReplayLoading(donationId);

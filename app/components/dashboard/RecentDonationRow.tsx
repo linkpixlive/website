@@ -2,14 +2,7 @@ import { useState } from "react";
 import { dashboardApi, type DonationHistory } from "~/api/modules/dashboard";
 import { AudioPlayer } from "~/components/ui/AudioPlayer";
 import { Icon } from "~/components/ui/Icon";
-
-function formatCurrency(value: number) {
-  if (!Number.isFinite(value)) return "—";
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  }).format(value);
-}
+import { formatBRLReais, buildDownloadName } from "~/util/currency";
 
 function formatShortDateTime(iso: string | null) {
   if (!iso) return null;
@@ -19,19 +12,6 @@ function formatShortDateTime(iso: string | null) {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-function buildDownloadName(item: DonationHistory) {
-  const slug =
-    item.name
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "") || "doacao";
-  const stamp = item.approvedAt ? new Date(item.approvedAt).getTime() : item.id;
-  const ext = item.voiceUrl?.toLowerCase().endsWith(".mp3") ? "mp3" : "wav";
-  return `doacao-${slug}-${stamp}.${ext}`;
 }
 
 interface RecentDonationRowProps {
@@ -50,7 +30,7 @@ export function RecentDonationRow({ item, token }: RecentDonationRowProps) {
           {item.name}
         </h3>
         <span className="shrink-0 text-sm font-extrabold text-ink-heading">
-          {formatCurrency(item.amount)}
+          {formatBRLReais(item.amount)}
         </span>
       </div>
 

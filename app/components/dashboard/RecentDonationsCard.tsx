@@ -3,6 +3,8 @@ import type { DonationHistory } from "~/api/modules/dashboard";
 import { Icon } from "~/components/ui/Icon";
 import { Skeleton } from "~/components/ui/Skeleton";
 import { RecentDonationRow } from "./RecentDonationRow";
+import { EmptyState } from "~/components/ui/EmptyState";
+import { CARD_CLASS, SECTION_HEADING_CLASS } from "~/components/ui/classes";
 
 interface RecentDonationsCardProps {
   items: DonationHistory[];
@@ -14,10 +16,10 @@ export function RecentDonationsCard({ items, token, loading = false }: RecentDon
   return (
     <section
       aria-label="Últimas doações"
-      className="h-full rounded-[26px] bg-card border border-line shadow-xs p-5 flex flex-col"
+      className={`h-full ${CARD_CLASS} flex flex-col`}
     >
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+        <h2 className={SECTION_HEADING_CLASS}>
           Últimas doações
         </h2>
         <Link
@@ -36,14 +38,11 @@ export function RecentDonationsCard({ items, token, loading = false }: RecentDon
           ))}
         </div>
       ) : items.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center py-8 text-center">
-          <p className="text-base font-extrabold tracking-tight text-ink-heading">
-            Nenhuma doação ainda
-          </p>
-          <p className="text-sm text-ink-secondary mt-1 max-w-xs">
-            Compartilhe sua página para receber a primeira.
-          </p>
-        </div>
+        <EmptyState
+          title="Nenhuma doação ainda"
+          description="Compartilhe sua página para receber a primeira."
+          className="flex-1 py-8"
+        />
       ) : (
         <div className="flex flex-col gap-2">
           {items.map((item) => (

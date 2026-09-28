@@ -1,12 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useRef } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Form, useNavigation, useSubmit } from "react-router";
+import { useFetcher } from "react-router";
+import { OtpField } from "~/components/auth/OtpField";
 import { PasswordField } from "~/components/auth/PasswordField";
-import { FormField } from "~/components/ui/FormField";
 import { AlertMessage } from "~/components/ui/AlertMessage";
+import { FormField } from "~/components/ui/FormField";
 import { Modal } from "~/components/ui/Modal";
 import { SubmitButton } from "~/components/ui/SubmitButton";
+import { SECTION_HEADING_CLASS } from "~/components/ui/classes";
+import { useToast } from "~/components/ui/useToast";
+import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
+import { useResetOnOpen } from "~/hooks/useResetOnOpen";
 import {
   changeEmailSchema,
   type ChangeEmailValues,
@@ -16,64 +21,143 @@ interface ChangeEmailModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentEmail?: string;
-  /** Error surfaced by the route action when the change fails. */
-  actionError?: string | null;
+  /** Com 2FA ativo o backend exige senha + TOTP. */
+  has2fa?: boolean;
 }
 
+/** Troca de email em duas etapas: `changeEmail` pede a reautenticação e dispara o
+ *  código; `confirmEmailChange` confirma. O backend preserva a sessão atual, então
+ *  nada aqui navega nem derruba o cookie. */
 export function ChangeEmailModal({
   isOpen,
   onClose,
   currentEmail,
-  actionError,
+  has2fa,
 }: ChangeEmailModalProps) {
-  const navigation = useNavigation();
-  const submit = useSubmit();
-  const formRef = useRef<HTMLFormElement>(null);
-  const loading =
-    navigation.state !== "idle" &&
-    navigation.formData?.get("intent") === "changeEmail";
+  const requestFetcher = useFetcher<{ success?: boolean; error?: string }>();
+  const confirmFetcher = useFetcher<{
+    success?: boolean;
+    error?: string;
+    message?: string;
+  }>();
+  const { toast } = useToast();
+  const [pending, setPending] = useState(false);
+  const [code, setCode] = useState("");
+  const [requestError, setRequestError] = useState<string | null>(null);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(changeEmailSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    } as ChangeEmailValues,
+    defaultValues: { email: "", password: "" } as ChangeEmailValues,
   });
 
-  useEffect(() => {
-    if (isOpen) {
-      reset({ email: "", password: "" });
-    }
-  }, [isOpen, reset]);
+  const totp = watch("totp");
+  const requesting = requestFetcher.state === "submitting";
+  const confirming = confirmFetcher.state === "submitting";
+  const busy = requesting || confirming;
 
-  // Success is handled by the route action, which redirects the whole
-  // document to the verify-email flow for the new address.
+  useResetOnOpen(isOpen, () => {
+    reset({ email: "", password: "" });
+    setPending(false);
+    setCode("");
+    setRequestError(null);
+    setConfirmError(null);
+  });
+
+  useFetcherFeedback({
+    data: requestFetcher.data,
+    state: requestFetcher.state,
+    onResult: (result) => {
+      if (result.success) {
+        setRequestError(null);
+        setPending(true);
+      } else if (result.error) {
+        setRequestError(result.error);
+      }
+    },
+    onSubmitting: () => setRequestError(null),
+  });
+
+  useFetcherFeedback({
+    data: confirmFetcher.data,
+    state: confirmFetcher.state,
+    onResult: (result: any) => {
+      if (result.success) {
+        toast(result.message ?? "E-mail atualizado com sucesso.", "success");
+        onClose();
+      } else if (result.error) {
+        setConfirmError(result.error);
+      }
+    },
+  });
+
+  const onRequest = (values: ChangeEmailValues) => {
+    const formData = new FormData();
+    formData.append("intent", "changeEmail");
+    formData.append("email", values.email);
+    formData.append("password", values.password);
+    if (values.totp) formData.append("totp", values.totp);
+    requestFetcher.submit(formData, { method: "post" });
+  };
+
+  const onConfirm = () => {
+    setConfirmError(null);
+    const formData = new FormData();
+    formData.append("intent", "confirmEmailChange");
+    formData.append("otp", code);
+    confirmFetcher.submit(formData, { method: "post" });
+  };
+
+  if (pending) {
+    return (
+      <Modal isOpen={isOpen} onClose={onClose} title="Confirmar novo e-mail" size="sm">
+        <div className="space-y-4">
+          {confirmError && (
+            <AlertMessage variant="error" message={confirmError} />
+          )}
+
+          <p className="text-[13px] font-medium leading-relaxed text-ink-secondary">
+            Enviamos um código de 6 dígitos para o novo endereço. Informe o código
+            para concluir a alteração.
+          </p>
+
+          <OtpField
+            isOpen={isOpen}
+            disabled={confirming}
+            error={Boolean(confirmError)}
+            onChange={setCode}
+            onComplete={onConfirm}
+          />
+
+          <SubmitButton
+            loading={confirming}
+            disabled={confirming || code.length !== 6}
+            onClick={onConfirm}
+          >
+            Confirmar
+          </SubmitButton>
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Alterar e-mail" size="sm">
-      <Form
-        ref={formRef}
-        method="post"
-        onSubmit={handleSubmit(() => {
-          // Validated client-side; now hand the form to React Router so the
-          // action's redirect (with its Set-Cookie header) applies document-wide.
-          if (formRef.current) submit(formRef.current, { method: "post" });
-        })}
-        className="space-y-3.5"
-      >
-        <input type="hidden" name="intent" value="changeEmail" />
-
-        {actionError && <AlertMessage variant="error" message={actionError} />}
+      <form onSubmit={handleSubmit(onRequest)} className="space-y-3.5">
+        {requestError && (
+          <AlertMessage variant="error" message={requestError} />
+        )}
 
         {currentEmail && (
           <div className="rounded-2xl bg-wash px-4 py-3">
-            <span className="block text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+            <span className={`block ${SECTION_HEADING_CLASS}`}>
               E-mail atual
             </span>
             <p className="mt-0.5 text-[13px] font-semibold text-ink-body">
@@ -89,7 +173,7 @@ export function ChangeEmailModal({
           placeholder="exemplo@email.com"
           autoComplete="email"
           error={errors.email?.message}
-          disabled={loading}
+          disabled={busy}
           {...register("email")}
         />
 
@@ -98,19 +182,32 @@ export function ChangeEmailModal({
           icon="lock"
           autoComplete="current-password"
           error={errors.password?.message}
-          disabled={loading}
+          disabled={busy}
           {...register("password")}
         />
 
+        {has2fa && (
+          <OtpField
+            label="Código do autenticador"
+            isOpen={isOpen}
+            disabled={busy}
+            error={Boolean(requestError) && !totp}
+            onChange={(value) => setValue("totp", value)}
+          />
+        )}
+
         <p className="text-xs font-medium leading-relaxed text-ink-muted">
           Enviaremos um código de verificação para o novo endereço e todas as
-          sessões serão encerradas.
+          outras sessões serão encerradas.
         </p>
 
-        <SubmitButton loading={loading} disabled={loading}>
+        <SubmitButton
+          loading={busy}
+          disabled={busy || (has2fa && totp?.length !== 6)}
+        >
           Atualizar e-mail
         </SubmitButton>
-      </Form>
+      </form>
     </Modal>
   );
 }

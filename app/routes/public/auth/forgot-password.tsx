@@ -9,6 +9,7 @@ import { AlertMessage } from "~/components/ui/AlertMessage";
 import { FormField } from "~/components/ui/FormField";
 import { SubmitButton } from "~/components/ui/SubmitButton";
 import { forgotPasswordSchema } from "~/validators/auth-validator";
+import { LINK_CLASS } from "~/components/ui/classes";
 import type { Route } from "./+types/forgot-password";
 
 export function meta({}: Route.MetaArgs) {
@@ -57,7 +58,7 @@ export default function ForgotPassword() {
           <div className="text-center">
             <Link
               to="/auth/login"
-              className="text-[13px] font-semibold text-info hover:text-blue-700 underline transition-colors duration-150"
+              className={`text-[13px] font-semibold ${LINK_CLASS} transition-colors duration-150`}
             >
               Voltar para Login
             </Link>

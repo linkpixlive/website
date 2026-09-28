@@ -2,9 +2,14 @@ import { z } from "zod";
 import { parseCurrencyToCents } from "~/util/currency";
 
 export function createDonationSchema(maxMessageLength: number, minAmountCents: number) {
+  const effectiveMaxMessageLength = Math.min(maxMessageLength, 250);
+
   return z.object({
-    name: z.string().min(1, "Seu nome é obrigatório"),
-    message: z.string().max(maxMessageLength, `A mensagem deve ter no máximo ${maxMessageLength} caracteres`),
+    name: z.string().trim().max(100, "O nome deve ter no máximo 100 caracteres"),
+    message: z.string().max(
+      effectiveMaxMessageLength,
+      `A mensagem deve ter no máximo ${effectiveMaxMessageLength} caracteres`,
+    ),
     amountText: z
       .string()
       .min(1, "Informe um valor")

@@ -1,5 +1,6 @@
 import { Button as BaseButton } from "@base-ui/react/button";
 import type { ReactNode } from "react";
+import { Spinner } from "./Spinner";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
@@ -64,9 +65,7 @@ export function Button({
       className={`${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} ${className}`}
       {...props}
     >
-      {loading && (
-        <span className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin shrink-0" />
-      )}
+      {loading && <Spinner />}
       {children}
     </BaseButton>
   );

@@ -1,18 +1,9 @@
+import type { components } from "../generated/api-schema";
 import { createApiClient, fetchApi } from "../http/client";
 
-export interface CreatePixKeyPayload {
-  key: string;
-  alias?: string;
-}
+export type CreatePixKeyPayload = components["schemas"]["CreatePixKeyDto"];
 
-export interface PixKey {
-  id: string;
-  key?: string;
-  keyMasked: string;
-  keyType: string;
-  alias?: string | null;
-  createdAt: string;
-}
+export type PixKey = components["schemas"]["PixKeyEntity"];
 
 export const pixKeysApi = {
   list: (token?: string | null) =>
