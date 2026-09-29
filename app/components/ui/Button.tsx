@@ -47,16 +47,16 @@ export function Button({
       : "bg-wash text-ink-body hover:bg-wash-hover active:scale-[0.98]",
     inverse: isDisabled
       ? "bg-inverse/50 text-white/60 cursor-not-allowed"
-      : "bg-inverse text-white hover:bg-black active:scale-[0.98]",
+      : "bg-inverse text-white hover:bg-inverse-hover active:scale-[0.98]",
     danger: isDisabled
       ? "bg-error/40 text-white cursor-not-allowed"
-      : "bg-error text-white hover:bg-error-hover shadow-md shadow-error/30 active:scale-[0.98]",
+      : "bg-error text-white hover:bg-error-hover active:scale-[0.98]",
     "danger-soft": isDisabled
       ? "bg-wash text-ink-label cursor-not-allowed"
       : "bg-error/10 text-error border border-error/20 hover:bg-error/15 active:scale-[0.98]",
     success: isDisabled
       ? "bg-success/40 text-white cursor-not-allowed"
-      : "bg-success text-white hover:bg-emerald-600 active:scale-[0.98]",
+      : "bg-success text-white hover:bg-success-hover active:scale-[0.98]",
   };
 
   return (

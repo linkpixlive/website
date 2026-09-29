@@ -59,10 +59,10 @@ export function ChangePasswordModal({
     setLocalError(null);
   });
 
-  useFetcherFeedback({
+  useFetcherFeedback<{ success: boolean; error?: string; message?: string }>({
     data: fetcher.data,
     state: fetcher.state,
-    onResult: (result: any) => {
+    onResult: (result) => {
       if (result.success) {
         toast(result.message ?? "Senha alterada com sucesso.", "success");
         onClose();

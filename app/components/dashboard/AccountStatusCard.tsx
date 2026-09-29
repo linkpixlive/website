@@ -124,8 +124,8 @@ export function AccountStatusCard({ checklist }: AccountStatusCardProps) {
 
       {allDone ? (
         <div className="flex-1 flex items-center gap-3 rounded-2xl bg-success/10 px-4 py-3 mt-3">
-          <Icon name="check-circle" size={20} strokeWidth={2} className="text-emerald-700 shrink-0" />
-          <p className="text-[13px] font-bold text-emerald-700 leading-snug">
+          <Icon name="check-circle" size={20} strokeWidth={2} className="text-success shrink-0" />
+          <p className="text-[13px] font-bold text-success leading-snug">
             Tudo pronto para receber. Boa live!
           </p>
         </div>
@@ -153,7 +153,7 @@ export function AccountStatusCard({ checklist }: AccountStatusCardProps) {
                     name="check-circle"
                     size={18}
                     strokeWidth={2}
-                    className="text-emerald-700 shrink-0"
+                    className="text-success shrink-0"
                     aria-label="Pronto"
                   />
                 ) : (

@@ -58,7 +58,7 @@ export function PaymentStep({
         </div>
       ) : (
         <>
-          <div className="inline-block rounded-2xl border border-line bg-white p-4 shadow-2xs">
+          <div className="inline-block rounded-2xl border border-line bg-card p-4 shadow-2xs">
             <QRCodeSVG value={payment.pix} size={180} fgColor="#11151e" bgColor="#ffffff" />
           </div>
 

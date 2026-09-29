@@ -35,10 +35,10 @@ export function PixKeysModal({
   });
 
   // Toast único por exclusão (sem loop em re-render).
-  useFetcherFeedback({
+  useFetcherFeedback<{ success: boolean; action: string; error?: string }>({
     data: fetcher.data,
     state: fetcher.state,
-    onResult: (result: any) => {
+    onResult: (result) => {
       if (result.success) {
         toast("Chave Pix excluída com sucesso!", "success");
         setConfirmingKey(null);

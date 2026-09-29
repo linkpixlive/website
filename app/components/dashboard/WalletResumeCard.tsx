@@ -5,7 +5,7 @@ import { Icon } from "~/components/ui/Icon";
 import { Skeleton } from "~/components/ui/Skeleton";
 import { formatBRLReais } from "~/util/currency";
 import { EyeToggleButton } from "~/components/ui/EyeToggleButton";
-import { CARD_CLASS, SECTION_HEADING_CLASS } from "~/components/ui/classes";
+import { CARD_CLASS, SECTION_HEADING_CLASS, STAT_NUMBER_CLASS } from "~/components/ui/classes";
 
 interface WalletResumeCardProps {
   balances: { available: number; pending: number; blocked: number } | null;
@@ -43,7 +43,7 @@ export function WalletResumeCard({ balances, lastWithdrawal, loading = false }: 
         <Skeleton className="h-9 w-40 rounded-xl" />
       ) : (
         <span
-          className={`text-[26px] leading-tight font-extrabold tracking-tight text-ink-heading ${
+          className={`${STAT_NUMBER_CLASS} ${
             !showValues ? "blur-sm select-none" : ""
           }`}
         >
@@ -52,7 +52,7 @@ export function WalletResumeCard({ balances, lastWithdrawal, loading = false }: 
       )}
       <p className="mt-1 text-xs font-medium text-ink-muted">
         {loading || !balances ? (
-          <Skeleton className="h-4 w-32 rounded-md" />
+          <Skeleton className="h-4 w-32 rounded-full" />
         ) : (
           <>Pendente {formatBRLReais(balances.pending)} · pronto para saque</>
         )}
@@ -70,7 +70,7 @@ export function WalletResumeCard({ balances, lastWithdrawal, loading = false }: 
         )}
         <Link
           to="/carteira"
-          className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full bg-wash px-4 h-10 w-full text-xs font-bold text-ink-body transition-all duration-150 outline-none hover:bg-[#e2e5ec] active:scale-[0.98]"
+          className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-full bg-wash px-4 h-10 w-full text-xs font-bold text-ink-body transition-all duration-150 outline-none hover:bg-wash-hover active:scale-[0.98]"
         >
           <Icon name="wallet" size={16} strokeWidth={2} />
           Abrir carteira

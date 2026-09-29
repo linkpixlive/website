@@ -1,7 +1,6 @@
 import { useEffect, useId, useState } from "react";
 import { Menu } from "@base-ui/react/menu";
 import { Icon } from "~/components/ui/Icon";
-import { CheckMark } from "~/components/ui/SelectField";
 import { MENU_ITEM_CLASS, SECTION_HEADING_CLASS } from "~/components/ui/classes";
 import { popupClasses } from "~/components/ui/header-styles";
 
@@ -83,7 +82,7 @@ export function FilterSearchField({
                     {option.label}
                     {option.value === value && (
                       <span className="absolute inset-y-0 right-3 h-4 w-4 my-auto text-yellow-ink">
-                        <CheckMark />
+                        <Icon name="check-circle" size={16} strokeWidth={2.3} />
                       </span>
                     )}
                   </Menu.Item>

@@ -73,10 +73,10 @@ export function PixKeyCreateForm({ isOpen, onError }: PixKeyCreateFormProps) {
     setSelectedType("");
   });
 
-  useFetcherFeedback({
+  useFetcherFeedback<{ success: boolean; action: string; error?: string }>({
     data: fetcher.data,
     state: fetcher.state,
-    onResult: (result: any) => {
+    onResult: (result) => {
       if (result.success) {
         toast("Chave Pix cadastrada com sucesso!", "success");
         reset({ key: "", alias: "" });

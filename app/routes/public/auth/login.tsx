@@ -18,7 +18,7 @@ export function loader({ request }: Route.LoaderArgs) {
 }
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Sign In — LinkPix" }];
+  return [{ title: "Entrar — LinkPix" }];
 }
 
 export async function action({ request }: Route.ActionArgs) {

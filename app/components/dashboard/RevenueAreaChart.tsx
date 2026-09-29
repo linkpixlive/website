@@ -33,7 +33,7 @@ function ChartTooltip({
   if (!active || !payload?.length || !label) return null;
   const raw = Number(payload[0]?.value ?? 0);
   return (
-    <div className="rounded-[16px] border border-line bg-card px-3 py-2 shadow-lg">
+    <div className="rounded-2xl border border-line bg-card px-3 py-2 shadow-lg">
       <p className="text-[11px] font-semibold text-ink-label">
         {formatLongDate(label)}
       </p>

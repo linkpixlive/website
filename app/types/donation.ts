@@ -18,6 +18,7 @@ export interface TtsVoice {
   imageUrl: string | null;
 }
 
+// Client-only: "expired" não existe no schema, derivado de expiredAt no frontend.
 export type DonationStatus = "pending" | "paid" | "displayed" | "failed" | "expired";
 
 export interface DonationPayment {

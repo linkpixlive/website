@@ -20,20 +20,6 @@ interface SelectFieldProps {
   className?: string;
 }
 
-export function CheckMark({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M4.5 12.5L9.5 17.5L19.5 6.5"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 export function SelectField({
   label,
   options,
@@ -105,7 +91,7 @@ export function SelectField({
                   >
                     <Select.ItemText className="block truncate">{option.label}</Select.ItemText>
                     <Select.ItemIndicator className="absolute inset-y-0 right-3 h-4 w-4 my-auto text-yellow-ink">
-                      <CheckMark />
+                      <Icon name="check-circle" size={16} strokeWidth={2.3} />
                     </Select.ItemIndicator>
                   </Select.Item>
                 ))

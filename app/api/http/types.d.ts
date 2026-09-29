@@ -1,4 +1,4 @@
-export interface ApiSuccessResponse<T = any> {
+export interface ApiSuccessResponse<T = unknown> {
   success: true;
   data: T;
   timestamp: string;
@@ -10,7 +10,7 @@ export interface ApiErrorResponse {
   error: {
     message: string;
     code: number;
-    details?: any;
+    details?: unknown;
   };
   timestamp: string;
   path: string;

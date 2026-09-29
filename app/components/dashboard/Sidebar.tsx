@@ -31,7 +31,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Desktop rail */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 z-20 bg-shell border-r border-white/10 flex-col">
         <div className="flex items-center justify-center pt-5 px-4 pb-4">
-          <LogoTile href="/dashboard" imgClassName="h-16" textClassName="text-[40px]" />
+          <LogoTile href="/dashboard" imgClassName="h-10" textClassName="text-2xl" />
         </div>
         <SidebarNav />
         <StreamerFooter {...footerNovidadesProps} />
@@ -53,7 +53,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <Dialog.Title render={<h2 />} className="sr-only">
                   Menu de navegação
                 </Dialog.Title>
-                <LogoTile href="/dashboard" imgClassName="h-14" textClassName="text-4xl" />
+                <LogoTile href="/dashboard" imgClassName="h-9" textClassName="text-xl" />
                 <button
                   type="button"
                   onClick={onClose}

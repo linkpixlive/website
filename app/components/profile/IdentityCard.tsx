@@ -78,7 +78,7 @@ export function IdentityCard({
             aria-label="Trocar foto de perfil"
             disabled={uploading}
             onClick={openPicker}
-            className="absolute -bottom-1 -right-1 grid h-7 w-7 place-items-center rounded-full bg-inverse text-white shadow-xs outline-none transition-all hover:bg-black active:scale-95 disabled:opacity-60 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand/40"
+            className="absolute -bottom-1 -right-1 grid h-7 w-7 place-items-center rounded-full bg-inverse text-white shadow-xs outline-none transition-all hover:bg-inverse-hover active:scale-95 disabled:opacity-60 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand/40"
           >
             <Icon name="camera-add" size={14} strokeWidth={2} />
           </button>

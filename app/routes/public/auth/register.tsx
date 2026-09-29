@@ -15,7 +15,7 @@ import { getPasswordStrength } from "~/validators/password";
 import type { Route } from "./+types/register";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Create Account — LinkPix" }];
+  return [{ title: "Criar conta — LinkPix" }];
 }
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -141,7 +141,7 @@ export default function Register() {
           Já tem uma conta?{" "}
           <Link
             to="/auth/login"
-            className="text-info hover:text-blue-700 font-semibold underline transition-colors duration-150"
+            className="text-info hover:text-info-hover font-semibold underline transition-colors duration-150"
           >
             Entre aqui
           </Link>

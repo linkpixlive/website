@@ -2,6 +2,7 @@ import type { components } from "../generated/api-schema";
 import { createApiClient, fetchApi } from "../http/client";
 import { pixKeysApi, type PixKey } from "./pix-keys";
 import {
+  DEFAULT_PAGE_LIMIT,
   toWithdrawalStatus,
   withdrawalsApi,
   type Withdrawal,
@@ -32,7 +33,7 @@ export const EMPTY_WALLET_PAGE: WalletPage = {
   pixKeys: [],
   withdrawals: {
     items: [],
-    meta: { total: 0, page: 1, limit: 10, totalPages: 1 },
+    meta: { total: 0, page: 1, limit: DEFAULT_PAGE_LIMIT, totalPages: 1 },
   },
 };
 

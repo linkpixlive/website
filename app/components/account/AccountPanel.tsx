@@ -10,7 +10,7 @@ export function TwoFactorBadge({ enabled }: { enabled: boolean }) {
     <span
       className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold shrink-0 ${
         enabled
-          ? "bg-success/10 text-emerald-700"
+          ? "bg-success/10 text-success"
           : "bg-wash text-ink-secondary border border-line-input"
       }`}
     >

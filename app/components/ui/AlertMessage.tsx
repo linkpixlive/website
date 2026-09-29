@@ -9,7 +9,7 @@ interface AlertMessageProps {
 }
 
 const variantStyles = {
-  success: "bg-success/10 border-success/20 text-emerald-700",
+  success: "bg-success/10 border-success/20 text-success",
   error: "bg-error/10 border-error/20 text-error",
   info: "bg-info/10 border-info/20 text-info",
 };

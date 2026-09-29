@@ -27,6 +27,11 @@ export function toWithdrawalStatus(
 
 export type Withdrawal = components["schemas"]["WithdrawalEntity"];
 
+/** Default de paginação das listas (popout usa exceção própria documentada). */
+export const DEFAULT_PAGE_LIMIT = 10;
+
+// Manual: PaginationMetaDto no schema tem totalPages opcional; aqui é obrigatório
+// (backend sempre envia e as telas indexam direto).
 export interface PaginationMeta {
   total: number;
   page: number;

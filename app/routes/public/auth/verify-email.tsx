@@ -17,7 +17,7 @@ import { verifyEmailSchema } from "~/validators/auth-validator";
 import type { Route } from "./+types/verify-email";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Verify Email — LinkPix" }];
+  return [{ title: "Verificar e-mail — LinkPix" }];
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -113,7 +113,7 @@ export default function VerifyEmail({ actionData }: Route.ComponentProps) {
           <p>Não recebeu o código?</p>
           <Link
             to="/auth/login"
-            className="inline-block mt-1 text-info hover:text-blue-700 font-semibold underline transition-colors duration-150"
+            className="inline-block mt-1 text-info hover:text-info-hover font-semibold underline transition-colors duration-150"
           >
             Reenviar
           </Link>

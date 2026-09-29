@@ -1,4 +1,5 @@
 import { redirect } from "react-router";
+import axios from "axios";
 import type { components } from "~/api/generated/api-schema";
 import { createApiClient } from "~/api/http/client";
 import { clearAuthCookie, getAuthToken } from "./session.server";
@@ -30,9 +31,12 @@ export async function requireValidAuth(request: Request) {
     }
 
     return user;
-  } catch {
-    // API fora do ar (ou sessão inválida): vai para a página de
-    // indisponibilidade SEM apagar o cookie — o retry decide o destino.
+  } catch (e: unknown) {
+    // 401 = sessão inválida → login + limpa cookie. 5xx/rede → indisponível
+    // com cookie preservado (o retry decide o destino).
+    if (axios.isAxiosError(e) && e.response?.status === 401) {
+      redirectToLogin(true);
+    }
     throw redirect("/indisponivel");
   }
 }

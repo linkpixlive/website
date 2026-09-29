@@ -85,10 +85,10 @@ export function ChangeEmailModal({
     onSubmitting: () => setRequestError(null),
   });
 
-  useFetcherFeedback({
+  useFetcherFeedback<{ success?: boolean; error?: string; message?: string }>({
     data: confirmFetcher.data,
     state: confirmFetcher.state,
-    onResult: (result: any) => {
+    onResult: (result) => {
       if (result.success) {
         toast(result.message ?? "E-mail atualizado com sucesso.", "success");
         onClose();

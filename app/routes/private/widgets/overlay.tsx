@@ -2,6 +2,7 @@ import { useLoaderData, useActionData } from "react-router";
 import type { Route } from "./+types/overlay";
 import { getAuthToken } from "~/util/session.server";
 import { widgetsApi, type Widget } from "~/api/modules/widgets";
+import { overlayApi } from "~/api/modules/overlay";
 import { listVoices } from "~/api/modules/public-donations";
 import type { TtsVoice } from "~/types/donation";
 import { useToast } from "~/components/ui/useToast";
@@ -74,7 +75,7 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   if (intent === "testAlert") {
-    const res = await widgetsApi.testAlert(token);
+    const res = await overlayApi.testAlert(token);
     if (!res.success) {
       return {
         success: false,
@@ -105,10 +106,10 @@ export default function OverlayRoute() {
   const actionData = useActionData<typeof action>();
   const { toast } = useToast();
 
-  useFetcherFeedback({
+  useFetcherFeedback<{ success: boolean; action: string; error?: string }>({
     data: actionData,
     state: "idle",
-    onResult: (result: any) => {
+    onResult: (result) => {
       if (result.success) {
         if (result.action === "saveOverlay") {
           toast("Configurações salvas com sucesso!", "success");
@@ -125,7 +126,7 @@ export default function OverlayRoute() {
 
   if (!overlayWidget) {
     return (
-      <div className="rounded-[26px] bg-card border border-line shadow-xs p-8 text-center flex flex-col items-center gap-4">
+      <div className="rounded-[26px] bg-card border border-line shadow-xs p-5 sm:p-6 text-center flex flex-col items-center gap-4">
         <span className="w-12 h-12 rounded-2xl bg-error/10 flex items-center justify-center text-error">
           <Icon name="danger-circle" size={22} strokeWidth={2} />
         </span>

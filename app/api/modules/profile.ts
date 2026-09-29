@@ -29,6 +29,8 @@ export const MAX_ORIGINAL_AVATAR_BYTES = 10 * 1024 * 1024;
 /** Lado do quadrado exportado pelo editor (espelha o backend). */
 export const AVATAR_EXPORT_SIZE = 512;
 
+// Manual: o schema não define body de resposta p/ username/photo (content?: never)
+// — formato observado do envelope; multipart segue via fetch nativo abaixo.
 export interface UsernameResponse {
   username: string;
 }
@@ -147,16 +149,22 @@ export const profileApi = {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         body: formData,
       });
-      const json = (await response.json()) as ApiResponse<ProfilePhotoResponse>;
-      if (json && typeof json.success === "boolean") return json;
+      const json: unknown = await response.json();
+      if (
+        typeof json === "object" &&
+        json !== null &&
+        typeof (json as { success?: unknown }).success === "boolean"
+      )
+        return json as ApiResponse<ProfilePhotoResponse>;
       return unexpectedPhotoResponse(response.status);
-    } catch (e: any) {
+    } catch (e: unknown) {
       return {
         success: false,
         error: {
           message:
-            e?.message ||
-            "Nossos sistemas estão com problemas. Tente novamente mais tarde.",
+            e instanceof Error
+              ? e.message
+              : "Nossos sistemas estão com problemas. Tente novamente mais tarde.",
           code: 500,
         },
         timestamp: new Date().toISOString(),

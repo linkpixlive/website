@@ -78,13 +78,17 @@ Text on yellow is always `#11151e` (or `#111216` on the logo). Never white on ye
 | Role | Hex | Notes |
 |---|---|---|
 | Destructive | `#ef4444` | Hover `#dc2626`. On dark chrome, idle `#f87171` → hover `#ef4444`. |
-| Success | `#10b981` | Inline confirmation only (“Copied”, “Invite sent”). |
-| Link / info | `#2563eb` | Hover `#1d4ed8`. Underline links in running text. |
+| Success | `#10b981` | Inline confirmation only (“Copied”, “Invite sent”). Hover `#059669` (`--color-success-hover`). |
+| Link / info | `#2563eb` | Hover `#1d4ed8` (`--color-info-hover`). Underline links in running text. |
 | Warning tint | `#f59e0b` | Icon-only, in notification tiles. |
 
 Destructive actions are isolated: last in a menu, separated by a hairline, `text-[#ef4444] hover:bg-red-50`. Confirmations that destroy (leave, delete) use a full red pill, not yellow.
 
 Avatar identity rings (pink `#ec4899`, gold `#eab308`, blue `#3b82f6`, cyan `#06b6d4`) are **person color**, not UI accent. Do not reuse them for buttons or badges.
+
+### Dark theme
+
+Shipped, not aspirational. `.dark` remaps the canvas tokens in `app.css`: canvas `#111216`, card `#181a1f`, wash `#20232a`, tile `#262a33`; ink flips to light; success `#34d399`, info `#60a5fa`, warning `#fbbf24`; hairlines become white whispers. Yellow, shell chrome and radius are unchanged. Semantic utilities (`bg-card`, `text-ink-body`, …) resolve at runtime, so no `dark:` variants in components.
 
 ### Selection
 
@@ -97,11 +101,11 @@ Avatar identity rings (pink `#ec4899`, gold `#eab308`, blue `#3b82f6`, cyan `#06
 **Families (two-role system), both from Fontshare (ITF Free Font License), self-hosted via `next/font/local` from `src/app/fonts/` (license texts kept alongside the files):**
 
 - **UI / body — Satoshi** (variable, wght 300–900; intermediate weights such as semibold interpolate cleanly). The default family: exposed through the `--font-sans` token (`--font-satoshi` CSS variable on `<html>`). Every role below uses Satoshi unless marked display.
-- **Display — Clash Display** (variable, wght 200–700). Exposed as the `--font-display` token → `font-display` utility (`--font-clash-display` CSS variable on `<html>`). **Reserved exclusively for marketing/landing surfaces — not used in the product UI today.** When that surface is built, its headlines use Clash Display while body copy stays Satoshi. Its weight axis caps at 700; never fake heavier weights with transforms.
+- **Display — Clash Display** (variable, wght 200–700). Exposed as the `--font-display` token → `font-display` utility (`--font-clash-display` CSS variable on `<html>`). **Reserved exclusively for marketing/landing surfaces — not used in the product UI today.** When that surface is built, its headlines use Clash Display while body copy stays Satoshi. Its weight axis caps at 700; never fake heavier weights with transforms. Exception: the `LogoTile` wordmark (default 22px, semibold) — a brand lockup, not UI text. Rail/drawer overrides cap at `text-2xl` so the H1 ≤ 26px rule still holds.
 
 **Rendering:** `antialiased`.
 
-Do not apply the display family to menus, labels, badges, buttons, or running text. No Inter, Geist, Roboto, system-ui stacks, or display serifs.
+Do not apply the display family to menus, labels, badges, buttons, or running text. No Inter, Geist, Roboto, system-ui stacks, or display serifs. Exception: `font-mono` only for Pix keys, codes and URLs (masked values, copy surfaces, 2FA secrets).
 
 ### Scale
 
@@ -157,11 +161,11 @@ This system is aggressively round. Default Tailwind `rounded` / `rounded-md` / `
 
 | Token | Value | Use |
 |---|---|---|
-| Pill | `rounded-full` | Buttons, text fields, icon buttons, badges, avatars, chips, send controls |
+| Pill | `rounded-full` | Buttons, text fields, OTP cells, icon buttons, badges, avatars, chips, send controls, skeleton line bars |
 | Media | `rounded-[28px]` | Large image / video wells |
 | Card | `rounded-[26px]` | Surfaces, modals, mobile sheets (`rounded-t-[26px]`) |
 | Nested chrome | `rounded-[20px]` | Dark banners inside a card, desktop popovers |
-| Nested surface | `rounded-2xl` (16px) | Profile wells, file-type icons, inner cards |
+| Nested surface | `rounded-2xl` (16px) | Profile wells, file-type icons, inner cards, multiline textarea, chart tooltips |
 | Row | `rounded-xl` (12px) | Menu items, search hits, list rows |
 | Tile | `rounded-[12px]` / `rounded-lg` | 36px icon squares |
 | Logo | `rounded-2xl` | Brand mark on the shell |
@@ -229,7 +233,7 @@ Rules below are structural. They are not tied to one screen.
 
 Every authenticated view is a **dark shell** (`#111216`) holding a **light canvas** (`#edf0f7`).
 
-- Desktop: an expanded dark rail (`w-64`, `px-3`, sticky, full viewport height) on the start edge. Logo at top, primary nav in the middle, destructive/session action at the bottom. Nav rows are `rounded-xl`, icon 20px + `text-[13px] font-semibold` label, `gap-3` icon-to-label, `px-3.5 py-2.5`, `gap-1` between rows, `overflow-y-auto scrollbar-thin` so more than ~9 items never clip. Active row: white + `bg-white/5` (persistent light wash), tick on the inner edge; idle `#7f8594`, `hover:text-white hover:bg-white/5`. Group rows (accordion) carry a trailing `ChevronDown` that rotates 180° when open; children rows indent under the parent label start (`pl-[46px]`), and the group auto-opens when one of its children is the selected page. Session action: red Log Out row under a `border-t border-white/10` divider.
+- Desktop: an expanded dark rail (`w-64`, `px-3`, sticky, full viewport height) on the start edge. Logo at top, primary nav in the middle, destructive/session action at the bottom. Nav rows are `rounded-xl`, icon 20px + `text-[13px] font-semibold` label, `gap-3` icon-to-label, `px-3.5 py-2.5`, `gap-1` between rows, `overflow-y-auto scrollbar-thin` so more than ~9 items never clip. Active row: white + `bg-white/5` (persistent light wash), tick on the inner edge; idle `#7f8594`, `hover:text-white hover:bg-white/5`. Group rows (accordion) carry a trailing `AltArrowDown` that rotates 180° when open (the installed Solar version has no `chevron-down`; `alt-arrow-down` is the accordion icon); children rows indent under the parent label start (`pl-[46px]`), and the group auto-opens when one of its children is the selected page. Session action: red Log Out row under a `border-t border-white/10` divider.
 - Mobile: the same nav becomes a **fixed bottom bar** (`z-50`, `border-t border-white/10`). A hamburger on the canvas opens a **left dark drawer** (`w-72`, `max-w-[85vw]`).
 - The canvas is the only place white cards live. Do not put white cards on `#111216`. Do not put a light top-nav bar above the canvas.
 
@@ -251,6 +255,10 @@ Compose from **cards**, not from full-bleed sections.
 
 Do not introduce a third chrome (tabs as a second top bar, a light sidebar, a footer). If a view needs local navigation, put it in the existing rail or as in-card segmented control that still uses pills / yellow tick — not underline tabs.
 
+### Public surfaces
+
+Donation pages, confirmation, auth and indisponível live outside the shell: a centered `max-w-md` column, `gap-5` between blocks, `px-4 py-6 sm:py-10`. The OBS overlay and queue popout are chromeless live surfaces (no shell, no canvas padding scale).
+
 ### Overlays (system-wide)
 
 | Pattern | Surface | Motion | Dismiss |
@@ -259,6 +267,7 @@ Do not introduce a third chrome (tabs as a second top bar, a light sidebar, a fo
 | Popover | Anchored, `rounded-[20px]`, `shadow-lg`, 8px below trigger. | `animate-pop-in` | ESC, outside click |
 | Mobile fallback for popover | Bottom sheet, `rounded-t-[26px]`, `shadow-2xl`, titled, close button. | `animate-slide-up` | ESC, backdrop |
 | Drawer | Left, dark `#111216`, `shadow-2xl`. Backdrop `bg-black/50`. | `animate-slide-left` | ESC, backdrop |
+| Toast | Bottom stack, card surface `rounded-[20px]`, `shadow-xl`, icon + title + close. | 200ms fade/slide | Swipe, close button, timeout |
 
 Lock body scroll while a modal or drawer is open. `z-50` for all overlays. Do not stack competing overlay systems.
 
@@ -295,6 +304,8 @@ Pill. Two legal fills:
 
 Both: transparent inner input, `font-medium`, placeholder `#707684`, no outline. Focus is `focus-within:border-[#fcc717] focus-within:ring-2 focus-within:ring-[#ffd037]/30`. Leading icon in `#707684`. Trailing submit is a 32px yellow circle.
 
+Multiline textarea (`AutoGrowTextarea`) uses the wash fill with `rounded-2xl`. OTP is one pill cell per digit (`rounded-full`, wash fill). Range slider uses `.slider-primary` (brand fill, wash track, white knob).
+
 ### Menus
 
 `text-[13px] font-semibold text-[#333945] rounded-xl hover:bg-[#f4f5f8]`. Icons 16px, `#707684`, stroke ~1.9. Destructive row last, red, `hover:bg-red-50`. Clipboard success swaps the icon to a green check and the label to “Copied!” for ~1.6s — no toast required.
@@ -303,6 +314,7 @@ Both: transparent inner input, `font-medium`, placeholder `#707684`, no outline.
 
 - Numeric / unread: 16px yellow circle, `#11151e` extrabold 11px, or a 10px yellow dot.
 - Status chip: yellow pill, `px-2 py-0.5`, 10px extrabold (`Speaking`).
+- Pending chip: yellow-ink text on yellow-wash (`bg-yellow-wash`), never `warning/10`.
 - Nav active: yellow tick on the inner edge of the rail (`rounded-r-full`) or a 24×4px yellow cap on the mobile bar. Active icon scales slightly and switches to the Bold tier (vs Linear idle).
 
 ### Avatars
@@ -313,13 +325,19 @@ Always circular, `object-cover`. Stack with negative space (`-space-x-1.5` to `-
 
 ## Icons & imagery
 
-- **Icons:** Solar only (`@solar-icons/react`), imported through the `@/components/ui/Icon` wrapper, which maps `strokeWidth` to a style tier: `<2` → Linear (idle / menu icons; the exact stroke value passes through, 1.5–1.9), `2–2.2` → Outline (default controls), `≥2.3` → Bold (active nav, send, confirmation checks — Solar has no heavy stroke style, so its Bold weight is filled; that fill is legal *only* on this accent tier). Never import from `@solar-icons/react` directly, never use Duotone/Broken styles. Do not mix icon sets.
+- **Icons:** Solar only (`@solar-icons/react`), imported through the `@/components/ui/Icon` wrapper, which maps `strokeWidth` to a style tier: `<2` → Linear (idle / menu icons; the exact stroke value passes through, 1.5–1.9), `2–2.2` → Outline (default controls), `≥2.3` → Bold (active nav, send, confirmation checks — Solar has no heavy stroke style, so its Bold weight is filled; that fill is legal *only* on this accent tier). Never import from `@solar-icons/react` directly, never use Duotone/Broken styles. Do not mix icon sets. Selected-state checks in menus use `check-circle` at Bold tier, never hand-drawn SVG. `ICON_TILE_CLASS` inner icon is 16px by default.
 - **Icons are Solar** — Solar icon set by 480-Design (`@solar-icons/react`, MIT package / CC-BY-4.0 glyphs).
 - **Photos:** real people, cropped as circles or as media wells. Media wells `rounded-[28px] overflow-hidden` with a dark fallback `#1e232d`.
 - **Logo:** 48px rounded-2xl yellow tile, dark glyph, yellow glow. Hover `scale-105`.
 - **Emoji:** allowed as a single page-title companion or as reactions. Not as empty-state illustration, not as a row of three decorative glyphs.
 
 No undraw / blob / gradient-mesh illustrations. Empty states are type-only: bold title + muted sentence, centered, modest vertical padding (`py-6` to `py-10`).
+
+Scan-safe exceptions (contrast, not style): QR code stays black-on-white (`fgColor`/`bgColor` fixed — it must scan), `Switch` knob stays white.
+
+### Shared classes
+
+Single source, no literals: `CARD_CLASS`, `SECTION_HEADING_CLASS`, `LINK_CLASS`, `ICON_TILE_CLASS`, `MENU_ITEM_CLASS`, `STAT_NUMBER_CLASS` (26px card numbers) in `components/ui/classes.ts` (product surfaces); `roundButtonClasses`, `popupClasses`, `menuRowClasses`, `menuRowDangerClasses` in `components/ui/header-styles.ts` (shell chrome). Banned: `bg-white` (use `bg-card`), `hover:bg-black` (use `hover:bg-inverse-hover`), `hover:text-blue-700` (use `LINK_CLASS` / `hover:text-info-hover`), `text-emerald-700` (use `text-success`), `hover:bg-emerald-600` (use `hover:bg-success-hover`), arbitrary gray hexes (`border-[#dfe3ea]`, `bg-[#eceef3]`, `text-[#11151e]` → line-input / wash / ink-heading tokens).
 
 ---
 
@@ -338,6 +356,8 @@ All motion is short and `ease-out`. If it takes longer than 260ms, it is too slo
 Interaction: `active:scale-95` on circles, `active:scale-[0.98]` on wide pills, `hover:scale-110` on small avatars and emoji cells. Hover-reveal controls use `opacity-0 group-hover:opacity-100` — do not leave ⋯ buttons permanently visible on dense lists.
 
 No bounce. No spring overshoot. No looping animations except a single `animate-ping` on a live destructive control (end-call). No page-load choreography.
+
+Exceptions (intentional, nowhere else): payment celebration (`confirmed-pop` 0.45s, `confirmed-ring` 0.9s), error shake (0.4s, `FieldError`/`OtpInput` only).
 
 Scrollbars in dense panels: 4px, thumb `#e2e8f0` → hover `#cbd5e1`, transparent track (`scrollbar-thin`).
 

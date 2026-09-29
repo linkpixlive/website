@@ -79,7 +79,7 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
                 return (
                   <div
                     key={level}
-                    className={`h-1 flex-1 rounded-full transition-colors duration-300 ${bgColor}`}
+                    className={`h-1 flex-1 rounded-full transition-colors duration-150 ${bgColor}`}
                   />
                 );
               })}

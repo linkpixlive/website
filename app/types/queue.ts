@@ -1,3 +1,4 @@
+// Client-only: modelo da fila ao vivo via socket, sem contraparte no schema.
 export interface OverlayDonationEntity {
   id: string;
   name: string;

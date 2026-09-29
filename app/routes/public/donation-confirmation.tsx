@@ -54,7 +54,7 @@ export default function DonationConfirmationPage() {
   if (error) {
     return (
       <main className="flex flex-1 items-center justify-center px-4 py-6 sm:py-10">
-        <div className="w-full max-w-md flex flex-col gap-6 animate-fade-in">
+        <div className="w-full max-w-md flex flex-col gap-5 animate-fade-in">
           <AlertMessage variant="error" message={error} />
           <Button variant="secondary" onClick={() => navigate("/dashboard")}>
             Voltar para o início
@@ -68,7 +68,7 @@ export default function DonationConfirmationPage() {
   if (!view) {
     return (
       <main className="flex flex-1 items-center justify-center px-4 py-6 sm:py-10">
-        <div className="w-full max-w-md flex flex-col items-center gap-6">
+        <div className="w-full max-w-md flex flex-col items-center gap-5">
           <div className="flex flex-col items-center text-center gap-2 py-10 animate-fade-in">
             <h1 className="text-lg font-extrabold tracking-tight text-ink-heading">
               Doação não encontrada

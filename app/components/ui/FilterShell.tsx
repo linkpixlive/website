@@ -54,7 +54,7 @@ export function FilterShell({
           <button
             type="button"
             onClick={onClearFilters}
-            className="hidden md:block self-end pb-2.5 text-xs font-semibold text-info hover:text-blue-700 underline cursor-pointer outline-none"
+            className="hidden md:block self-end pb-2.5 text-xs font-semibold text-info hover:text-info-hover underline cursor-pointer outline-none"
           >
             Limpar filtros
           </button>

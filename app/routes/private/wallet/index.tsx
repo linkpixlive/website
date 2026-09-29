@@ -8,7 +8,7 @@ import {
 import { accountSettingsApi } from "~/api/modules/account-settings";
 import { pixKeysApi } from "~/api/modules/pix-keys";
 import { walletsApi } from "~/api/modules/wallets";
-import { toWithdrawalStatus, withdrawalsApi } from "~/api/modules/withdrawals";
+import { toWithdrawalStatus, withdrawalsApi, DEFAULT_PAGE_LIMIT } from "~/api/modules/withdrawals";
 import { PageHeader } from "~/components/dashboard/PageHeader";
 import { Pagination } from "~/components/ui/Pagination";
 import { useToast } from "~/components/ui/useToast";
@@ -32,7 +32,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   // Search parameters for filters and pagination
   const page = getPageParam(url);
-  const limit = getPageParam(url, "limit", 10);
+  const limit = getPageParam(url, "limit", DEFAULT_PAGE_LIMIT);
 
   const walletPage = await walletsApi.getWalletPage(token, {
     page,
@@ -174,10 +174,10 @@ export default function WalletPage() {
   const loadingData = navigation.state === "loading";
 
   // Handle action results (toast feedbacks & modal closing)
-  useFetcherFeedback({
+  useFetcherFeedback<WalletActionResult>({
     data: actionData,
     state: navigation.state,
-    onResult: (result: any) => {
+    onResult: (result) => {
       if (result.success) {
         if (result.action === "createWithdrawal") {
           toast("Saque solicitado com sucesso!", "success");

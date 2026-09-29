@@ -59,7 +59,7 @@ export function TotpChallenge({
         <button
           type="button"
           onClick={onBack}
-          className="text-info hover:text-blue-700 font-semibold underline transition-colors duration-150"
+          className="text-info hover:text-info-hover font-semibold underline transition-colors duration-150"
         >
           Voltar para o login
         </button>

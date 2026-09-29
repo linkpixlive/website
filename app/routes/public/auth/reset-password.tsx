@@ -15,7 +15,7 @@ import { LINK_CLASS } from "~/components/ui/classes";
 import type { Route } from "./+types/reset-password";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Reset Password — LinkPix" }];
+  return [{ title: "Redefinir senha — LinkPix" }];
 }
 
 type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
@@ -40,7 +40,7 @@ export default function ResetPassword() {
 
   const onSubmit = async (data: ResetPasswordFormValues) => {
     if (!token) {
-      setApiError("Invalid or missing reset token.");
+      setApiError("Link inválido ou ausente.");
       return;
     }
 
@@ -61,17 +61,17 @@ export default function ResetPassword() {
   if (!token) {
     return (
       <AuthCard
-        title="Invalid Link"
-        subtitle="This password reset link is invalid or missing."
+        title="Link inválido"
+        subtitle="Este link de redefinição é inválido ou está ausente."
       >
         <div className="space-y-6">
-          <AlertMessage variant="error" message="Missing reset token." />
+          <AlertMessage variant="error" message="Token de redefinição ausente." />
           <div className="text-center">
             <Link
               to="/auth/forgot-password"
               className={`text-[13px] font-semibold ${LINK_CLASS} transition-colors duration-150`}
             >
-              Request a new link
+              Solicitar novo link
             </Link>
           </div>
         </div>
@@ -80,17 +80,17 @@ export default function ResetPassword() {
   }
 
   return (
-    <AuthCard title="Set new password" subtitle="Choose a strong password">
+    <AuthCard title="Definir nova senha" subtitle="Escolha uma senha forte">
       {success ? (
         <div className="space-y-6">
           <AlertMessage
             variant="success"
-            message="Your password has been changed successfully."
+            message="Sua senha foi alterada com sucesso."
           />
           <div className="text-center mt-6">
             <Link to="/auth/login" className="inline-block w-full">
               <Button variant="primary" className="w-full">
-                Go to sign in
+                Ir para o login
               </Button>
             </Link>
           </div>
@@ -104,11 +104,11 @@ export default function ResetPassword() {
           {apiError && <AlertMessage variant="error" message={apiError} />}
 
           <PasswordField
-            label="New Password"
+            label="Nova senha"
             {...register("newPassword")}
             error={errors.newPassword?.message}
             icon="lock"
-            placeholder="Create a strong password"
+            placeholder="Crie uma senha forte"
             disabled={isSubmitting}
             showStrength
             strengthScore={getPasswordStrength(newPasswordValue || "")}
@@ -116,16 +116,16 @@ export default function ResetPassword() {
           />
 
           <PasswordField
-            label="Confirm Password"
+            label="Confirmar senha"
             {...register("confirmPassword")}
             error={errors.confirmPassword?.message}
             icon="lock"
-            placeholder="Confirm your password"
+            placeholder="Confirme sua senha"
             disabled={isSubmitting}
           />
 
           <div className="mt-6">
-            <SubmitButton loading={isSubmitting}>Reset password</SubmitButton>
+            <SubmitButton loading={isSubmitting}>Redefinir senha</SubmitButton>
           </div>
         </form>
       )}

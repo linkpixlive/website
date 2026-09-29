@@ -1,5 +1,6 @@
 import { useLoaderData, useNavigation } from "react-router";
 import { dashboardApi, toHistoryQuery, type DonationHistory } from "~/api/modules/dashboard";
+import { DEFAULT_PAGE_LIMIT, type PaginatedResponse } from "~/api/modules/withdrawals";
 import { PageHeader } from "~/components/dashboard/PageHeader";
 import { DonationHistoryFilters } from "~/components/history/DonationHistoryFilters";
 import { DonationHistoryList } from "~/components/history/DonationHistoryList";
@@ -25,19 +26,16 @@ export async function loader({ request }: Route.LoaderArgs) {
   const token = getAuthToken(request);
   const url = new URL(request.url);
   const page = getPageParam(url);
-  const limit = getPageParam(url, "limit", 10);
+  const limit = getPageParam(url, "limit", DEFAULT_PAGE_LIMIT);
   const status = url.searchParams.get("status") || undefined;
   // Padrão = últimos 30 dias (teto de retenção, alinhado ao lifecycle do R2).
   const days = url.searchParams.get("days") || DEFAULT_HISTORY_DAYS;
   const search = url.searchParams.get("search") || undefined;
   const searchBy = url.searchParams.get("searchBy") || undefined;
 
-  let history: {
-    items: DonationHistory[];
-    meta: { total: number; page: number; limit: number; totalPages: number };
-  } = {
+  let history: PaginatedResponse<DonationHistory> = {
     items: [],
-    meta: { total: 0, page: 1, limit: 10, totalPages: 1 },
+    meta: { total: 0, page: 1, limit: DEFAULT_PAGE_LIMIT, totalPages: 1 },
   };
 
   try {

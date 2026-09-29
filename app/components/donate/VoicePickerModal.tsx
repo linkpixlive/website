@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Modal } from "~/components/ui/Modal";
 import { Icon } from "~/components/ui/Icon";
 import { VoiceSampleButton } from "~/components/ui/VoiceSampleButton";
-import { CheckMark } from "~/components/ui/SelectField";
 
 export interface VoiceOption {
   value: string;
@@ -13,7 +12,7 @@ export interface VoiceOption {
 }
 
 const AVATAR_SIZES = {
-  xs: { box: "size-6 rounded-[8px]", icon: 13 },
+  xs: { box: "size-6 rounded-lg", icon: 13 },
   sm: { box: "size-9 rounded-[12px]", icon: 16 },
   md: { box: "size-11 rounded-[14px]", icon: 18 },
 } as const;
@@ -110,7 +109,7 @@ export function VoicePickerModal({
               )}
               {selected && (
                 <span className="shrink-0 h-4 w-4 text-yellow-ink" aria-hidden="true">
-                  <CheckMark />
+                  <Icon name="check-circle" size={16} strokeWidth={2.3} />
                 </span>
               )}
             </div>

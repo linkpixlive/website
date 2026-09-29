@@ -59,7 +59,7 @@ export function LoginForm({ loading, apiError, onClearError, onSubmit }: LoginFo
         <div className="flex justify-end">
           <Link
             to="/auth/forgot-password"
-            className="text-[13px] font-semibold text-info hover:text-blue-700 transition-colors duration-150"
+            className="text-[13px] font-semibold text-info hover:text-info-hover transition-colors duration-150"
           >
             Esqueceu a senha?
           </Link>
@@ -76,7 +76,7 @@ export function LoginForm({ loading, apiError, onClearError, onSubmit }: LoginFo
         Não tem uma conta?{" "}
         <Link
           to="/auth/register"
-          className="text-info hover:text-blue-700 font-semibold underline transition-colors duration-150"
+          className="text-info hover:text-info-hover font-semibold underline transition-colors duration-150"
         >
           Crie aqui
         </Link>

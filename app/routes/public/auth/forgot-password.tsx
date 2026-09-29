@@ -13,7 +13,7 @@ import { LINK_CLASS } from "~/components/ui/classes";
 import type { Route } from "./+types/forgot-password";
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "Forgot Password — LinkPix" }];
+  return [{ title: "Esqueci minha senha — LinkPix" }];
 }
 
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
@@ -90,7 +90,7 @@ export default function ForgotPassword() {
           <div className="mt-4 text-center">
             <Link
               to="/auth/login"
-              className="text-[13px] font-semibold text-info hover:text-blue-700 transition-colors duration-150"
+              className="text-[13px] font-semibold text-info hover:text-info-hover transition-colors duration-150"
             >
               Voltar para Login
             </Link>

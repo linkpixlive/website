@@ -25,10 +25,10 @@ export function DonationHistoryList({
         {[1, 2, 3].map((i) => (
           <div key={i} className="animate-pulse rounded-2xl bg-wash p-3 sm:p-3.5">
             <div className="flex items-center justify-between gap-3">
-              <div className="h-4 w-40 rounded-md bg-card" />
-              <div className="h-4 w-16 rounded-md bg-card" />
+              <div className="h-4 w-40 rounded-full bg-card" />
+              <div className="h-4 w-16 rounded-full bg-card" />
             </div>
-            <div className="mt-2 h-3 w-56 rounded-md bg-card" />
+            <div className="mt-2 h-3 w-56 rounded-full bg-card" />
             <div className="mt-2.5 flex items-center gap-2">
               <div className="h-12 max-w-[320px] flex-1 rounded-2xl bg-card" />
               <div className="ml-auto h-10 w-24 shrink-0 rounded-full bg-card" />

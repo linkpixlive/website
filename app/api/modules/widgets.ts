@@ -1,3 +1,4 @@
+import type { components } from "../generated/api-schema";
 import { createApiClient, fetchApi } from "../http/client";
 
 export interface OverlaySettings {
@@ -20,12 +21,11 @@ export type WidgetSettingsMap = {
   qrcode: QrCodeSettings;
 };
 
-export interface Widget<T = OverlaySettings> {
-  token: string;
-  type: "overlay" | "qrcode";
-  active: boolean;
+// Manual: WidgetEntity.settings no schema é Record<string,never> — settings reais
+// por tipo vivem aqui como fonte de verdade.
+export interface Widget<T = OverlaySettings>
+  extends Omit<components["schemas"]["WidgetEntity"], "settings"> {
   settings: T;
-  updatedAt: string;
 }
 
 export const widgetsApi = {
@@ -66,9 +66,6 @@ export const widgetsApi = {
     if (res.error.code !== 404) return res;
     return widgetsApi.upsertSettings(token, type);
   },
-  testAlert: (token: string | null | undefined) =>
-    fetchApi<void>(createApiClient(token).post("/overlay/test")),
-
   resetToken: (token: string | null | undefined, type: string) =>
     fetchApi<Widget>(createApiClient(token).post(`/widgets/${type}/reset-token`)),
 };

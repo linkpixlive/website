@@ -15,6 +15,7 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+// Exceção ao DEFAULT_PAGE_LIMIT: popout ao vivo mostra mais itens por tela.
 const POPOUT_HISTORY_LIMIT = 20;
 
 export async function loader({ request }: Route.LoaderArgs) {

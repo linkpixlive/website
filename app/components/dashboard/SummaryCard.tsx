@@ -34,7 +34,7 @@ function DeltaPill({ value, label }: { value: number | null; label: string }) {
   }
   const tone =
     value !== null && value > 0
-      ? "bg-success/10 text-emerald-700"
+      ? "bg-success/10 text-success"
       : value !== null && value < 0
         ? "bg-error/10 text-error"
         : "bg-wash text-ink-secondary";
@@ -77,7 +77,7 @@ export function SummaryCard({ stats, mode, onModeChange, loading = false }: Summ
             <Skeleton className="h-6 w-20 rounded-full" />
           </div>
           <Skeleton className="h-[220px] w-full rounded-2xl" />
-          <Skeleton className="h-4 w-56 rounded-md" />
+          <Skeleton className="h-4 w-56 rounded-full" />
         </div>
       ) : (
         <>

@@ -41,7 +41,9 @@
   --color-text-muted: #707684;
 
   --color-success: #10b981;
+  --color-success-hover: #059669;
   --color-info: #2563eb;
+  --color-info-hover: #1d4ed8;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
   --color-error-hover: #dc2626;
