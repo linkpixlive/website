@@ -1,5 +1,5 @@
 import type { Area } from "react-easy-crop";
-import { AVATAR_EXPORT_SIZE } from "~/api/modules/profile";
+import { AVATAR_EXPORT_SIZE } from "~/validators/profile-validator";
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {

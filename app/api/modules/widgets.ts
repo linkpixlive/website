@@ -1,8 +1,8 @@
 import type { components } from "../generated/api-schema";
-import { createApiClient, fetchApi } from "../http/client";
+import { api, authHeaders, fetchApi } from "../http/client";
 
 export interface OverlaySettings {
-  volume: number; // 0-100
+  volume: number;
   speakNameAmount: boolean;
   defaultNarrator: string;
   audioOnly: boolean;
@@ -21,10 +21,10 @@ export type WidgetSettingsMap = {
   qrcode: QrCodeSettings;
 };
 
-// Manual: WidgetEntity.settings no schema é Record<string,never> — settings reais
-// por tipo vivem aqui como fonte de verdade.
-export interface Widget<T = OverlaySettings>
-  extends Omit<components["schemas"]["WidgetEntity"], "settings"> {
+export interface Widget<T = OverlaySettings> extends Omit<
+  components["schemas"]["WidgetEntity"],
+  "settings"
+> {
   settings: T;
 }
 
@@ -32,31 +32,25 @@ export const widgetsApi = {
   getSettings: <T extends WidgetType>(
     token: string | null | undefined,
     type: T,
-  ) => fetchApi<Widget<WidgetSettingsMap[T]>>(createApiClient(token).get(`/widgets/${type}`)),
+  ) =>
+    fetchApi<Widget<WidgetSettingsMap[T]>>(
+      api.get(`/widgets/${type}`, { headers: authHeaders(token) }),
+    ),
 
-  getPublicSettings: <T extends WidgetType = "overlay">(
-    widgetToken: string,
-  ) => fetchApi<Widget<WidgetSettingsMap[T]>>(createApiClient().get(`/widgets/public/${widgetToken}`)),
+  getPublicSettings: <T extends WidgetType = "overlay">(widgetToken: string) =>
+    fetchApi<Widget<WidgetSettingsMap[T]>>(
+      api.get(`/widgets/public/${widgetToken}`),
+    ),
 
-  /**
-   * Cria ou atualiza (upsert). O PUT substitui o objeto `settings` inteiro,
-   * então updates devem enviar o objeto completo. Sem body, o backend
-   * aplica os defaults do tipo.
-   */
   upsertSettings: <T extends WidgetType>(
     token: string | null | undefined,
     type: T,
     body?: Partial<WidgetSettingsMap[T]>,
   ) =>
     fetchApi<Widget<WidgetSettingsMap[T]>>(
-      createApiClient(token).put(`/widgets/${type}`, body),
+      api.put(`/widgets/${type}`, body, { headers: authHeaders(token) }),
     ),
 
-  /**
-   * Garante que o widget existe: lê e, se ainda não foi criado (404),
-   * cria com os defaults do backend via PUT sem body. A criação é
-   * implícita — o usuário nunca percebe o estado "não configurado".
-   */
   ensureSettings: async <T extends WidgetType>(
     token: string | null | undefined,
     type: T,
@@ -67,5 +61,9 @@ export const widgetsApi = {
     return widgetsApi.upsertSettings(token, type);
   },
   resetToken: (token: string | null | undefined, type: string) =>
-    fetchApi<Widget>(createApiClient(token).post(`/widgets/${type}/reset-token`)),
+    fetchApi<Widget>(
+      api.post(`/widgets/${type}/reset-token`, undefined, {
+        headers: authHeaders(token),
+      }),
+    ),
 };

@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { validateAvatarFile } from "~/api/modules/profile";
+import { validateAvatarFile } from "~/validators/profile-validator";
 import { readFileAsDataUrl } from "~/components/profile/crop-image";
 
 /** Picker → crop → upload da foto de perfil (remove incluído). */

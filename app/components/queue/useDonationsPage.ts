@@ -1,5 +1,5 @@
 import type { DonationHistory } from "~/api/modules/dashboard";
-import type { PaginatedResponse } from "~/api/modules/withdrawals";
+import type { PaginatedResponse } from "~/api/http/types";
 import { useDonationHistorySocket } from "~/hooks/useDonationHistorySocket";
 import { useQueueActions } from "~/hooks/useQueueActions";
 import { useQueueSocket } from "~/hooks/useQueueSocket";

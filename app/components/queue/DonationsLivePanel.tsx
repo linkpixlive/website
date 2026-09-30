@@ -1,7 +1,7 @@
 import type {
   DonationHistory,
 } from "~/api/modules/dashboard";
-import type { PaginatedResponse } from "~/api/modules/withdrawals";
+import type { PaginatedResponse } from "~/api/http/types";
 import { PageHeader } from "~/components/dashboard/PageHeader";
 import { DonationHistoryList } from "~/components/history/DonationHistoryList";
 import { QueueControlsSection } from "./QueueControlsSection";

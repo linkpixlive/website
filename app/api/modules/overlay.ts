@@ -1,23 +1,39 @@
-import { createApiClient, fetchApi } from "../http/client";
+import { api, authHeaders, fetchApi } from "../http/client";
 
 export const overlayApi = {
   togglePause: (token: string | null) =>
-    fetchApi<void>(createApiClient(token).post("/overlay/toggle-pause")),
+    fetchApi<void>(
+      api.post("/overlay/toggle-pause", undefined, {
+        headers: authHeaders(token),
+      }),
+    ),
 
   skipAlert: (token: string | null) =>
-    fetchApi<void>(createApiClient(token).post("/overlay/skip")),
+    fetchApi<void>(
+      api.post("/overlay/skip", undefined, { headers: authHeaders(token) }),
+    ),
 
   clearQueue: (token: string | null) =>
-    fetchApi<void>(createApiClient(token).delete("/overlay/queue")),
+    fetchApi<void>(
+      api.delete("/overlay/queue", { headers: authHeaders(token) }),
+    ),
 
   replayDonation: (token: string | null, donationId: string) =>
-    fetchApi<void>(createApiClient(token).post(`/overlay/replay/${donationId}`)),
+    fetchApi<void>(
+      api.post(`/overlay/replay/${donationId}`, undefined, {
+        headers: authHeaders(token),
+      }),
+    ),
 
   removeFromQueue: (token: string | null, donationId: string) =>
     fetchApi<void>(
-      createApiClient(token).delete(`/overlay/queue/${donationId}`)
+      api.delete(`/overlay/queue/${donationId}`, {
+        headers: authHeaders(token),
+      }),
     ),
 
   testAlert: (token: string | null) =>
-    fetchApi<void>(createApiClient(token).post("/overlay/test")),
+    fetchApi<void>(
+      api.post("/overlay/test", undefined, { headers: authHeaders(token) }),
+    ),
 };

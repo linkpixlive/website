@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { DonationHistory } from "~/api/modules/dashboard";
-import type { PaginatedResponse } from "~/api/modules/withdrawals";
+import type { PaginatedResponse } from "~/api/http/types";
 import { matchesFilters, type HistoryFilters } from "~/util/history-filters";
 import { useDashboardSocket } from "./useDashboardSocket";
 

@@ -1,13 +1,11 @@
 import type { components } from "../generated/api-schema";
-import { createApiClient, fetchApi } from "../http/client";
+import { api, authHeaders, fetchApi } from "../http/client";
 
 export type AccountSettings = components["schemas"]["AccountEntity"] & {
-  // `id` existe no runtime (@Expose), mas fica fora do Swagger (@ApiHideProperty).
   id: string;
 };
 
-export type ChangePasswordPayload =
-  components["schemas"]["ChangePasswordDto"];
+export type ChangePasswordPayload = components["schemas"]["ChangePasswordDto"];
 
 export type ChangeEmailPayload = components["schemas"]["ChangeEmailDto"];
 
@@ -29,39 +27,44 @@ export type UpdateProfilePayload = components["schemas"]["UpdateProfileDto"];
 
 export type MessageResponse = components["schemas"]["MessageDto"];
 
+export type UpdateProfileResponse =
+  components["schemas"]["UpdateProfileResponseDto"];
+
 export const accountSettingsApi = {
   getSettings: (token?: string | null) =>
-    fetchApi<AccountSettings>(createApiClient(token).get("/account")),
+    fetchApi<AccountSettings>(
+      api.get("/account", { headers: authHeaders(token) }),
+    ),
   updateProfile: (token: string | null, body: UpdateProfilePayload) =>
-    fetchApi<components["schemas"]["UpdateProfileResponseDto"]>(
-      createApiClient(token).patch("/account/profile", body),
+    fetchApi<UpdateProfileResponse>(
+      api.patch("/account/profile", body, { headers: authHeaders(token) }),
     ),
   changePassword: (token: string | null, body: ChangePasswordPayload) =>
     fetchApi<MessageResponse>(
-      createApiClient(token).patch("/account/password", body),
+      api.patch("/account/password", body, { headers: authHeaders(token) }),
     ),
   changeEmail: (token: string | null, body: ChangeEmailPayload) =>
     fetchApi<MessageResponse>(
-      createApiClient(token).patch("/account/email", body),
+      api.patch("/account/email", body, { headers: authHeaders(token) }),
     ),
   deactivateAccount: (token: string | null, body: DeactivateAccountPayload) =>
     fetchApi<MessageResponse>(
-      createApiClient(token).patch("/account/deactivate", body),
+      api.patch("/account/deactivate", body, { headers: authHeaders(token) }),
     ),
   setup2fa: (token: string | null, body: Setup2faPayload) =>
     fetchApi<Setup2faResponse>(
-      createApiClient(token).post("/account/2fa/setup", body),
+      api.post("/account/2fa/setup", body, { headers: authHeaders(token) }),
     ),
   enable2fa: (token: string | null, body: Enable2faPayload) =>
     fetchApi<MessageResponse>(
-      createApiClient(token).post("/account/2fa/enable", body),
+      api.post("/account/2fa/enable", body, { headers: authHeaders(token) }),
     ),
   disable2fa: (token: string | null, body: Disable2faPayload) =>
     fetchApi<MessageResponse>(
-      createApiClient(token).post("/account/2fa/disable", body),
+      api.post("/account/2fa/disable", body, { headers: authHeaders(token) }),
     ),
   confirmEmailChange: (token: string | null, body: ConfirmEmailChangePayload) =>
     fetchApi<MessageResponse>(
-      createApiClient(token).post("/account/email/verify", body),
+      api.post("/account/email/verify", body, { headers: authHeaders(token) }),
     ),
 };

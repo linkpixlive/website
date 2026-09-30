@@ -7,7 +7,10 @@ import { Button } from "~/components/ui/Button";
 import { FormField } from "~/components/ui/FormField";
 import { useToast } from "~/components/ui/useToast";
 import { useUnsavedChanges } from "~/components/ui/UnsavedChangesProvider";
-import { diffPublicData, getUsernameCooldown } from "~/api/modules/profile";
+import {
+  diffPublicData,
+  getUsernameCooldown,
+} from "~/validators/profile-validator";
 import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
 import { ProfileCard } from "./ProfileCard";
 import type { ProfileActionResult } from "./profile-result";

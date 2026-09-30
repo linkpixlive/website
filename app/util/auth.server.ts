@@ -1,7 +1,7 @@
 import { redirect } from "react-router";
 import axios from "axios";
 import type { components } from "~/api/generated/api-schema";
-import { createApiClient } from "~/api/http/client";
+import { api, authHeaders } from "~/api/http/client";
 import { clearAuthCookie, getAuthToken } from "./session.server";
 
 function redirectToLogin(clearCookie = false): never {
@@ -18,8 +18,9 @@ export async function requireValidAuth(request: Request) {
   }
 
   try {
-    const client = createApiClient(token);
-    const response = await client.get("/auth/me");
+    const response = await api.get("/auth/me", {
+      headers: authHeaders(token),
+    });
 
     const user = (response.data?.data ?? response.data) as
       | components["schemas"]["SafeUser"]

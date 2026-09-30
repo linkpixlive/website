@@ -3,7 +3,7 @@ import {
   dashboardApi,
   type DonationHistory,
 } from "~/api/modules/dashboard";
-import type { PaginatedResponse } from "~/api/modules/withdrawals";
+import type { PaginatedResponse } from "~/api/http/types";
 import { DEFAULT_HISTORY_DAYS } from "~/util/history-filters";
 
 /** Infinite scroll for older donations in the popout. Keeps separate state and dedupes against live items. */

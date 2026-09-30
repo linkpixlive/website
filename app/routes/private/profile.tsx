@@ -3,12 +3,12 @@ import type { Route } from "./+types/profile";
 import { PageHeader } from "~/components/dashboard/PageHeader";
 import { useCurrentUser } from "~/components/dashboard/ProfilePopover";
 import { accountSettingsApi } from "~/api/modules/account-settings";
+import { profileApi } from "~/api/modules/profile";
 import {
   diffPublicData,
-  profileApi,
   validateAvatarFile,
   validateUsernameFormat,
-} from "~/api/modules/profile";
+} from "~/validators/profile-validator";
 import {
   getStreamerByUsername,
 } from "~/api/modules/public-donations";

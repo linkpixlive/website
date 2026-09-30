@@ -1,5 +1,5 @@
 import type { components } from "../generated/api-schema";
-import { createApiClient, fetchApi } from "../http/client";
+import { api, authHeaders, fetchApi } from "../http/client";
 import { pixKeysApi, type PixKey } from "./pix-keys";
 import {
   withdrawalsApi,
@@ -28,11 +28,10 @@ export interface WalletPage {
 
 export const walletsApi = {
   getBalances: (token?: string | null) =>
-    fetchApi<WalletBalances>(createApiClient(token).get("/wallets/balances")),
+    fetchApi<WalletBalances>(
+      api.get("/wallets/balances", { headers: authHeaders(token) }),
+    ),
 
-  /** Agregação da página da carteira (saldos + chaves + saques). Fail-fast:
-   *  qualquer fonte com erro derruba o loader (o ErrorBoundary mostra retry)
-   *  em vez de exibir saldo zerado ou lista vazia falsos. */
   getWalletPage: async (
     token: string | null,
     filters: WalletPageFilters,
