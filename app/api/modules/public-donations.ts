@@ -158,8 +158,8 @@ export async function createDonation(
   );
   if (!res.success) {
     throw new DonationRequestError(
-      res.error?.message || DEFAULT_ERROR_MESSAGE,
-      res.error?.code,
+      res.error.message || DEFAULT_ERROR_MESSAGE,
+      res.error.code,
     );
   }
   return mapDonationPayment(res.data);
@@ -172,8 +172,8 @@ export async function getDonationView(
     api.get(`/donations/donation/${id}`),
   );
   if (!res.success) {
-    if (res.error?.code === 404) return null;
-    throw new Error(res.error?.message || DEFAULT_ERROR_MESSAGE);
+    if (res.error.code === 404) return null;
+    throw new Error(res.error.message || DEFAULT_ERROR_MESSAGE);
   }
   return mapDonationView(res.data);
 }

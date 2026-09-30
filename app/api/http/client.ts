@@ -44,16 +44,29 @@ function fallbackError(
   code?: number,
   path?: string,
 ): ApiErrorResponse {
+  return errorEnvelope(
+    e instanceof Error && e.message ? e.message : DEFAULT_ERROR_MESSAGE,
+    code ?? 500,
+    path ?? "",
+  );
+}
+
+export function errorEnvelope(
+  message: string,
+  code = 500,
+  path = "",
+): ApiErrorResponse {
   return {
     success: false,
-    error: {
-      message:
-        e instanceof Error && e.message ? e.message : DEFAULT_ERROR_MESSAGE,
-      code: code ?? 500,
-    },
+    error: { message, code },
     timestamp: new Date().toISOString(),
-    path: path ?? "",
+    path,
   };
+}
+
+export function dataOrThrow<T>(res: ApiResponse<T>): T {
+  if (!res.success) throw new Response(res.error.message, { status: 502 });
+  return res.data;
 }
 
 export async function fetchApi<T>(

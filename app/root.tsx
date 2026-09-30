@@ -1,18 +1,12 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 
-import { ThemeProvider } from "~/contexts/ThemeProvider";
+import { ThemeProvider, themePrePaintScript } from "~/contexts/ThemeProvider";
 import { UnsavedChangesProvider } from "~/components/ui/UnsavedChangesProvider";
 import { RouteErrorState } from "~/components/ui/ErrorState";
 import type { Route } from "./+types/root";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [];
-
-/**
- * Aplica o tema salvo antes da primeira pintura (o ThemeProvider assume isto
- * — ver comentário em ThemeProvider.tsx) para evitar flash de tema claro.
- */
-const themePrePaintScript = `(function(){try{var d=localStorage.getItem("linkpix:theme")==="dark";document.documentElement.classList.toggle("dark",d);document.documentElement.style.colorScheme=d?"dark":"light";}catch(e){}})();`;
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (

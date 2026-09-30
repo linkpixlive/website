@@ -10,6 +10,9 @@ export type Theme = "light" | "dark";
 
 export const THEME_STORAGE_KEY = "linkpix:theme";
 
+// Runs before the first paint to avoid a flash of light theme on dark mode users.
+export const themePrePaintScript = `(function(){try{var d=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)})==="dark";document.documentElement.classList.toggle("dark",d);document.documentElement.style.colorScheme=d?"dark":"light";}catch(e){}})();`;
+
 export interface ThemeContextValue {
   theme: Theme;
   setTheme: (theme: Theme) => void;

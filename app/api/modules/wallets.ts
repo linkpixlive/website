@@ -1,5 +1,5 @@
 import type { components } from "../generated/api-schema";
-import { api, authHeaders, fetchApi } from "../http/client";
+import { api, authHeaders, dataOrThrow, fetchApi } from "../http/client";
 import { pixKeysApi, type PixKey } from "./pix-keys";
 import {
   withdrawalsApi,
@@ -48,20 +48,10 @@ export const walletsApi = {
       }),
     ]);
 
-    if (!balRes.success) {
-      throw new Response(balRes.error.message, { status: 502 });
-    }
-    if (!keysRes.success) {
-      throw new Response(keysRes.error.message, { status: 502 });
-    }
-    if (!withRes.success) {
-      throw new Response(withRes.error.message, { status: 502 });
-    }
-
     return {
-      balances: balRes.data,
-      pixKeys: keysRes.data,
-      withdrawals: withRes.data,
+      balances: dataOrThrow(balRes),
+      pixKeys: dataOrThrow(keysRes),
+      withdrawals: dataOrThrow(withRes),
     };
   },
 };

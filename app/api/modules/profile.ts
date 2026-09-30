@@ -2,10 +2,11 @@ import {
   apiUrl,
   api,
   authHeaders,
+  DEFAULT_ERROR_MESSAGE,
+  errorEnvelope,
   fetchApi,
   type ApiResponse,
 } from "../http/client";
-import type { ApiErrorResponse } from "../http/types";
 
 export interface UsernameResponse {
   username: string;
@@ -13,18 +14,6 @@ export interface UsernameResponse {
 
 export interface ProfilePhotoResponse {
   profileImageUrl: string | null;
-}
-
-function unexpectedPhotoResponse(status: number): ApiErrorResponse {
-  return {
-    success: false,
-    error: {
-      message: "Resposta inesperada do servidor. Tente novamente.",
-      code: status,
-    },
-    timestamp: new Date().toISOString(),
-    path: "/profile/photo",
-  };
 }
 
 export const profileApi = {
@@ -56,20 +45,19 @@ export const profileApi = {
         typeof (json as { success?: unknown }).success === "boolean"
       )
         return json as ApiResponse<ProfilePhotoResponse>;
-      return unexpectedPhotoResponse(response.status);
+      return errorEnvelope(
+        "Resposta inesperada do servidor. Tente novamente.",
+        response.status,
+        "/profile/photo",
+      );
     } catch (e: unknown) {
-      return {
-        success: false,
-        error: {
-          message:
-            e instanceof Error
-              ? e.message
-              : "Nossos sistemas estão com problemas. Tente novamente mais tarde.",
-          code: 500,
-        },
-        timestamp: new Date().toISOString(),
-        path: "/profile/photo",
-      };
+      return errorEnvelope(
+        e instanceof Error && e.message
+          ? e.message
+          : DEFAULT_ERROR_MESSAGE,
+        500,
+        "/profile/photo",
+      );
     }
   },
 };

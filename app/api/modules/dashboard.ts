@@ -1,5 +1,5 @@
 import type { components, operations } from "../generated/api-schema";
-import { api, authHeaders, fetchApi, type ApiResponse } from "../http/client";
+import { api, authHeaders, dataOrThrow, fetchApi } from "../http/client";
 import type { PaginatedResponse } from "../http/types";
 import { accountSettingsApi, type AccountSettings } from "./account-settings";
 import { donationSettingsApi, type DonationSettings } from "./donation-settings";
@@ -114,11 +114,6 @@ export interface HomePageData {
   overlay: Widget | null;
   account: AccountSettings | null;
   recent: DonationHistory[];
-}
-
-function dataOrThrow<T>(res: ApiResponse<T>): T {
-  if (!res.success) throw new Response(res.error.message, { status: 502 });
-  return res.data;
 }
 
 export async function getHomePage(
