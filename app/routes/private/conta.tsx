@@ -5,7 +5,7 @@ import {
   type AccountSettings,
 } from "~/api/modules/account-settings";
 import { AccountPanel } from "~/components/account/AccountPanel";
-import { ChangeEmailModal } from "~/components/account/ChangeEmailModal";
+import { PageHeader } from "~/components/dashboard/PageHeader";import { ChangeEmailModal } from "~/components/account/ChangeEmailModal";
 import { ChangePasswordModal } from "~/components/account/ChangePasswordModal";
 import { DeactivateAccountModal } from "~/components/account/DeactivateAccountModal";
 import { TwoFactorModal } from "~/components/account/TwoFactorModal";
@@ -186,6 +186,12 @@ export default function AccountPage() {
 
   return (
     <div>
+      {/* Title block */}
+      <PageHeader
+        title="Conta"
+        subtitle="Gerencie seu e-mail, senha e segurança da conta."
+      />
+
       <AccountPanel
         settings={settings}
         onChangePassword={() => setModal("password")}
