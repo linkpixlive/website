@@ -30,18 +30,6 @@ export function formatLongDate(isoDate: string) {
   });
 }
 
-export function formatRangeLabel(startIso: string, endIso: string) {
-  const start = new Date(startIso).toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "short",
-  });
-  const end = new Date(endIso).toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "short",
-  });
-  return `${start} a ${end}`;
-}
-
 const WEEKDAY_FULL = [
   "domingo",
   "segunda-feira",

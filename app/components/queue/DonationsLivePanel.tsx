@@ -18,12 +18,6 @@ interface DonationsLivePanelProps {
   initialHistory: PaginatedResponse<DonationHistory>;
 }
 
-/**
- * Espelho operacional da página Doações, usado pelo popup (/fila/popout).
- * Mesmos componentes e visual da página, sem filtros e sem paginação:
- * o histórico é uma lista atualizada em tempo real via socket, com scroll
- * infinito para carregar doações mais antigas.
- */
 export function DonationsLivePanel({
   token,
   initialHistory,

@@ -1,6 +1,6 @@
 import { createContext, useCallback, useMemo, useRef, type ReactNode } from "react";
 import { Toast } from "@base-ui/react/toast";
-import { ToastList } from "./Toast";
+import { ToastList } from "~/components/ui/Toast";
 
 export type ToastVariant = "success" | "error" | "info";
 
@@ -12,11 +12,6 @@ export const ToastContext = createContext<ToastContextType | undefined>(undefine
 
 function ToastBridge({ children }: { children: ReactNode }) {
   const manager = Toast.useToastManager();
-
-  // `useToastManager()` retorna um objeto novo a cada toast adicionado/removido
-  // (memoizado em `[toasts, store]`). Depender dele direto tornaria `toast`
-  // instável e refaria qualquer `useEffect(..., [toast])` em loop.
-  // `store.addToast` é estável, então fixamos via ref.
   const addRef = useRef(manager.add);
   addRef.current = manager.add;
 

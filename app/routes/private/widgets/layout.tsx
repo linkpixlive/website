@@ -28,8 +28,6 @@ export default function WidgetsLayout() {
     visible: false,
   });
 
-  // Casa exata; ordena pela rota mais longa para evitar colisão
-  // futura (ex.: /widgets/regras-extra não deve acender "Configurações").
   const active =
     [...sections]
       .sort((a, b) => b.to.length - a.to.length)
@@ -38,8 +36,6 @@ export default function WidgetsLayout() {
           pathname === section.to || pathname.startsWith(`${section.to}/`),
       ) ?? sections[0];
 
-  // Mede a aba ativa e posiciona o indicador; a transição de
-  // left/width faz o fundo "escorregar" entre as opções.
   useLayoutEffect(() => {
     const measure = () => {
       const el = itemRefs.current[active.to];

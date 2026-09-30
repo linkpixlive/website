@@ -11,7 +11,6 @@ interface FilterShellProps {
   children: ReactNode;
 }
 
-/** Moldura mobile-colapsável + "Limpar filtros" dos filtros de listagem. */
 export function FilterShell({
   hasActiveFilters,
   onClearFilters,

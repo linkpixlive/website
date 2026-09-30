@@ -29,7 +29,6 @@ export function DonationHistoryFilters() {
   const [isOpen, setIsOpen] = useState(false);
 
   const status = searchParams.get("status") || "all";
-  // Padrão = últimos 30 dias (teto de retenção, alinhado ao lifecycle do R2).
   const days = searchParams.get("days") || DEFAULT_HISTORY_DAYS;
   const searchBy = searchParams.get("searchBy") || "name";
   const searchParam = searchParams.get("search") || "";
@@ -42,7 +41,6 @@ export function DonationHistoryFilters() {
 
   const handleDaysChange = (value: string) => {
     updateParams(searchParams, setSearchParams, (params) => {
-      // Padrão não precisa ir para a URL.
       setParamOrDelete(params, "days", value, DEFAULT_HISTORY_DAYS);
     });
   };

@@ -1,15 +1,15 @@
-import { useLoaderData, useActionData, useNavigation } from "react-router";
-import type { Route } from "./+types/overlay";
-import { getAuthToken } from "~/util/session.server";
-import { widgetsApi, type Widget } from "~/api/modules/widgets";
+import { useActionData, useLoaderData, useNavigation } from "react-router";
 import { overlayApi } from "~/api/modules/overlay";
 import { listVoices } from "~/api/modules/public-donations";
-import { overlaySchema } from "~/validators/overlay-validator";
-import type { TtsVoice } from "~/types/donation";
-import { useToast } from "~/components/ui/useToast";
-import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
+import { widgetsApi } from "~/api/modules/widgets";
 import { ErrorState } from "~/components/ui/ErrorState";
+import { useToast } from "~/contexts/useToast";
 import { OverlayWidgetConfig } from "~/components/widgets/OverlayWidgetConfig";
+import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
+import type { TtsVoice } from "~/types/donation";
+import { getAuthToken } from "~/util/session.server";
+import { overlaySchema } from "~/validators/overlay-validator";
+import type { Route } from "./+types/overlay";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -24,91 +24,97 @@ export function meta({}: Route.MetaArgs) {
 export async function loader({ request }: Route.LoaderArgs) {
   const token = getAuthToken(request);
 
-  // Garante existência (cria com defaults do backend na 1ª abertura) e
-  // carrega a mesma lista de vozes do formulário de doação para o
-  // streamer escolher a voz padrão. Falha em vozes não quebra a página.
   const [overlayRes, voices] = await Promise.all([
-    widgetsApi.ensureSettings(token, "overlay"),
+    widgetsApi.getSettings(token, "overlay"),
     listVoices().catch(() => [] as TtsVoice[]),
   ]);
-  let overlayWidget: Widget | null = null;
-  if (overlayRes.success) {
-    overlayWidget = overlayRes.data;
-  }
 
-  return { overlayWidget, voices };
+  return {
+    overlayWidget: overlayRes.success ? overlayRes.data : null,
+    voices,
+  };
 }
+
+type OverlayActionResult = {
+  success: boolean;
+  action: string;
+  error?: string;
+};
 
 export async function action({ request }: Route.ActionArgs) {
   const token = getAuthToken(request);
   const formData = await request.formData();
-  const intent = formData.get("intent") as string;
+  const handler = intentHandlers[String(formData.get("intent") ?? "")];
+  return handler ? handler(token, formData) : null;
+}
 
-  if (intent === "saveOverlay") {
+type OverlayIntentHandler = (
+  token: string | null,
+  formData: FormData,
+) => Promise<OverlayActionResult>;
+
+const intentHandlers: Record<string, OverlayIntentHandler> = {
+  saveOverlay: async (token, formData) => {
+    const intent = "saveOverlay";
     const parsed = overlaySchema.safeParse({
       volume: Number(formData.get("volume")),
       speakNameAmount: formData.get("speakNameAmount") === "true",
       audioOnly: formData.get("audioOnly") === "true",
       defaultNarrator: String(formData.get("defaultNarrator") ?? ""),
     });
+
     if (!parsed.success) {
-      return {
-        success: false,
-        error: parsed.error.issues[0].message,
-        action: "saveOverlay",
-      };
+      return fail(intent, parsed.error.issues[0].message);
     }
 
-    // Sem `isPaused`: pausa é só via POST /overlay/toggle-pause (o PUT
-    // preserva o valor atual no backend e o pipe rejeita o campo).
-    const body = {
+    const res = await widgetsApi.upsertSettings(token, "overlay", {
       volume: parsed.data.volume,
       speakNameAmount: parsed.data.speakNameAmount,
       audioOnly: parsed.data.audioOnly,
       defaultNarrator: parsed.data.defaultNarrator,
-    };
-
-    // Upsert: cria na 1ª vez, atualiza nas demais. O PUT substitui o
-    // objeto de settings inteiro — por isso o body vai sempre completo.
-    const res = await widgetsApi.upsertSettings(token, "overlay", body);
+    });
 
     if (!res.success) {
-      return {
-        success: false,
-        error: res.error.message,
-        action: "saveOverlay",
-      };
+      return fail(intent, res.error.message);
     }
 
-    return { success: true, action: "saveOverlay" };
-  }
+    return ok(intent);
+  },
 
-  if (intent === "testAlert") {
+  testAlert: async (token) => {
     const res = await overlayApi.testAlert(token);
-    if (!res.success) {
-      return {
-        success: false,
-        error: res.error.message,
-        action: "testAlert",
-      };
-    }
-    return { success: true, action: "testAlert" };
-  }
 
-  if (intent === "resetToken") {
+    if (!res.success) {
+      return fail("testAlert", res.error.message);
+    }
+
+    return ok("testAlert");
+  },
+
+  resetToken: async (token) => {
     const res = await widgetsApi.resetToken(token, "overlay");
-    if (!res.success) {
-      return {
-        success: false,
-        error: res.error.message,
-        action: "resetToken",
-      };
-    }
-    return { success: true, action: "resetToken" };
-  }
 
-  return null;
+    if (!res.success) {
+      return fail("resetToken", res.error.message);
+    }
+
+    return ok("resetToken");
+  },
+};
+
+function fail(action: string, error: string): OverlayActionResult {
+  return { success: false, action, error };
 }
+
+function ok(action: string): OverlayActionResult {
+  return { success: true, action };
+}
+
+const overlaySuccessToasts: Record<string, string> = {
+  saveOverlay: "Configurações salvas com sucesso!",
+  testAlert: "Alerta de teste enviado!",
+  resetToken: "Token resetado com sucesso!",
+};
 
 export default function OverlayRoute() {
   const { overlayWidget, voices } = useLoaderData<typeof loader>();
@@ -121,13 +127,8 @@ export default function OverlayRoute() {
     state: navigation.state,
     onResult: (result) => {
       if (result.success) {
-        if (result.action === "saveOverlay") {
-          toast("Configurações salvas com sucesso!", "success");
-        } else if (result.action === "testAlert") {
-          toast("Alerta de teste enviado!", "success");
-        } else if (result.action === "resetToken") {
-          toast("Token resetado com sucesso!", "success");
-        }
+        const message = overlaySuccessToasts[result.action];
+        if (message) toast(message, "success");
       } else if (result.error) {
         toast(result.error, "error");
       }
@@ -143,8 +144,6 @@ export default function OverlayRoute() {
     );
   }
 
-  // `key` por token: após resetToken o loader revalida com o novo token
-  // e o form remonta exibindo a nova URL.
   return (
     <OverlayWidgetConfig
       key={`${overlayWidget.token}-${overlayWidget.updatedAt}`}

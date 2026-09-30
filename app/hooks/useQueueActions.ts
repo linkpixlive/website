@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { overlayApi } from "~/api/modules/overlay";
-import { useToast } from "~/components/ui/useToast";
+import { useToast } from "~/contexts/useToast";
 
 /** Queue control actions (pause, skip, clear, test, replay) with per-action loading and toasts. */
 export function useQueueActions(

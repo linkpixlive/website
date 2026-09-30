@@ -4,7 +4,6 @@ import { cn } from "~/util/cn";
 
 interface HistorySectionShellProps {
   title: string;
-  /** Total exibido como "N registro(s)"; omitido quando 0. */
   total: number;
   ariaLabel?: string;
   className?: string;
@@ -12,7 +11,6 @@ interface HistorySectionShellProps {
   footer?: ReactNode;
 }
 
-/** Card padrão das seções de histórico (título + contador + conteúdo + rodapé). */
 export function HistorySectionShell({
   title,
   total,

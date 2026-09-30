@@ -9,7 +9,7 @@ import { FormField } from "~/components/ui/FormField";
 import { Modal } from "~/components/ui/Modal";
 import { SubmitButton } from "~/components/ui/SubmitButton";
 import { SECTION_HEADING_CLASS } from "~/components/ui/classes";
-import { useToast } from "~/components/ui/useToast";
+import { useToast } from "~/contexts/useToast";
 import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
 import { useResetOnOpen } from "~/hooks/useResetOnOpen";
 import {
@@ -21,13 +21,9 @@ interface ChangeEmailModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentEmail?: string;
-  /** Com 2FA ativo o backend exige senha + TOTP. */
   has2fa?: boolean;
 }
 
-/** Troca de email em duas etapas: `changeEmail` pede a reautenticação e dispara o
- *  código; `confirmEmailChange` confirma. O backend preserva a sessão atual, então
- *  nada aqui navega nem derruba o cookie. */
 export function ChangeEmailModal({
   isOpen,
   onClose,
@@ -117,15 +113,20 @@ export function ChangeEmailModal({
 
   if (pending) {
     return (
-      <Modal isOpen={isOpen} onClose={onClose} title="Confirmar novo e-mail" size="sm">
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title="Confirmar novo e-mail"
+        size="sm"
+      >
         <div className="space-y-4">
           {confirmError && (
             <AlertMessage variant="error" message={confirmError} />
           )}
 
           <p className="text-[13px] font-medium leading-relaxed text-ink-secondary">
-            Enviamos um código de 6 dígitos para o novo endereço. Informe o código
-            para concluir a alteração.
+            Enviamos um código de 6 dígitos para o novo endereço. Informe o
+            código para concluir a alteração.
           </p>
 
           <OtpField

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFetcher } from "react-router";
-import { useToast } from "~/components/ui/useToast";
+import { useToast } from "~/contexts/useToast";
 import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
 import { useResetOnOpen } from "~/hooks/useResetOnOpen";
 import { buildIntentFormData } from "~/util/submit-intent";
@@ -22,9 +22,6 @@ function isAction(
   return Boolean(data && data.action === action);
 }
 
-/** Estado + intents do 2FA. Token do OtpInput fica em ref (lido no submit),
- *  sem espelhar em state — evita race se o autocomplete preencher e o
- *  usuário confirmar no mesmo instante. */
 export function useTwoFactorSetup({
   isOpen,
   enabled,
@@ -70,7 +67,10 @@ export function useTwoFactorSetup({
         (isAction(result, "2faEnable") || isAction(result, "2faDisable")) &&
         result.success
       ) {
-        toast(result.message ?? "Autenticação em dois fatores atualizada.", "success");
+        toast(
+          result.message ?? "Autenticação em dois fatores atualizada.",
+          "success",
+        );
         onClose();
       }
     },
@@ -80,12 +80,6 @@ export function useTwoFactorSetup({
     tokenRef.current = "";
     setLocalError(null);
   });
-
-  useEffect(() => {
-    if (fetcher.state === "submitting") {
-      setLocalError(null);
-    }
-  }, [fetcher.state]);
 
   const submitIntent = (intent: string, values: Record<string, string>) => {
     fetcher.submit(buildIntentFormData(intent, values), { method: "post" });
@@ -111,8 +105,6 @@ export function useTwoFactorSetup({
     submitIntent("2faDisable", { password, token: tokenRef.current });
   };
 
-  /** O setup exige a senha atual, então só dispara depois que o usuário a
-   *  informa — não no automático ao abrir o modal. */
   const handleStartSetup = (password: string) => {
     if (loading) return;
     if (!password) {

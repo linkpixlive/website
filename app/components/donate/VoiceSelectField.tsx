@@ -20,11 +20,6 @@ interface VoiceSelectFieldProps {
   disabled?: boolean;
   error?: string | null;
   hint?: string;
-  /**
-   * Quando false, omite a pseudo-opção "Voz padrão do streamer" e lista só
-   * as vozes reais — usado em /widgets/overlay, onde o streamer escolhe a
-   * própria voz padrão (não faria sentido um "padrão do padrão").
-   */
   includeDefaultOption?: boolean;
 }
 

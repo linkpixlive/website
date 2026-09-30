@@ -8,35 +8,37 @@ import {
 import { accountSettingsApi } from "~/api/modules/account-settings";
 import { pixKeysApi } from "~/api/modules/pix-keys";
 import { walletsApi } from "~/api/modules/wallets";
-import { toWithdrawalStatus, withdrawalsApi, DEFAULT_PAGE_LIMIT } from "~/api/modules/withdrawals";
+import {
+  DEFAULT_PAGE_LIMIT,
+  toWithdrawalStatus,
+  withdrawalsApi,
+} from "~/api/modules/withdrawals";
 import { PageHeader } from "~/components/dashboard/PageHeader";
+import { HistorySectionShell } from "~/components/ui/HistorySectionShell";
 import { Pagination } from "~/components/ui/Pagination";
-import { useToast } from "~/components/ui/useToast";
+import { useToast } from "~/contexts/useToast";
 import { BalanceCard } from "~/components/wallet/BalanceCard";
 import { PixKeysCard } from "~/components/wallet/PixKeysCard";
 import { PixKeysModal } from "~/components/wallet/PixKeysModal";
-import { StreamerPrivacyNotice } from "~/components/wallet/StreamerPrivacyNotice";
 import { WithdrawalFilters } from "~/components/wallet/WithdrawalFilters";
 import { WithdrawalHistoryTable } from "~/components/wallet/WithdrawalHistoryTable";
 import { WithdrawalModal } from "~/components/wallet/WithdrawalModal";
-import { clearAuthCookie, getAuthToken } from "~/util/session.server";
 import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
 import { usePageParam } from "~/hooks/usePageParam";
 import { getPageParam } from "~/util/search-params";
-import { HistorySectionShell } from "~/components/ui/HistorySectionShell";
+import { clearAuthCookie, getAuthToken } from "~/util/session.server";
 import {
   createWithdrawalSchema,
   MAX_WITHDRAWAL_AMOUNT,
   MIN_WITHDRAWAL_AMOUNT,
   pixKeySchema,
 } from "~/validators/wallet-validator";
-import type { Route } from "./+types/index";
+import type { Route } from "./+types/wallet";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const token = getAuthToken(request);
   const url = new URL(request.url);
 
-  // Search parameters for filters and pagination
   const page = getPageParam(url);
   const limit = getPageParam(url, "limit", DEFAULT_PAGE_LIMIT);
 
@@ -48,8 +50,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     endDate: url.searchParams.get("endDate") || undefined,
   });
 
-  // `has2fa` decide se o saque pede só a senha ou senha + TOTP no formulário.
   const account = await accountSettingsApi.getSettings(token);
+
   if (!account.success) {
     throw new Response(account.error.message, { status: 502 });
   }
@@ -81,22 +83,18 @@ async function createWithdrawalAction(
     password: String(formData.get("password") ?? ""),
     totp: formData.get("totp") ? String(formData.get("totp")) : undefined,
   });
+
+  const intent = "createWithdrawal";
+
   if (!parsed.success) {
-    return {
-      success: false,
-      action: "createWithdrawal",
-      error: parsed.error.issues[0].message,
-    };
+    return fail(intent, parsed.error.issues[0].message);
   }
+
   const { amount, pixId, password, totp } = parsed.data;
   const idempotencyKey = String(formData.get("idempotencyKey") ?? "");
 
   if (!idempotencyKey) {
-    return {
-      success: false,
-      action: "createWithdrawal",
-      error: "Falha interna: chave de idempotência ausente.",
-    };
+    return fail(intent, "Falha interna: chave de idempotência ausente.");
   }
 
   const res = await withdrawalsApi.create(
@@ -106,14 +104,10 @@ async function createWithdrawalAction(
   );
 
   if (!res.success) {
-    return {
-      success: false,
-      action: "createWithdrawal",
-      error: res.error.message,
-    };
+    return fail(intent, res.error.message);
   }
 
-  return { success: true, action: "createWithdrawal" };
+  return ok(intent);
 }
 
 async function createPixKeyAction(
@@ -124,12 +118,10 @@ async function createPixKeyAction(
     key: String(formData.get("key") ?? ""),
     alias: formData.get("alias") ? String(formData.get("alias")) : undefined,
   });
+  const intent = "createPixKey";
+
   if (!parsed.success) {
-    return {
-      success: false,
-      action: "createPixKey",
-      error: parsed.error.issues[0].message,
-    };
+    return fail(intent, parsed.error.issues[0].message);
   }
 
   const res = await pixKeysApi.create(token, {
@@ -138,14 +130,10 @@ async function createPixKeyAction(
   });
 
   if (!res.success) {
-    return {
-      success: false,
-      action: "createPixKey",
-      error: res.error.message,
-    };
+    return fail(intent, res.error.message);
   }
 
-  return { success: true, action: "createPixKey" };
+  return ok(intent);
 }
 
 async function deletePixKeyAction(
@@ -153,51 +141,53 @@ async function deletePixKeyAction(
   formData: FormData,
 ): Promise<WalletActionResult> {
   const id = String(formData.get("id") ?? "");
+  const intent = "deletePixKey";
   if (!id) {
-    return {
-      success: false,
-      action: "deletePixKey",
-      error: "Chave Pix inválida.",
-    };
+    return fail(intent, "Chave Pix inválida.");
   }
 
   const res = await pixKeysApi.delete(token, id);
 
   if (!res.success) {
-    return {
-      success: false,
-      action: "deletePixKey",
-      error: res.error.message,
-    };
+    return fail(intent, res.error.message);
   }
 
-  return { success: true, action: "deletePixKey" };
+  return ok(intent);
 }
 
 export async function action({ request }: Route.ActionArgs) {
   const token = getAuthToken(request);
   const formData = await request.formData();
-  const intent = formData.get("intent") as string;
+  const handler = intentHandlers[String(formData.get("intent") ?? "")];
+  return handler ? handler(token, formData) : null;
+}
 
-  if (intent === "logout") {
+type WalletIntentHandler = (
+  token: string | null,
+  formData: FormData,
+) => Promise<WalletActionResult>;
+
+const intentHandlers: Record<string, WalletIntentHandler> = {
+  logout: async () => {
     throw redirect("/auth/login", {
       headers: { "Set-Cookie": clearAuthCookie() },
     });
-  }
+  },
 
-  if (intent === "createWithdrawal") {
-    return createWithdrawalAction(token, formData);
-  }
+  createWithdrawal: (token, formData) =>
+    createWithdrawalAction(token, formData),
 
-  if (intent === "createPixKey") {
-    return createPixKeyAction(token, formData);
-  }
+  createPixKey: (token, formData) => createPixKeyAction(token, formData),
 
-  if (intent === "deletePixKey") {
-    return deletePixKeyAction(token, formData);
-  }
+  deletePixKey: (token, formData) => deletePixKeyAction(token, formData),
+};
 
-  return null;
+function fail(action: string, error: string): WalletActionResult {
+  return { success: false, action, error };
+}
+
+function ok(action: string): WalletActionResult {
+  return { success: true, action };
 }
 
 export default function WalletPage() {
@@ -214,9 +204,6 @@ export default function WalletPage() {
 
   const loadingData = navigation.state === "loading";
 
-  // Canal único: esta página (navegação) trata só `createWithdrawal`.
-  // `createPixKey`/`deletePixKey` chegam via `fetcher` e são tratados em
-  // `PixKeysModal`/`PixKeyCreateForm` — ignorar aqui evita toast duplo.
   useFetcherFeedback<WalletActionResult>({
     data: actionData,
     state: navigation.state,
@@ -245,8 +232,6 @@ export default function WalletPage() {
         subtitle="Acompanhe seu saldo disponível e o histórico de saques."
       />
 
-      <StreamerPrivacyNotice />
-
       {/* Primary + secondary columns */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
         <div className="lg:col-span-7 xl:col-span-8">
@@ -257,10 +242,7 @@ export default function WalletPage() {
           />
         </div>
         <aside className="lg:col-span-5 xl:col-span-4">
-          <PixKeysCard
-            pixKeys={pixKeys}
-            onManage={() => setModal("pixKeys")}
-          />
+          <PixKeysCard pixKeys={pixKeys} onManage={() => setModal("pixKeys")} />
         </aside>
       </div>
 
@@ -273,7 +255,10 @@ export default function WalletPage() {
         <WithdrawalFilters />
 
         <div className="mt-5">
-          <WithdrawalHistoryTable items={withdrawals.items} loading={loadingData} />
+          <WithdrawalHistoryTable
+            items={withdrawals.items}
+            loading={loadingData}
+          />
         </div>
 
         <Pagination

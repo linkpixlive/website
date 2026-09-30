@@ -47,9 +47,6 @@ export function OverlaySettingsForm({
   loading: boolean;
   onSubmit: (data: OverlayFormValues) => void;
 }) {
-  // Valor legado (ex.: "Ricardo") ou vazio (default novo do backend) não
-  // existe na lista de vozes — pré-seleciona a 1ª voz ativa para exibição
-  // e para o submit, em vez de travar o form com erro.
   const initialNarrator = voices.some(
     (v) => v.id === widget.settings.defaultNarrator,
   )
@@ -71,7 +68,6 @@ export function OverlaySettingsForm({
     },
   });
 
-  // Watch volume to display its percentage in real-time
   const volumeValue = watch("volume");
   useUnsavedChanges(isDirty);
 
@@ -83,7 +79,6 @@ export function OverlaySettingsForm({
         </span>
 
         <div className="flex flex-col gap-6">
-          {/* Narrador padrão — mesma lista de vozes do formulário de doação */}
           <Controller
             name="defaultNarrator"
             control={control}
@@ -101,7 +96,6 @@ export function OverlaySettingsForm({
             )}
           />
 
-          {/* Volume Range Slider */}
           <div className="flex flex-col gap-2 max-w-xs">
             <div className="flex items-center justify-between">
               <label className="text-[13px] font-medium text-ink-secondary">

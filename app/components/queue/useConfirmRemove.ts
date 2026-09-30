@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { overlayApi } from "~/api/modules/overlay";
-import { useToast } from "~/components/ui/useToast";
+import { useToast } from "~/contexts/useToast";
 import type { OverlayDonationEntity } from "~/types/queue";
 
 export interface ConfirmTarget {
@@ -8,9 +8,6 @@ export interface ConfirmTarget {
   id: string | undefined;
 }
 
-/** Remoção com confirmação por linha. A mesma doação pode aparecer várias
- *  vezes na fila (ex. "Repetir"), então a confirmação é identificada pela
- *  LINHA clicada (índice), com snapshot do id para validar antes de remover. */
 export function useConfirmRemove(
   queue: OverlayDonationEntity[],
   token: string | null,

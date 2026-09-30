@@ -245,7 +245,6 @@ export interface IconProps
   extends Omit<React.ComponentPropsWithoutRef<"svg">, "name" | "strokeWidth"> {
   name: IconName;
   size?: string | number;
-  /** Style tier: <2 Linear (idle/menu), 2–2.2 Outline (default controls), >=2.3 Bold (active accents). */
   strokeWidth?: number;
 }
 

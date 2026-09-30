@@ -1,4 +1,4 @@
-import { useLoaderData, useNavigate, useSearchParams } from "react-router";
+import { useLoaderData, useNavigate } from "react-router";
 import type { Route } from "./+types/donation-confirmation";
 import { LogoTile } from "~/components/ui/LogoTile";
 import { AlertMessage } from "~/components/ui/AlertMessage";
@@ -8,10 +8,10 @@ import {
   WaitingState,
 } from "~/components/donate/ConfirmationStates";
 import { PaymentConfirmedStep } from "~/components/donate/PaymentConfirmedStep";
+import { DonationFooter } from "~/components/donate/DonationFooter";
 import { getDonationView } from "~/api/modules/public-donations";
 import { normalizeUsername } from "~/util/username";
 import { useDonationStatus } from "~/hooks/useDonationStatus";
-import type { DonationView } from "~/types/donation";
 
 export function meta() {
   return [{ title: "Confirmação da doação — LinkPix" }];
@@ -32,25 +32,15 @@ export async function loader({ params }: Route.LoaderArgs) {
   }
 }
 
-/** Username do streamer para voltar: API → query `u` (fallback do card de doação) → null. */
-function useStreamerUsername(view: DonationView | null): string | null {
-  const [searchParams] = useSearchParams();
-  return (
-    normalizeUsername(view?.streamerUsername) ??
-    normalizeUsername(searchParams.get("u"))
-  );
-}
-
 export default function DonationConfirmationPage() {
   const { view, error } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
-  const streamerUsername = useStreamerUsername(view);
+  const streamerUsername = normalizeUsername(view?.streamerUsername);
 
   const { status, connectionLost } = useDonationStatus(view?.id ?? null, {
     enabled: !!view && view.status === "pending",
   });
 
-  // Enquanto o loader traz "pending", o status efetivo vem do polling.
   const effectiveStatus = view && view.status !== "pending" ? view.status : status;
   const confirmed = effectiveStatus === "paid" || effectiveStatus === "displayed";
 
@@ -123,12 +113,7 @@ export default function DonationConfirmationPage() {
           </div>
         </div>
 
-        <div className="flex flex-col items-center gap-2 pb-2">
-          <LogoTile variant="auto" imgClassName="h-6" textClassName="text-lg" />
-          <p className="text-[11px] font-medium text-ink-label">
-            Doações processadas via Pix · LinkPix
-          </p>
-        </div>
+        <DonationFooter />
       </div>
     </main>
   );

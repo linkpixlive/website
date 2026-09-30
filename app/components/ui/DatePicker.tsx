@@ -37,7 +37,6 @@ interface CalendarDay {
   isCurrentMonth: boolean;
 }
 
-/** Grade 6×7 do mês (com dias dos meses vizinhos). Pura — sem estado. */
 function buildCalendarDays(month: number, year: number): CalendarDay[] {
   const startOffset = new Date(year, month, 1).getDay();
   const start = new Date(year, month, 1 - startOffset);
@@ -79,7 +78,6 @@ export function DatePicker({
   const viewMonth = viewDate.getMonth();
   const viewYear = viewDate.getFullYear();
 
-  // Generate calendar days grid
   const calendarDays = buildCalendarDays(viewMonth, viewYear);
 
   const handlePrevMonth = (e: React.MouseEvent) => {

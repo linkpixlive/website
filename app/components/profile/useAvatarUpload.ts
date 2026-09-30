@@ -2,7 +2,6 @@ import { useRef, useState } from "react";
 import { validateAvatarFile } from "~/validators/profile-validator";
 import { readFileAsDataUrl } from "~/components/profile/crop-image";
 
-/** Picker → crop → upload da foto de perfil (remove incluído). */
 export function useAvatarUpload(uploading: boolean) {
   const [isCropOpen, setIsCropOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
@@ -10,7 +9,6 @@ export function useAvatarUpload(uploading: boolean) {
   const [confirmingRemove, setConfirmingRemove] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  /** Primeiro clique abre o explorador; o modal só abre após a seleção. */
   const openPicker = () => {
     if (uploading) return;
     setPickerError(null);

@@ -8,7 +8,8 @@ export const overlaySchema = z.object({
     .max(100),
   speakNameAmount: z.boolean(),
   audioOnly: z.boolean(),
-  defaultNarrator: z.string().min(1, "Selecione um narrador").max(100),
+  // Vazio = "Voz padrão" (o backend trata `''` como voz do sistema).
+  defaultNarrator: z.string().max(100),
 });
 
 export type OverlayFormValues = z.infer<typeof overlaySchema>;

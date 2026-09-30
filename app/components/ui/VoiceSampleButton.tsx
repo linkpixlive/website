@@ -8,7 +8,6 @@ interface VoiceSampleButtonProps {
   voiceName: string;
 }
 
-/** Play/pause compacto para a amostra de voz; garante um áudio por vez. */
 export function VoiceSampleButton({ src, voiceName }: VoiceSampleButtonProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);

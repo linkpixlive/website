@@ -9,9 +9,7 @@ import {
   validateAvatarFile,
   validateUsernameFormat,
 } from "~/validators/profile-validator";
-import {
-  getStreamerByUsername,
-} from "~/api/modules/public-donations";
+import { getStreamerByUsername } from "~/api/modules/public-donations";
 import { IdentityCard } from "~/components/profile/IdentityCard";
 import { PublicDataCard } from "~/components/profile/PublicDataCard";
 import { PublicPageCard } from "~/components/profile/PublicPageCard";
@@ -57,33 +55,58 @@ export async function action({
 }: Route.ActionArgs): Promise<ProfileActionResult | null> {
   const token = getAuthToken(request);
   const formData = await request.formData();
-  const intent = String(formData.get("intent") ?? "");
+  const handler = intentHandlers[String(formData.get("intent") ?? "")];
+  return handler ? handler(token, formData, request) : null;
+}
 
-  if (intent === "savePublicData") {
+type ProfileIntentHandler = (
+  token: string | null,
+  formData: FormData,
+  request: Request,
+) => Promise<ProfileActionResult>;
+
+const intentHandlers: Record<string, ProfileIntentHandler> = {
+  savePublicData: async (token, formData, request) => {
     const name = String(formData.get("name") ?? "").trim();
     const newUsername = String(formData.get("username") ?? "").trim();
-    // O backend é a fonte da verdade sobre o que mudou.
     const me = await requireValidAuth(request);
     return savePublicDataAction(
       token,
       { name: me.name ?? "", username: me.username ?? "" },
       { name, username: newUsername },
     );
-  }
+  },
 
-  if (intent === "uploadPhoto") {
-    return uploadPhotoAction(token, formData.get("file"));
-  }
+  uploadPhoto: (token, formData) =>
+    uploadPhotoAction(token, formData.get("file")),
 
-  if (intent === "removePhoto") {
+  removePhoto: async (token) => {
     const res = await profileApi.removePhoto(token);
-    if (!res.success) {
-      return { success: false, action: intent, error: res.error.message };
-    }
-    return { success: true, action: intent, message: "Foto removida." };
-  }
+    if (!res.success) return fail("removePhoto", res.error.message);
+    return ok("removePhoto", "Foto removida.");
+  },
+};
 
-  return null;
+type ProfileIntent = ProfileActionResult["action"];
+
+function fail(
+  action: ProfileIntent,
+  error: string,
+  extra?: Partial<ProfileActionResult>,
+): ProfileActionResult {
+  return { success: false, action, error, ...extra };
+}
+
+function invalid(
+  action: ProfileIntent,
+  fieldErrors: NonNullable<ProfileActionResult["fieldErrors"]>,
+  extra?: Partial<ProfileActionResult>,
+): ProfileActionResult {
+  return { success: false, action, fieldErrors, ...extra };
+}
+
+function ok(action: ProfileIntent, message: string): ProfileActionResult {
+  return { success: true, action, message };
 }
 
 async function savePublicDataAction(
@@ -103,53 +126,46 @@ async function savePublicDataAction(
   if (usernameInvalid) fieldErrors.username = usernameInvalid;
 
   if (fieldErrors.name || fieldErrors.username) {
-    return { success: false, action: intent, fieldErrors };
+    return invalid(intent, fieldErrors);
   }
 
   const { updateName, updateUsername } = diffPublicData(current, next);
 
   if (!updateName && !updateUsername) {
-    return {
-      success: false,
-      action: intent,
-      error: "Nenhuma alteração para salvar.",
-    };
+    return fail(intent, "Nenhuma alteração para salvar.");
   }
 
   if (updateName) {
     const res = await accountSettingsApi.updateProfile(token, { name: next.name });
     if (!res.success) {
-      return {
-        success: false,
-        action: intent,
-        fieldErrors: { name: res.error.message },
-      };
+      return invalid(intent, { name: res.error.message });
     }
   }
 
   if (updateUsername) {
     const res = await profileApi.changeUsername(token, next.username);
     if (!res.success) {
-      return {
-        success: false,
-        action: intent,
-        fieldErrors: { username: res.error.message },
-        message: updateName
-          ? "Nome atualizado, mas o username não pôde ser salvo."
-          : undefined,
-      };
+      return invalid(
+        intent,
+        { username: res.error.message },
+        {
+          message: updateName
+            ? "Nome atualizado, mas o username não pôde ser salvo."
+            : undefined,
+        },
+      );
     }
   }
 
-  return {
-    success: true,
-    action: intent,
-    message: updateUsername
-      ? updateName
-        ? "Dados atualizados. Seu @ antigo ficou reservado."
-        : "Username atualizado. Seu @ antigo ficou reservado."
-      : "Nome atualizado.",
-  };
+  return ok(intent, pickSaveMessage(updateName, updateUsername));
+}
+
+function pickSaveMessage(updateName: boolean, updateUsername: boolean): string {
+  if (updateName && updateUsername)
+    return "Dados atualizados. Seu @ antigo ficou reservado.";
+  if (updateUsername)
+    return "Username atualizado. Seu @ antigo ficou reservado.";
+  return "Nome atualizado.";
 }
 
 async function uploadPhotoAction(
@@ -158,28 +174,22 @@ async function uploadPhotoAction(
 ): Promise<ProfileActionResult> {
   const intent = "uploadPhoto";
   if (!isUploadableFile(file)) {
-    return {
-      success: false,
-      action: intent,
-      error: "Escolha uma imagem para enviar.",
-    };
+    return fail(intent, "Escolha uma imagem para enviar.");
   }
-  const invalid = validateAvatarFile(file);
-  if (invalid) {
-    return { success: false, action: intent, error: invalid };
+  const invalidAvatar = validateAvatarFile(file);
+  if (invalidAvatar) {
+    return fail(intent, invalidAvatar);
   }
   const res = await profileApi.uploadPhoto(token, file);
   if (!res.success) {
-    return {
-      success: false,
-      action: intent,
-      error:
-        res.error.code === 429
-          ? "Muitas tentativas. Aguarde um minuto e tente de novo."
-          : res.error.message,
-    };
+    return fail(
+      intent,
+      res.error.code === 429
+        ? "Muitas tentativas. Aguarde um minuto e tente de novo."
+        : res.error.message,
+    );
   }
-  return { success: true, action: intent, message: "Foto atualizada." };
+  return ok(intent, "Foto atualizada.");
 }
 
 export default function Profile() {

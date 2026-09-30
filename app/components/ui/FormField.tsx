@@ -4,14 +4,10 @@ import { FieldError } from "./FieldError";
 import type { IconName } from "./Icon";
 
 export interface FormFieldProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'name'> {
-  name: string; // Ensure name is required for RHF
+  name: string;
   label: string;
   error?: string | null;
   icon?: IconName;
-  /**
-   * Texto fixo à esquerda dentro do campo (ex.: base de URL). Quando
-   * presente, substitui o ícone — os dois ocupam o mesmo espaço.
-   */
   prefix?: string;
 }
 
@@ -23,8 +19,6 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
     const prefixRef = useRef<HTMLSpanElement>(null);
     const [prefixWidth, setPrefixWidth] = useState(0);
 
-    // Mede a largura real do prefixo na fonte renderizada: `ch` superestima
-    // (o glifo "0" é mais largo que as letras do domínio) e abre um vão.
     useEffect(() => {
       if (showPrefix && prefixRef.current) {
         setPrefixWidth(prefixRef.current.offsetWidth);

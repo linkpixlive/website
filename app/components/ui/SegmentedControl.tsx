@@ -1,3 +1,4 @@
+import { Tabs } from "@base-ui/react/tabs";
 import { cn } from "~/util/cn";
 
 interface SegmentedOption<T extends string> {
@@ -26,31 +27,26 @@ export function SegmentedControl<T extends string>({
   size = "md",
 }: SegmentedControlProps<T>) {
   return (
-    <div
-      role="group"
-      aria-label={label}
-      className="inline-flex items-center gap-1 rounded-full bg-wash p-1"
-    >
-      {options.map((opt) => {
-        const active = opt.value === value;
-        return (
-          <button
+    <Tabs.Root value={value} onValueChange={(next) => onChange(next as T)}>
+      <Tabs.List
+        aria-label={label}
+        className="inline-flex items-center gap-1 rounded-full bg-wash p-1"
+      >
+        {options.map((opt) => (
+          <Tabs.Tab
             key={opt.value}
-            type="button"
-            onClick={() => onChange(opt.value)}
-            aria-pressed={active}
+            value={opt.value}
             className={cn(
               "rounded-full outline-none transition-all duration-150 cursor-pointer active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-brand/40",
               SIZES[size].button,
-              active
-                ? "bg-inverse text-white shadow-xs"
-                : "text-ink-secondary hover:text-ink-heading",
+              "text-ink-secondary hover:text-ink-heading",
+              "data-active:bg-inverse data-active:text-white data-active:shadow-xs data-active:hover:text-white",
             )}
           >
             {opt.label}
-          </button>
-        );
-      })}
-    </div>
+          </Tabs.Tab>
+        ))}
+      </Tabs.List>
+    </Tabs.Root>
   );
 }

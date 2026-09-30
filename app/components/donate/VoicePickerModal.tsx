@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { RadioGroup } from "@base-ui/react/radio-group";
+import { Radio } from "@base-ui/react/radio";
 import { Modal } from "~/components/ui/Modal";
 import { Icon } from "~/components/ui/Icon";
 import { VoiceSampleButton } from "~/components/ui/VoiceSampleButton";
@@ -51,9 +53,7 @@ interface VoicePickerModalProps {
   isOpen: boolean;
   onClose: () => void;
   options: VoiceOption[];
-  /** Valor atual já resolvido (inclui a opção padrão). */
   value: string;
-  /** Recebe o valor bruto (inclui a opção padrão); fechar fica com o chamador. */
   onSelect: (value: string) => void;
 }
 
@@ -66,23 +66,19 @@ export function VoicePickerModal({
 }: VoicePickerModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Escolher voz" size="sm">
-      <div role="radiogroup" aria-label="Voz da mensagem" className="flex flex-col gap-1">
+      <RadioGroup
+        value={value}
+        onValueChange={onSelect}
+        aria-label="Voz da mensagem"
+        className="flex flex-col gap-1"
+      >
         {options.map((option) => {
           const selected = option.value === value;
           return (
-            <div
+            <Radio.Root
               key={option.value}
-              role="radio"
-              aria-checked={selected}
+              value={option.value}
               aria-label={option.label}
-              tabIndex={0}
-              onClick={() => onSelect(option.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  onSelect(option.value);
-                }
-              }}
               className={`
                 relative flex items-center gap-3 rounded-2xl px-3.5 py-2.5 outline-none cursor-pointer
                 transition-colors duration-150
@@ -113,10 +109,10 @@ export function VoicePickerModal({
                   <Icon name="check-circle" size={16} strokeWidth={2.3} />
                 </span>
               )}
-            </div>
+            </Radio.Root>
           );
         })}
-      </div>
+      </RadioGroup>
     </Modal>
   );
 }

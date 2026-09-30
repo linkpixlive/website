@@ -12,12 +12,6 @@ interface RangeSliderProps
   onChange: (value: number) => void;
 }
 
-/**
- * Slider com a parte consumida na cor primária (`--color-brand-button`).
- * O percentual vai para a variável `--slider-fill`, consumida pelo
- * `.slider-primary` em `app.css` (gradiente no webkit, `range-progress`
- * no Firefox). Tokens resolvem em runtime, então funciona em light/dark.
- */
 export function RangeSlider({
   min,
   max,

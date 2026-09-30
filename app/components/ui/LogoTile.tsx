@@ -1,20 +1,10 @@
 import { Link } from "react-router";
 
 interface LogoTileProps {
-  /** When provided, renders the logo as a link (e.g. back to home). */
   href?: string;
-  /** Extra classes for the outer wrapper (layout / spacing). */
   className?: string;
-  /** Extra classes for the icon <img> (e.g. height overrides). */
   imgClassName?: string;
-  /** Extra classes for the wordmark (e.g. size overrides). */
   textClassName?: string;
-  /**
-   * Which artwork to use:
-   * - "light": white icon + white wordmark for dark surfaces (sidebar).
-   * - "dark": shell icon + shell wordmark for light surfaces (donations).
-   * - "auto": "dark" in light mode, "light" in dark mode.
-   */
   variant?: "light" | "dark" | "auto";
 }
 

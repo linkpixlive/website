@@ -1,7 +1,7 @@
 import { Outlet } from "react-router";
 import { Icon } from "~/components/ui/Icon";
 import { RouteErrorState } from "~/components/ui/ErrorState";
-import { useTheme } from "~/components/ui/useTheme";
+import { useTheme } from "~/contexts/useTheme";
 import { roundButtonClasses } from "~/components/ui/header-styles";
 
 export default function PublicLayoutRoute() {

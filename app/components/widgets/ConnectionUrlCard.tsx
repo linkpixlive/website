@@ -19,9 +19,6 @@ export function ConnectionUrlCard({
 }) {
   const [showUrl, setShowUrl] = useState(false);
   const [urlCopied, setUrlCopied] = useState(false);
-
-  // SSR-safe: `window` não existe no servidor (F5/refresh renderiza no
-  // servidor primeiro). Monta a URL absoluta só no cliente.
   const [widgetUrl, setWidgetUrl] = useState(`/overlay?token=${widget.token}`);
 
   useEffect(() => {

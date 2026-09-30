@@ -4,7 +4,6 @@ interface DonationsSubtitleProps {
   pendingCount: number;
 }
 
-/** Subtítulo 3-estados do header (histórico / fila / vazio). */
 export function DonationsSubtitle({
   total,
   queueLength,

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Outlet } from "react-router";
 import { Sidebar } from "~/components/dashboard/Sidebar";
 import { MobileHeader } from "~/components/dashboard/MobileHeader";
-import { ToastProvider } from "~/components/ui/ToastProvider";
+import { ToastProvider } from "~/contexts/ToastProvider";
 import { RouteErrorState } from "~/components/ui/ErrorState";
 import { requireValidAuth } from "~/util/auth.server";
 import type { Route } from "./+types/layout";

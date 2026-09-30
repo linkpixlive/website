@@ -7,7 +7,6 @@ const SIZES = {
 } as const;
 
 interface EyeToggleButtonProps {
-  /** Se o segredo está visível no momento. */
   visible: boolean;
   onToggle: () => void;
   size?: keyof typeof SIZES;

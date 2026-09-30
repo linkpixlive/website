@@ -1,21 +1,23 @@
 import { useLoaderData } from "react-router";
-import type { Route } from "./+types/queue-popout";
-import { getAuthToken } from "~/util/session.server";
-import { requireValidAuth } from "~/util/auth.server";
 import { dashboardApi } from "~/api/modules/dashboard";
-import { DEFAULT_HISTORY_DAYS } from "~/util/history-filters";
-import { ToastProvider } from "~/components/ui/ToastProvider";
 import { DonationsLivePanel } from "~/components/queue/DonationsLivePanel";
+import { ToastProvider } from "~/contexts/ToastProvider";
 import { useAnnouncePopout } from "~/hooks/usePopoutPresence";
+import { requireValidAuth } from "~/util/auth.server";
+import { DEFAULT_HISTORY_DAYS } from "~/util/history-filters";
+import { getAuthToken } from "~/util/session.server";
+import type { Route } from "./+types/queue-popout";
 
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Doações — Ao Vivo — LinkPix" },
-    { name: "description", content: "Acompanhe e gerencie as doações em tempo real" },
+    {
+      name: "description",
+      content: "Acompanhe e gerencie as doações em tempo real",
+    },
   ];
 }
 
-// Exceção ao DEFAULT_PAGE_LIMIT: popout ao vivo mostra mais itens por tela.
 const POPOUT_HISTORY_LIMIT = 20;
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -27,6 +29,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     limit: POPOUT_HISTORY_LIMIT,
     days: DEFAULT_HISTORY_DAYS,
   });
+
   if (!res.success) {
     throw new Response(res.error.message, { status: 502 });
   }

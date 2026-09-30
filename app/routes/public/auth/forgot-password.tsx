@@ -1,15 +1,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Link, useActionData, useNavigation, useSubmit } from "react-router";
+import { Link, useNavigation, useSubmit } from "react-router";
 import { z } from "zod";
 import { authApi } from "~/api/modules/auth";
 import { AuthCard } from "~/components/auth/AuthCard";
 import { AlertMessage } from "~/components/ui/AlertMessage";
+import { LINK_CLASS } from "~/components/ui/classes";
 import { FormField } from "~/components/ui/FormField";
 import { SubmitButton } from "~/components/ui/SubmitButton";
 import { useActionError } from "~/hooks/useActionError";
 import { forgotPasswordSchema } from "~/validators/auth-validator";
-import { LINK_CLASS } from "~/components/ui/classes";
 import type { Route } from "./+types/forgot-password";
 
 export function meta({}: Route.MetaArgs) {
@@ -42,7 +42,7 @@ export default function ForgotPassword({ actionData }: Route.ComponentProps) {
   const [apiError, clearApiError] = useActionError(actionData);
 
   const success = actionData?.success === true;
-  const submittedEmail = success ? actionData.email as string : "";
+  const submittedEmail = success ? (actionData.email as string) : "";
 
   const {
     register,

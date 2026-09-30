@@ -15,7 +15,6 @@ import {
 interface DeactivateAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Error surfaced by the route action when the deactivation fails. */
   actionError?: string | null;
 }
 

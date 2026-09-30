@@ -18,7 +18,6 @@ interface LoginFormProps {
   onSubmit: (data: LoginFormValues) => void;
 }
 
-/** Etapa 1 do login: e-mail + senha. */
 export function LoginForm({ loading, apiError, onClearError, onSubmit }: LoginFormProps) {
   const {
     register,

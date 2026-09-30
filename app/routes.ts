@@ -14,7 +14,7 @@ export default [
   layout("routes/private/layout.tsx", [
     index("routes/private/index.tsx"),
     route("dashboard", "routes/private/dashboard.tsx"),
-    route("carteira", "routes/private/wallet/index.tsx"),
+    route("carteira", "routes/private/wallet.tsx"),
     route("widgets", "routes/private/widgets/layout.tsx", [
       route("overlay", "routes/private/widgets/overlay.tsx"),
       route("regras", "routes/private/widgets/regras.tsx"),

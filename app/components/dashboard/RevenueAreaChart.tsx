@@ -54,8 +54,6 @@ export function RevenueAreaChart({ series, mode }: RevenueAreaChartProps) {
 
   return (
     <div>
-      {/* O wrapper do recharts recebe foco ao clicar: o anel padrão é suprimido
-          aqui porque o gráfico é decorativo (valores na tabela sr-only abaixo). */}
       <div
         className="h-[220px] w-full [&_.recharts-wrapper]:outline-none [&_.recharts-surface]:outline-none"
         role="img"

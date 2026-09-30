@@ -1,4 +1,10 @@
-import { createContext, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 export type Theme = "light" | "dark";
 
@@ -14,7 +20,9 @@ export const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function readStoredTheme(): Theme {
   try {
-    return localStorage.getItem(THEME_STORAGE_KEY) === "dark" ? "dark" : "light";
+    return localStorage.getItem(THEME_STORAGE_KEY) === "dark"
+      ? "dark"
+      : "light";
   } catch {
     return "light";
   }
@@ -23,9 +31,7 @@ function readStoredTheme(): Theme {
 function persistTheme(theme: Theme) {
   try {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
-  } catch {
-    // Storage unavailable (private mode etc.) — keep a session-only theme.
-  }
+  } catch {}
 }
 
 export function applyThemeToDom(theme: Theme) {
@@ -34,9 +40,6 @@ export function applyThemeToDom(theme: Theme) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Starts as "light" on server and first client render so hydration markup
-  // matches; the inline <head> script in root.tsx has already applied the
-  // stored class pre-paint, so there is no visual flash.
   const [theme, setThemeState] = useState<Theme>("light");
 
   useEffect(() => {
@@ -71,7 +74,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const value = useMemo(() => ({ theme, setTheme, toggleTheme }), [theme, setTheme, toggleTheme]);
+  const value = useMemo(
+    () => ({ theme, setTheme, toggleTheme }),
+    [theme, setTheme, toggleTheme],
+  );
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
 }

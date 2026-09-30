@@ -4,6 +4,7 @@ import { LogoTile } from "~/components/ui/LogoTile";
 import { createDonation, getStreamerByUsername, listVoices } from "~/api/modules/public-donations";
 import { normalizeUsername } from "~/util/username";
 import { UnifiedDonationCard } from "~/components/donate/UnifiedDonationCard";
+import { DonationFooter } from "~/components/donate/DonationFooter";
 import { NotFoundState } from "~/components/donate/NotFoundState";
 import type { DonationFormValues } from "~/validators/donation-validator";
 
@@ -64,12 +65,7 @@ export default function DonationPage() {
           onCreateDonation={handleCreateDonation}
         />
 
-        <div className="flex flex-col items-center gap-2 pb-2">
-          <LogoTile variant="auto" imgClassName="h-6" textClassName="text-lg" />
-          <p className="text-[11px] font-medium text-ink-label">
-            Doações processadas via Pix · LinkPix
-          </p>
-        </div>
+        <DonationFooter />
       </div>
     </main>
   );

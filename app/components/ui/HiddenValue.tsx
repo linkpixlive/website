@@ -7,7 +7,6 @@ interface HiddenValueProps {
   className?: string;
 }
 
-/** Valor sensível com blur até o olho ser ativado (saldos, chaves). */
 export function HiddenValue({ visible, children, className }: HiddenValueProps) {
   return (
     <span className={cn(className, !visible && "blur-sm select-none")}>

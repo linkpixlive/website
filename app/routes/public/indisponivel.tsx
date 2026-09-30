@@ -7,11 +7,6 @@ export function meta() {
   return [{ title: "Serviço indisponível — LinkPix" }];
 }
 
-/**
- * Área privada inacessível (API fora do ar ou sessão inválida). Não limpa
- * o cookie: se a sessão ainda vale, o retry volta ao app; se não, o guard
- * leva ao login.
- */
 export default function Indisponivel() {
   const navigate = useNavigate();
 
@@ -26,7 +21,10 @@ export default function Indisponivel() {
             Nossos sistemas estão com problemas. Tente novamente em instantes.
           </p>
         </div>
-        <AlertMessage variant="info" message="Sua sessão foi mantida neste dispositivo." />
+        <AlertMessage
+          variant="info"
+          message="Sua sessão foi mantida neste dispositivo."
+        />
         <Button variant="secondary" onClick={() => navigate("/dashboard")}>
           Tentar de novo
         </Button>

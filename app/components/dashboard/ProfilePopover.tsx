@@ -1,7 +1,7 @@
 import { Menu } from "@base-ui/react/menu";
 import { Form, Link, useRouteLoaderData } from "react-router";
 import { Icon, type IconName } from "~/components/ui/Icon";
-import { useTheme } from "~/components/ui/useTheme";
+import { useTheme } from "~/contexts/useTheme";
 import { menuRowClasses, menuRowDangerClasses } from "~/components/ui/header-styles";
 import { getPublicPageUrl } from "./menu";
 import { isSafeMediaUrl } from "~/util/safe-url";
@@ -15,7 +15,6 @@ export interface LayoutUser {
   usernameChangedAt?: string | null;
 }
 
-/** Reads the authenticated user provided by the private layout loader. */
 export function useCurrentUser(): LayoutUser | null {
   const data = useRouteLoaderData("routes/private/layout") as
     | { user: LayoutUser }

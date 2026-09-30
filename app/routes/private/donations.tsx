@@ -29,7 +29,6 @@ export async function loader({ request }: Route.LoaderArgs) {
   const page = getPageParam(url);
   const limit = getPageParam(url, "limit", DEFAULT_PAGE_LIMIT);
   const status = url.searchParams.get("status") || undefined;
-  // Padrão = últimos 30 dias (teto de retenção, alinhado ao lifecycle do R2).
   const days = url.searchParams.get("days") || DEFAULT_HISTORY_DAYS;
   const search = url.searchParams.get("search") || undefined;
   const searchBy = url.searchParams.get("searchBy") || undefined;
@@ -56,8 +55,6 @@ export default function Donations() {
     search: searchParams.get("search") || undefined,
     searchBy: searchParams.get("searchBy") || undefined,
   };
-  // W7: com o popout aberto ele assume o tempo real; a página pausa os
-  // próprios sockets em vez de duplicar as conexões.
   const popoutOpen = useIsPopoutOpen();
   const {
     queue,

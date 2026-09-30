@@ -19,7 +19,6 @@ interface QueueControlsSectionProps {
   toolbarExtra?: ReactNode;
 }
 
-/** Trecho idêntico entre `donations.tsx` e `DonationsLivePanel`. */
 export function QueueControlsSection({
   queue,
   token,

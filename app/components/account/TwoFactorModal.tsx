@@ -143,7 +143,6 @@ function TwoFactorSetupView({
     );
   }
 
-  // Sem segredo gerado ainda (primeira vez ou retry): a senha é o que libera o setup.
   return (
     <form
       onSubmit={(event) => {

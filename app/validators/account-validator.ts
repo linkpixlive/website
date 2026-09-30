@@ -22,6 +22,20 @@ export const changePasswordSchema = withPasswordConfirmation(
 
 export type ChangePasswordValues = z.infer<typeof changePasswordSchema>;
 
+/**
+ * Subset usado pela action (sem `confirmPassword`, validado só no browser).
+ * Espelha `changePasswordSchema` para o que viaja no FormData.
+ */
+export const changePasswordActionSchema = z.object({
+  currentPassword: z.string().min(1, "Informe a senha atual"),
+  newPassword: strongPassword,
+  totp: totpField,
+});
+
+export type ChangePasswordActionValues = z.infer<
+  typeof changePasswordActionSchema
+>;
+
 export const changeEmailSchema = z.object({
   email: z
     .email("Informe um e-mail válido")

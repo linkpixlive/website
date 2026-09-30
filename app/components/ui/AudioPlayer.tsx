@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Icon } from "~/components/ui/Icon";
-import { useToast } from "~/components/ui/useToast";
+import { useToast } from "~/contexts/useToast";
 import { useExclusiveAudio } from "~/hooks/useExclusiveAudio";
 import { isSafeMediaUrl } from "~/util/safe-url";
 

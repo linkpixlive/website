@@ -8,12 +8,9 @@ import { getCroppedImage } from "./crop-image";
 
 interface PhotoCropModalProps {
   isOpen: boolean;
-  /** Data URL da imagem já escolhida (o picker vive no componente pai). */
   imageSrc: string;
   onClose: () => void;
-  /** Reabre o explorador de arquivos do pai para trocar a imagem. */
   onChooseAnother: () => void;
-  /** Chamado com o quadrado 512px webp pronto para upload. */
   onExport: (file: File) => void;
   exporting: boolean;
   serverError?: string | null;

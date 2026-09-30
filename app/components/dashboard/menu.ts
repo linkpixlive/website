@@ -7,7 +7,6 @@ export interface MenuItem {
   end?: boolean;
 }
 
-/** Itens internos, fonte única para rail desktop e drawer mobile. */
 export const menuItems: MenuItem[] = [
   { label: "Dashboard", to: "/dashboard", icon: "widget-2", end: true },
   { label: "Carteira", to: "/carteira", icon: "wallet" },
@@ -21,13 +20,8 @@ export const menuItems: MenuItem[] = [
   },
 ];
 
-/** URL da página pública do streamer, na mesma origem. */
 export function getPublicPageUrl(username: string): string {
   return `/${username}`;
 }
 
-/**
- * Domínio canônico exibido nos textos de URL pública (prefixo do campo de
- * username, cartão Minha página). Os links seguem mesma-origem.
- */
 export const PUBLIC_PAGE_BASE = "linkpix.com.br/";

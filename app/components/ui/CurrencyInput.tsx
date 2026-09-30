@@ -4,9 +4,6 @@ import { maskCurrencyInput, parseCurrencyToCents } from "~/util/currency";
 import { mergeRefs } from "~/util/merge-refs";
 import { MoneyInputBase } from "./MoneyInputBase";
 
-/** Campo monetário para Padrão A (`RHF + zod -> action`). Para edição
- *  inline sem RHF (`fetcher.Form`) use `MoneyField`. Visual compartilhado
- *  em `MoneyInputBase`. */
 export interface CurrencyInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value"> {
   name: string;
@@ -57,7 +54,6 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
 
     const displayValue = currentValue || "";
 
-    // Sem label próprio: o formulário RHF rotula por fora.
     return (
       <Controller
         name={name}

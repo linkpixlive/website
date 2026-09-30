@@ -6,7 +6,7 @@ import { FormField } from "~/components/ui/FormField";
 import { Icon } from "~/components/ui/Icon";
 import { SelectField } from "~/components/ui/SelectField";
 import { SubmitButton } from "~/components/ui/SubmitButton";
-import { useToast } from "~/components/ui/useToast";
+import { useToast } from "~/contexts/useToast";
 import { SECTION_HEADING_CLASS } from "~/components/ui/classes";
 import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
 import { useResetOnOpen } from "~/hooks/useResetOnOpen";
@@ -40,11 +40,9 @@ function getPlaceholder(type: PixKeyType | ""): string {
 
 interface PixKeyCreateFormProps {
   isOpen: boolean;
-  /** Erro exibido no topo do modal pai. */
   onError: (message: string | null) => void;
 }
 
-/** Formulário de cadastro (tipo + chave mascarada + alias) com fetcher próprio. */
 export function PixKeyCreateForm({ isOpen, onError }: PixKeyCreateFormProps) {
   const fetcher = useFetcher();
   const { toast } = useToast();

@@ -13,7 +13,6 @@ interface QueueRowProps {
   onCancel: () => void;
 }
 
-/** Linha da fila (dados + lixeira + confirmação inline de remoção). */
 export function QueueRow({
   donation,
   index,

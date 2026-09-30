@@ -7,7 +7,6 @@ interface PixKeysListProps {
   onDelete: (key: PixKey) => void;
 }
 
-/** Lista de chaves cadastradas (vazio + linhas com excluir). */
 export function PixKeysList({ pixKeys, onDelete }: PixKeysListProps) {
   return (
     <div className="space-y-2">

@@ -1,3 +1,5 @@
+import { Switch as BaseSwitch } from "@base-ui/react/switch";
+
 interface SwitchProps {
   checked: boolean;
   onChange: (next: boolean) => void;
@@ -7,25 +9,23 @@ interface SwitchProps {
 
 export function Switch({ checked, onChange, disabled, label }: SwitchProps) {
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
+    <BaseSwitch.Root
+      checked={checked}
+      onCheckedChange={onChange}
       disabled={disabled}
-      onClick={() => onChange(!checked)}
+      aria-label={label}
       className={`
         relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-150 cursor-pointer outline-none shrink-0 active:scale-95
         focus-visible:ring-2 focus-visible:ring-brand/40 disabled:opacity-50 disabled:cursor-not-allowed
         ${checked ? "bg-brand-button" : "bg-wash border border-line-input"}
       `}
     >
-      <span
+      <BaseSwitch.Thumb
         className={`inline-block h-4 w-4 rounded-full bg-white shadow-2xs transition-transform duration-150 ${
           checked ? "translate-x-6" : "translate-x-1"
         }`}
       />
-    </button>
+    </BaseSwitch.Root>
   );
 }
 

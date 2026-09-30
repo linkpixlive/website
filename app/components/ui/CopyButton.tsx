@@ -5,21 +5,16 @@ import { useCopyToClipboard } from "~/hooks/useCopyToClipboard";
 import { cn } from "~/util/cn";
 
 interface CopyButtonProps {
-  /** pill = faixa full-width · icon = botão circular · inline = só ícone. */
   variant: "pill" | "icon" | "inline";
-  /** Texto copiado para o clipboard. */
   text: string;
   children: ReactNode;
   copiedChildren?: ReactNode;
-  /** title (icon) / aria-label (inline). */
   label?: string;
   copiedLabel?: string;
   className?: string;
-  /** Espelho do estado (ex.: legenda "Copiado!" fora do botão). */
   onStatusChange?: (copied: boolean) => void;
 }
 
-/** Botão de copiar com estado "Copiado!" temporizado (via useCopyToClipboard). */
 export function CopyButton({
   variant,
   text,

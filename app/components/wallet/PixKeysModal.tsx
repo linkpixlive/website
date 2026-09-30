@@ -5,7 +5,7 @@ import { AlertMessage } from "~/components/ui/AlertMessage";
 import { ConfirmButtons } from "~/components/ui/ConfirmButtons";
 import { Icon } from "~/components/ui/Icon";
 import { Modal } from "~/components/ui/Modal";
-import { useToast } from "~/components/ui/useToast";
+import { useToast } from "~/contexts/useToast";
 import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
 import { useResetOnOpen } from "~/hooks/useResetOnOpen";
 import { buildIntentFormData } from "~/util/submit-intent";
@@ -34,7 +34,6 @@ export function PixKeysModal({
     setLocalError(null);
   });
 
-  // Toast único por exclusão (sem loop em re-render).
   useFetcherFeedback<{ success: boolean; action: string; error?: string }>({
     data: fetcher.data,
     state: fetcher.state,

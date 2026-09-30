@@ -12,7 +12,6 @@ interface TotpChallengeProps {
   onBack: () => void;
 }
 
-/** Etapa 2 do login: código TOTP do app autenticador. */
 export function TotpChallenge({
   credentials,
   nonce,

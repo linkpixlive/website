@@ -11,11 +11,6 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-/**
- * Recorta a área selecionada e exporta um quadrado webp pronto para upload.
- * Espelha o processamento do servidor (512px), então o arquivo final fica na
- * casa das dezenas de KB — bem abaixo do limite de 2 MB do backend.
- */
 export async function getCroppedImage(
   imageSrc: string,
   pixelCrop: Area,
@@ -52,7 +47,6 @@ export async function getCroppedImage(
   return blob;
 }
 
-/** Lê o arquivo original como data URL para alimentar o editor. */
 export function readFileAsDataUrl(file: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

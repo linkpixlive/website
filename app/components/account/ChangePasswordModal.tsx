@@ -7,7 +7,7 @@ import { Modal } from "~/components/ui/Modal";
 import { PasswordField } from "~/components/auth/PasswordField";
 import { OtpField } from "~/components/auth/OtpField";
 import { SubmitButton } from "~/components/ui/SubmitButton";
-import { useToast } from "~/components/ui/useToast";
+import { useToast } from "~/contexts/useToast";
 import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
 import { useResetOnOpen } from "~/hooks/useResetOnOpen";
 import {
@@ -18,7 +18,6 @@ import {
 interface ChangePasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Com 2FA ativo o backend exige a senha atual + TOTP. */
   has2fa?: boolean;
 }
 

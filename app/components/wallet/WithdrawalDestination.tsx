@@ -12,7 +12,6 @@ interface WithdrawalDestinationProps {
   onManageKeys: () => void;
 }
 
-/** Destino do saque: vazio (CTA cadastrar) ou SelectField + gerenciar. */
 export function WithdrawalDestination({
   pixKeys,
   value,
@@ -41,8 +40,6 @@ export function WithdrawalDestination({
   }
 
   const options = pixKeys.map((pk) => {
-    // Valor completo (sem máscara) para o usuário confirmar o destino exato.
-    // Fallback para keyMasked caso a chave descriptografada não venha na listagem.
     const displayValue = getPixDisplayName(pk, true);
     return {
       value: pk.id,

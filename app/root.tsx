@@ -1,6 +1,6 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 
-import { ThemeProvider } from "~/components/ui/ThemeProvider";
+import { ThemeProvider } from "~/contexts/ThemeProvider";
 import { UnsavedChangesProvider } from "~/components/ui/UnsavedChangesProvider";
 import { RouteErrorState } from "~/components/ui/ErrorState";
 import type { Route } from "./+types/root";

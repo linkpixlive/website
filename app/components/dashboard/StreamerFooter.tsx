@@ -15,7 +15,6 @@ interface StreamerFooterProps {
   hasUnseenNovidades?: boolean;
 }
 
-/** Rodapé da sidebar: conta do streamer + menu (perfil, novidades, sair). */
 export function StreamerFooter({
   onNavigate,
   onOpenNovidades,

@@ -1,6 +1,5 @@
 interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
-  /** Fundo do bloco: `wash` (padrão) ou `card` (skeleton sobre fundo wash). */
   tone?: "wash" | "card";
 }
 

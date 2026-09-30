@@ -5,7 +5,7 @@ import {
   type DonationSettings,
 } from "~/api/modules/donation-settings";
 import { SubmitButton } from "~/components/ui/SubmitButton";
-import { useToast } from "~/components/ui/useToast";
+import { useToast } from "~/contexts/useToast";
 import { useUnsavedChanges } from "~/components/ui/UnsavedChangesProvider";
 import { MinAmountsSection } from "~/components/widgets/MinAmountsSection";
 import { ModerationSection } from "~/components/widgets/ModerationSection";
@@ -67,6 +67,7 @@ export async function action({ request }: Route.ActionArgs) {
     filterHateSpeech: formData.get("filterHateSpeech") === "true",
     customRules: String(formData.get("customRules") ?? ""),
   });
+  
   if (!parsed.success) {
     return {
       success: false,

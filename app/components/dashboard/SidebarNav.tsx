@@ -44,7 +44,6 @@ function InternalRow({
   );
 }
 
-/** Lista de navegação reusada pelo rail desktop e pelo drawer mobile. */
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <nav

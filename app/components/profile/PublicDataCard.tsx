@@ -5,7 +5,7 @@ import type { LayoutUser } from "~/components/dashboard/ProfilePopover";
 import { AlertMessage } from "~/components/ui/AlertMessage";
 import { Button } from "~/components/ui/Button";
 import { FormField } from "~/components/ui/FormField";
-import { useToast } from "~/components/ui/useToast";
+import { useToast } from "~/contexts/useToast";
 import { useUnsavedChanges } from "~/components/ui/UnsavedChangesProvider";
 import {
   diffPublicData,

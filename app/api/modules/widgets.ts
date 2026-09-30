@@ -51,15 +51,6 @@ export const widgetsApi = {
       api.put(`/widgets/${type}`, body, { headers: authHeaders(token) }),
     ),
 
-  ensureSettings: async <T extends WidgetType>(
-    token: string | null | undefined,
-    type: T,
-  ) => {
-    const res = await widgetsApi.getSettings(token, type);
-    if (res.success) return res;
-    if (res.error.code !== 404) return res;
-    return widgetsApi.upsertSettings(token, type);
-  },
   resetToken: (token: string | null | undefined, type: string) =>
     fetchApi<Widget>(
       api.post(`/widgets/${type}/reset-token`, undefined, {

@@ -32,7 +32,6 @@ interface WithdrawalModalProps {
   pixKeys: PixKey[];
   onOpenManageKeys: () => void;
   error?: string | null;
-  /** Com 2FA ativo o backend exige senha + TOTP no saque. */
   has2fa?: boolean;
 }
 
@@ -54,9 +53,6 @@ export function WithdrawalModal({
 
   const [amountDisplay, setAmountDisplay] = useState("");
 
-  // Chave de idempotência presa ao payload: reenviar a MESMA tentativa (timeout
-  // de rede, duplo clique) reaproveita a chave e o backend devolve o mesmo saque
-  // em vez de criar outro. Mudar valor ou chave Pix exige uma chave nova.
   const idempotencyRef = useRef<{
     key: string;
     amount: number;
@@ -113,7 +109,6 @@ export function WithdrawalModal({
     });
   };
 
-  // Taxa derivada do valor (sem useEffect+setState para valor derivado).
   const { feeAmount, netAmount } = useMemo(() => {
     const val = Number(amountWatch);
     if (isNaN(val) || val <= 0) return { feeAmount: 0, netAmount: 0 };
@@ -121,8 +116,6 @@ export function WithdrawalModal({
     return { feeAmount: fee, netAmount: +(val - fee).toFixed(2) };
   }, [amountWatch, feePercentage]);
 
-  // Clean form values on modal open — destinatário sempre começa vazio
-  // para exigir seleção manual (evita saque na chave errada por padrão).
   useResetOnOpen(isOpen, () => {
     reset({ amount: "", pixId: "", password: "" });
     setAmountDisplay("");

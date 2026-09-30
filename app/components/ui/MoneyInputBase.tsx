@@ -11,8 +11,6 @@ interface MoneyInputBaseProps {
   children: (inputClassName: string) => ReactNode;
 }
 
-/** Shell visual do campo monetário (label + prefixo R$ + erro). O input real
- *  vem via render prop para preservar as integrações RHF × fetcher. */
 export function MoneyInputBase({
   id,
   label,

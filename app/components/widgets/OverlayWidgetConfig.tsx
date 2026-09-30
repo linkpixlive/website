@@ -8,7 +8,6 @@ import { buildIntentFormData } from "~/util/submit-intent";
 
 interface OverlayWidgetConfigProps {
   widget: Widget<OverlaySettings>;
-  /** Mesma lista do formulário de doação (GET /voices). */
   voices: TtsVoice[];
 }
 

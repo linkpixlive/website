@@ -5,7 +5,6 @@ import { Spinner } from "./Spinner";
 interface SubmitButtonProps {
   children: ReactNode;
   loading?: boolean;
-  /** Alias para `loading` — unifica `isSubmitting` (RHF) e `navigation/fetcher.state`. */
   isLoading?: boolean;
   disabled?: boolean;
   type?: "button" | "submit";

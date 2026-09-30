@@ -2,13 +2,11 @@ interface ConfirmButtonsProps {
   confirmLabel: string;
   cancelLabel: string;
   onCancel: () => void;
-  /** Omitido quando o confirmar é `type="submit"` de um `<form>` pai. */
   onConfirm?: () => void;
   loading?: boolean;
   loadingLabel?: string;
 }
 
-/** Par perigo/cancelar dos modais de confirmação (excluir, desativar). */
 export function ConfirmButtons({
   confirmLabel,
   cancelLabel,
