@@ -1,6 +1,10 @@
-import { redirect } from "react-router";
+import type { Route } from "./+types/index";
 
-/** `/` existe só por compatibilidade (bookmarks): o dashboard mora em `/dashboard`. */
-export function loader() {
-  throw redirect("/dashboard");
+export function meta({}: Route.MetaArgs) {
+  return [{ title: "LinkPix" }];
+}
+
+// Placeholder: a home será construída aqui futuramente (sem redirect).
+export default function HomePlaceholder() {
+  return <main className="min-h-[40dvh]" />;
 }

@@ -96,7 +96,7 @@ export function ProfileMenuContent({
       </div>
 
       <ProfileMenuLink
-        to="/configuracoes/conta"
+        to="/conta"
         icon="lock"
         label="Conta"
         onNavigate={onNavigate}

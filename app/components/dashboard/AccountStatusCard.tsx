@@ -89,7 +89,7 @@ export function AccountStatusCard({ checklist }: AccountStatusCardProps) {
       icon: "lock",
       title: "Login em dois fatores",
       description: checklist.has2fa ? "Proteção extra ativa" : "Recomendado para segurança",
-      to: "/configuracoes/conta",
+      to: "/conta",
       done: checklist.has2fa,
     },
     ...(checklist.emailVerified === null
@@ -102,7 +102,7 @@ export function AccountStatusCard({ checklist }: AccountStatusCardProps) {
             description: checklist.emailVerified
               ? "Conta verificada"
               : "Confirme seu email",
-            to: "/configuracoes/conta",
+            to: "/conta",
             done: checklist.emailVerified,
           },
         ]),

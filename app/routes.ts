@@ -16,18 +16,12 @@ export default [
     route("dashboard", "routes/private/dashboard.tsx"),
     route("carteira", "routes/private/wallet/index.tsx"),
     route("widgets", "routes/private/widgets/layout.tsx", [
-      index("routes/private/widgets/index.tsx"),
       route("overlay", "routes/private/widgets/overlay.tsx"),
       route("regras", "routes/private/widgets/regras.tsx"),
     ]),
     route("doacoes", "routes/private/donations.tsx"),
     route("perfil", "routes/private/profile.tsx"),
     route("conta", "routes/private/conta.tsx"),
-    route("configuracoes", "routes/private/configuracoes/layout.tsx", [
-      index("routes/private/configuracoes/index.tsx"),
-      route("conta", "routes/private/configuracoes/conta.tsx"),
-      route("doacoes", "routes/private/configuracoes/doacoes.tsx"),
-    ]),
   ]),
   route("fila/popout", "routes/private/queue-popout.tsx"),
   route("overlay", "routes/public/overlay.tsx"),

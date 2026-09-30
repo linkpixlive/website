@@ -37,7 +37,7 @@ export async function action({ request }: Route.ActionArgs) {
     return { error: result.error.message };
   }
 
-  return redirect("/", {
+  return redirect("/dashboard", {
     headers: { "Set-Cookie": createAuthCookie(result.data) },
   });
 }

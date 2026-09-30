@@ -11,12 +11,12 @@ export interface MenuItem {
 export const menuItems: MenuItem[] = [
   { label: "Dashboard", to: "/dashboard", icon: "widget-2", end: true },
   { label: "Carteira", to: "/carteira", icon: "wallet" },
-  { label: "Integrações", to: "/widgets", icon: "link-minimalistic" },
+  { label: "Integrações", to: "/widgets/overlay", icon: "link-minimalistic" },
   { label: "Doações", to: "/doacoes", icon: "list" },
   { label: "Perfil", to: "/perfil", icon: "user-circle" },
   {
     label: "Conta",
-    to: "/configuracoes",
+    to: "/conta",
     icon: "lock",
   },
 ];
