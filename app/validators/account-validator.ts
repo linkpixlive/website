@@ -5,8 +5,6 @@ import {
   withPasswordConfirmation,
 } from "./password";
 
-/** Step-up: o backend só exige o TOTP quando o 2FA está ativo, então o campo é
- *  opcional aqui e a obrigatoriedade é decidida pelo chamador (`has2fa`). */
 export const totpField = z
   .string()
   .length(6, "O código tem 6 dígitos")
@@ -26,9 +24,8 @@ export type ChangePasswordValues = z.infer<typeof changePasswordSchema>;
 
 export const changeEmailSchema = z.object({
   email: z
-    .string()
-    .min(1, "Informe o novo e-mail")
     .email("Informe um e-mail válido")
+    .min(1, "Informe o novo e-mail")
     .max(100, "O e-mail deve ter no máximo 100 caracteres"),
   password: z.string().min(1, "Confirme com sua senha"),
   totp: totpField,

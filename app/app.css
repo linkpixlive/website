@@ -2,8 +2,6 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ── Self-hosted fonts (Fontshare ITF Free Font License) ───────────── */
-
 @font-face {
   font-family: "Satoshi";
   src: url("./fonts/Satoshi-Variable.woff2") format("woff2-variations");

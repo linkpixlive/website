@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 
-/** Roda `reset` na transição fechado→aberto (limpa estado entre aberturas).
- *  `reset` inline é seguro: só dispara na transição, sempre na versão atual. */
+/** Runs reset on closed-to-open transition to clear stale modal state. */
 export function useResetOnOpen(isOpen: boolean, reset: () => void) {
   const resetRef = useRef(reset);
   resetRef.current = reset;

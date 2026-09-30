@@ -2,11 +2,7 @@ import { useState } from "react";
 import { overlayApi } from "~/api/modules/overlay";
 import { useToast } from "~/components/ui/useToast";
 
-/**
- * Ações da fila de doações compartilhadas entre a página Doações
- * e o popup (/fila/popout). O `isPaused` é recebido de fora para que
- * o socket continue sendo aberto uma única vez por quem usa o hook.
- */
+/** Queue control actions (pause, skip, clear, test, replay) with per-action loading and toasts. */
 export function useQueueActions(
   token: string | null,
   isPaused: boolean,

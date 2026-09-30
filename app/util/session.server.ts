@@ -1,6 +1,3 @@
-// Server-only utilities for auth cookie management.
-// This file is never bundled for the browser (React Router .server.ts convention).
-
 export function createAuthCookie(token: string): string {
   const maxAge = 7 * 24 * 60 * 60; // 7 days
   const isProduction = process.env.NODE_ENV === "production";

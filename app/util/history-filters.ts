@@ -12,7 +12,7 @@ export interface HistoryFilters {
   searchBy?: string;
 }
 
-/** Filtro local dos itens ao vivo via socket (mesma regra do backend). */
+// filter donation history real-time by status, days, and search term
 export function matchesFilters(
   donation: DonationHistory,
   filters?: HistoryFilters,
@@ -31,7 +31,6 @@ export function matchesFilters(
     const approved = new Date(donation.approvedAt);
     if (approved < start || approved > end) return false;
   } else if (daysFilter === "today") {
-    // "Hoje" = últimas 24h corridas (mesma regra do backend).
     if (!donation.approvedAt) return false;
     const approved = new Date(donation.approvedAt).getTime();
     if (Number.isNaN(approved)) return false;
@@ -46,7 +45,8 @@ export function matchesFilters(
       const regex = new RegExp(`\\b${escaped}\\b`, "i");
       if (!regex.test(msg)) return false;
     } else {
-      if (!donation.name.toLowerCase().includes(term.toLowerCase())) return false;
+      if (!donation.name.toLowerCase().includes(term.toLowerCase()))
+        return false;
     }
   }
   return true;

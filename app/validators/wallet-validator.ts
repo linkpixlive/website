@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { totpField } from "./account-validator";
 
-// We'll read these values inside components or actions using import.meta.env
 export const MIN_WITHDRAWAL_AMOUNT = Number(
   import.meta.env.VITE_MIN_WITHDRAWAL_AMOUNT || "10",
 );
@@ -10,8 +9,6 @@ export const WITHDRAWAL_FEE_PERCENTAGE = Number(
   import.meta.env.VITE_WITHDRAWAL_FEE_PERCENTAGE || "4",
 );
 
-/** Schema parametrizado (mesmo padrão de createDonationSchema): o env é lido
- *  nas consts acima e passado pelo caller. */
 export function createWithdrawalSchema(minAmount: number, maxAmount: number) {
   return z.object({
     amount: z

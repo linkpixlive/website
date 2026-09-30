@@ -7,9 +7,6 @@ interface DashboardSocketEntry {
   refcount: number;
 }
 
-// Singleton por token: um `io(/dashboard)` compartilhado por todos os
-// hooks da página, não um por hook (W1). Sem isso, fila + histórico
-// abrem 2 conexões idênticas — 4 com o popout aberto.
 const entries = new Map<string, DashboardSocketEntry>();
 
 function acquire(token: string): Socket {
@@ -36,13 +33,7 @@ function release(token: string): void {
   }
 }
 
-/**
- * Socket `/dashboard` compartilhado com lazy connect (W3): só conecta
- * com a aba visível; `hidden` desconecta, `visible` reconecta (mesmo
- * padrão de `useOverlayAlerts`). `enabled=false` (ex.: popout aberto,
- * W7) nem adquire o socket. `connect/disconnect` são idempotentes no
- * socket.io, então N consumidores na mesma página são seguros.
- */
+/** Shared /dashboard socket with lazy connect. Disconnects when the tab is hidden or disabled (e.g. popout takes over). */
 export function useDashboardSocket(
   token: string | null,
   enabled = true,

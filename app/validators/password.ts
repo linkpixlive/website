@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-/** Regra canônica de senha forte (a da conta): 8–36, maiúscula+minúscula e
- *  (número ou especial). Register/reset herdavam regra mais fraca. */
 export const strongPassword = z
   .string()
   .min(8, "A senha deve ter no mínimo 8 caracteres")
@@ -11,18 +9,15 @@ export const strongPassword = z
     "Senha muito fraca. Use maiúsculas, números e caracteres especiais.",
   );
 
-export const confirmPasswordField = z
-  .string()
-  .min(1, "Confirme a nova senha");
+export const confirmPasswordField = z.string().min(1, "Confirme a nova senha");
 
-/** Medidor de força p/ PasswordField (0–4, critérios alinhados ao strongPassword). */
 export function getPasswordStrength(value: string): number {
   if (!value) return 0;
   let score = 0;
   if (value.length >= 8) score += 1;
-  if (/[A-Z]/.test(value)) score += 1;
-  if (/[0-9]/.test(value)) score += 1;
-  if (/[^A-Za-z0-9]/.test(value)) score += 1;
+  if (/[A-Z]/.test(value)) score += 1; // Valid if contains at least one uppercase letter
+  if (/[0-9]/.test(value)) score += 1; // Valid if contains at least one number
+  if (/[^A-Za-z0-9]/.test(value)) score += 1; // Valid if contains at least one special character
   return score;
 }
 

@@ -1,7 +1,6 @@
 export interface StreamerProfile {
   name: string;
   username: string;
-  /** Selo de conta verificada (GET /user/:username → verified). */
   verified: boolean;
   profileImageUrl: string | null;
   overlayActive: boolean;
@@ -29,7 +28,6 @@ export interface DonationPayment {
   expiredAt: number;
 }
 
-/** Resumo público da doação (GET /donation/:id) usado na página de confirmação. */
 export interface DonationView {
   id: string;
   status: DonationStatus;

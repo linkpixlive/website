@@ -9,6 +9,7 @@ interface UseDonationStatusOptions {
   enabled?: boolean;
 }
 
+/** Polls donation status until settled. Flags connection loss after consecutive failures. */
 export function useDonationStatus(
   donationId: string | null,
   { intervalMs = 8000, enabled = true }: UseDonationStatusOptions = {},

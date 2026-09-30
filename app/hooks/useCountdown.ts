@@ -10,6 +10,7 @@ export function formatRemaining(totalSeconds: number): string {
   return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 }
 
+/** Counts down to a target timestamp, updating every second. */
 export function useCountdown(target: number | null) {
   const [remainingSeconds, setRemainingSeconds] = useState(() =>
     target ? getRemainingSeconds(target) : 0,

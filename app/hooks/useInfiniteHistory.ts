@@ -6,10 +6,7 @@ import {
 import type { PaginatedResponse } from "~/api/modules/withdrawals";
 import { DEFAULT_HISTORY_DAYS } from "~/util/history-filters";
 
-/**
- * Scroll infinito do popout: páginas antigas em estado separado porque o
- * socket trunca a própria lista no limite do loader a cada evento ao vivo.
- */
+/** Infinite scroll for older donations in the popout. Keeps separate state and dedupes against live items. */
 export function useInfiniteHistory(
   token: string | null,
   initialHistory: PaginatedResponse<DonationHistory>,
@@ -22,7 +19,7 @@ export function useInfiniteHistory(
   );
   const [loadingMore, setLoadingMore] = useState(false);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-  // Espelho mutável para o observer não re-anexar a cada render.
+
   const loaderStateRef = useRef({ hasMore, loadingMore, nextPage });
   loaderStateRef.current = { hasMore, loadingMore, nextPage };
   const liveIdsRef = useRef(new Set(liveItems.map((d) => d.id)));

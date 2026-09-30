@@ -7,6 +7,7 @@ interface UseQueueSocketReturn {
   isPaused: boolean;
 }
 
+/** Live donation queue and pause state synced over the shared dashboard socket. */
 export function useQueueSocket(
   token: string | null,
   enabled = true,

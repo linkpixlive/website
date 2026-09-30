@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 const COPY_RESET_MS = 1600;
 
-/** "Copiado!" temporizado com try/catch (clipboard pode indisponível). */
+/** Copies text to clipboard with temporary copied feedback. */
 export function useCopyToClipboard() {
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

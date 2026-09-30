@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
-/** Sincroniza `{ error }` de `useActionData` com estado local de `AlertMessage`.
- *  Padrão A: `RHF + zod -> action`. Retorna `[error, clearError]`. */
+/** Syncs server action error to local alert state. Returns error plus a clear handler. */
 export function useActionError(actionData: { error?: string } | undefined | null) {
   const [error, setError] = useState<string | null>(null);
 

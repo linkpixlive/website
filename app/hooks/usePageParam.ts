@@ -1,6 +1,6 @@
 import { useSearchParams } from "react-router";
 
-/** Lê os params da URL + troca de página preservando os filtros atuais. */
+/** Reads URL page param and changes page while preserving filters. */
 export function usePageParam() {
   const [searchParams, setSearchParams] = useSearchParams();
 

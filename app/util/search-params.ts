@@ -1,6 +1,5 @@
 import type { SetURLSearchParams } from "react-router";
 
-/** Muta uma cópia dos params, reseta `page=1` e aplica. */
 export function updateParams(
   searchParams: URLSearchParams,
   setSearchParams: SetURLSearchParams,
@@ -12,7 +11,6 @@ export function updateParams(
   setSearchParams(params);
 }
 
-/** Seta o param, ou deleta quando vazio/igual ao padrão (padrão some da URL). */
 export function setParamOrDelete(
   params: URLSearchParams,
   key: string,
@@ -26,7 +24,6 @@ export function setParamOrDelete(
   }
 }
 
-/** Lê `page`/`limit` numéricos da URL do loader (com guarda `NaN`). */
 export function getPageParam(url: URL, key = "page", fallback = 1): number {
   const raw = url.searchParams.get(key);
   if (raw === null || raw.trim() === "") return fallback;

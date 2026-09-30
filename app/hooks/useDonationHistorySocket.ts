@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { DonationHistory } from "~/api/modules/dashboard";
 import type { PaginatedResponse } from "~/api/modules/withdrawals";
-import {
-  matchesFilters,
-  type HistoryFilters,
-} from "~/util/history-filters";
+import { matchesFilters, type HistoryFilters } from "~/util/history-filters";
 import { useDashboardSocket } from "./useDashboardSocket";
 
 interface HistoryState {
@@ -16,44 +13,30 @@ export type HistoryEvent =
   | { type: "created"; donation: DonationHistory }
   | { type: "updated"; donation: DonationHistory };
 
-/** Reducer puro dos eventos ao vivo (testável sem socket). */
+/** Pure reducer that merges a live donation event into history state. Applies current filters and pagination limits. */
 export function applyHistoryEvent(
   state: HistoryState,
   event: HistoryEvent,
   opts: { filters?: HistoryFilters; page: number; limit: number },
 ): HistoryState {
   const { filters, page, limit } = opts;
+  const matches = matchesFilters(event.donation, filters);
+  const exists = state.items.some((d) => d.id === event.donation.id);
 
   if (event.type === "created") {
-    if (!matchesFilters(event.donation, filters)) return state;
-    if (state.items.some((d) => d.id === event.donation.id)) return state;
-    return {
-      total: state.total + 1,
-      items:
-        page === 1
-          ? [event.donation, ...state.items].slice(0, limit)
-          : state.items,
-    };
+    if (!matches || exists) return state;
+    return insert(state, event.donation, page, limit);
   }
 
-  const stillMatches = matchesFilters(event.donation, filters);
-  const exists = state.items.some((d) => d.id === event.donation.id);
-  if (exists && !stillMatches) {
-    // Saiu do filtro (ex.: paid → displayed filtrando paid).
+  if (exists && !matches) {
     return {
       total: Math.max(0, state.total - 1),
       items: state.items.filter((d) => d.id !== event.donation.id),
     };
   }
-  if (!exists && stillMatches) {
-    // Passou a casar (raro).
-    return {
-      total: state.total + 1,
-      items:
-        page === 1
-          ? [event.donation, ...state.items].slice(0, limit)
-          : state.items,
-    };
+  if (!exists) {
+    if (!matches) return state;
+    return insert(state, event.donation, page, limit);
   }
   return {
     ...state,
@@ -63,6 +46,20 @@ export function applyHistoryEvent(
   };
 }
 
+function insert(
+  state: HistoryState,
+  donation: DonationHistory,
+  page: number,
+  limit: number,
+): HistoryState {
+  return {
+    total: state.total + 1,
+    items:
+      page === 1 ? [donation, ...state.items].slice(0, limit) : state.items,
+  };
+}
+
+/** Live donation history synced over socket. Reads filters via ref to avoid reconnecting on every keystroke. */
 export function useDonationHistorySocket(
   token: string | null,
   initial: PaginatedResponse<DonationHistory>,
@@ -75,19 +72,12 @@ export function useDonationHistorySocket(
     total: initial.meta.total,
   });
 
-  // Sync when initial changes due to navigation (page change)
   useEffect(() => {
     setState({ items: initial.items, total: initial.meta.total });
   }, [initial.items, initial.meta.total, currentPage]);
 
-  // Lidos via ref: o socket conecta uma vez por token, sem reconectar
-  // a cada keystroke de filtro ou troca de página.
-  const filtersRef = useRef(filters);
-  filtersRef.current = filters;
-  const pageRef = useRef(currentPage);
-  pageRef.current = currentPage;
-  const limitRef = useRef(initial.meta.limit);
-  limitRef.current = initial.meta.limit;
+  const optsRef = useRef({ filters, page: currentPage, limit: initial.meta.limit });
+  optsRef.current = { filters, page: currentPage, limit: initial.meta.limit };
 
   const socket = useDashboardSocket(token, enabled);
 
@@ -95,13 +85,7 @@ export function useDonationHistorySocket(
     if (!socket) return;
 
     const dispatch = (event: HistoryEvent) =>
-      setState((prev) =>
-        applyHistoryEvent(prev, event, {
-          filters: filtersRef.current,
-          page: pageRef.current,
-          limit: limitRef.current,
-        }),
-      );
+      setState((prev) => applyHistoryEvent(prev, event, optsRef.current));
 
     const onCreated = (donation: DonationHistory) =>
       dispatch({ type: "created", donation });

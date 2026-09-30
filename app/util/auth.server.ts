@@ -21,7 +21,6 @@ export async function requireValidAuth(request: Request) {
     const client = createApiClient(token);
     const response = await client.get("/auth/me");
 
-    // O backend envolve as respostas no envelope { success, data, ... }.
     const user = (response.data?.data ?? response.data) as
       | components["schemas"]["SafeUser"]
       | undefined;
@@ -32,8 +31,6 @@ export async function requireValidAuth(request: Request) {
 
     return user;
   } catch (e: unknown) {
-    // 401 = sessão inválida → login + limpa cookie. 5xx/rede → indisponível
-    // com cookie preservado (o retry decide o destino).
     if (axios.isAxiosError(e) && e.response?.status === 401) {
       redirectToLogin(true);
     }

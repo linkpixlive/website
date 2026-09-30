@@ -1,4 +1,3 @@
-/** Mescla refs (callback + objeto) para um mesmo elemento. */
 export function mergeRefs<T>(
   ...refs: (React.Ref<T | null> | undefined)[]
 ) {

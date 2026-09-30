@@ -1,16 +1,12 @@
 import { useEffect } from "react";
 
-/** Registro global: só um áudio toca por vez na página. */
 const activePlayers = new Set<() => void>();
 
 function pauseAll() {
   for (const pause of activePlayers) pause();
 }
 
-/**
- * Exclusão mútua de áudio entre `AudioPlayer` e `VoiceSampleButton`
- * (antes cada um tinha seu `Set` e não se conheciam).
- */
+/** Registers audio for mutual exclusion. Starting one pauses all others on the page. */
 export function useExclusiveAudio(
   audioRef: React.RefObject<HTMLAudioElement | null>,
 ) {

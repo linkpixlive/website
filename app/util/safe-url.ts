@@ -1,4 +1,3 @@
-/** Allowlist simples de mídia: relativo/blob/https. Bloqueia javascript:/data:/http:. */
 export function isSafeMediaUrl(
   url: string | null | undefined,
 ): boolean {

@@ -10,7 +10,6 @@ interface ErrorStateProps {
   retryLabel?: string;
 }
 
-/** Card de erro único do app (mesmo visual em root, privado e público). */
 export function ErrorState({
   title = "Não foi possível carregar",
   message = "Verifique sua conexão e tente novamente.",
@@ -35,7 +34,6 @@ export function ErrorState({
   );
 }
 
-/** Lê o erro da rota e traduz para o ErrorState (401 → login, resto → retry). */
 export function RouteErrorState() {
   const error = useRouteError();
   const navigate = useNavigate();

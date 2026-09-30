@@ -9,12 +9,12 @@ import { useOverlayAudio } from "./useOverlayAudio";
 interface UseOverlayAlertsReturn {
   current: OverlayDonationEntity | null;
   settings: OverlaySettings | null;
-  /** Token inexistente/resetado (GET público 404) — mostra erro fixo. */
   tokenInvalid: boolean;
 }
 
 const HEARTBEAT_INTERVAL_MS = 25000;
 
+/** Orchestrates overlay alerts over socket with heartbeat. Disconnects when hidden and falls back to REST for settings. */
 export function useOverlayAlerts(token: string | null): UseOverlayAlertsReturn {
   const [current, setCurrent] = useState<OverlayDonationEntity | null>(null);
   const [settings, setSettings] = useState<OverlaySettings | null>(null);
@@ -88,26 +88,18 @@ export function useOverlayAlerts(token: string | null): UseOverlayAlertsReturn {
     const socket = io(`${apiUrl}/overlay`, { query: { token } });
     socketRef.current = socket;
 
-    socket.on("connect", () => {
-      startHeartbeat();
-    });
-
-    socket.on("disconnect", () => {
-      stopHeartbeat();
-    });
+    socket.on("connect", startHeartbeat);
+    socket.on("disconnect", stopHeartbeat);
 
     socket.on("new_donation", (donation: OverlayDonationEntity) => {
       if (currentIdRef.current) return;
       playDonation(donation);
     });
 
-    socket.on("skip_alert", discardCurrent);
+    for (const event of ["skip_alert", "clear_alerts", "pause_alerts"] as const) {
+      socket.on(event, discardCurrent);
+    }
 
-    socket.on("clear_alerts", discardCurrent);
-
-    socket.on("pause_alerts", discardCurrent);
-
-    // W6: o evento já pode trazer as settings — GET só como fallback.
     socket.on("settings_updated", (payload: unknown) => {
       const next = resolveSettingsUpdate(payload);
       if (next) {
@@ -118,14 +110,6 @@ export function useOverlayAlerts(token: string | null): UseOverlayAlertsReturn {
       loadSettings();
     });
 
-    /**
-     * Fonte oculta (ex.: "olhinho" do OBS com shutdown desligado, ou aba em
-     * segundo plano) conta como overlay offline: para o playback local e
-     * desconecta o socket, pausando a fila no backend. Ao voltar a ficar
-     * visível, reconecta e o backend reenvia o alerta atual + despacha
-     * a fila pendente. Sem `alert_finished` no hide, o alerta reinicia
-     * do início em vez de ser consumido invisível.
-     */
     const handleVisibilityChange = () => {
       if (document.hidden) {
         discardCurrent();

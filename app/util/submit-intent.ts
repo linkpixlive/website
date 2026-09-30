@@ -1,4 +1,3 @@
-/** Monta o FormData de intent (`intent` + campos) para submit de formulários. */
 export function buildIntentFormData(
   intent: string,
   values: Record<string, string> = {},
