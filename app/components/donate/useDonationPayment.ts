@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { useDonationStatus } from "~/hooks/useDonationStatus";
+import { normalizeUsername } from "~/util/username";
+import { DonationRequestError } from "~/api/modules/public-donations";
 import type {
   DonationPayment,
   StreamerProfile,
@@ -22,7 +24,17 @@ import { DEFAULT_VOICE_VALUE } from "./VoiceSelectField";
  */
 const MODERATION_BLOCK_HINT = "Mensagem não permitida";
 
-function isModerationBlock(message: string): boolean {
+// ponytail: código estável da moderação a confirmar no backend; texto mantido como fallback.
+const MODERATION_BLOCK_CODES: ReadonlyArray<unknown> = ["MODERATION_BLOCKED"];
+
+function isModerationBlock(error: unknown): boolean {
+  if (
+    error instanceof DonationRequestError &&
+    MODERATION_BLOCK_CODES.includes(error.code)
+  ) {
+    return true;
+  }
+  const message = error instanceof Error ? error.message : "";
   return message.includes(MODERATION_BLOCK_HINT);
 }
 
@@ -50,7 +62,7 @@ export function useDonationPayment({
   const [submitting, setSubmitting] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { status } = useDonationStatus(payment?.id ?? null, {
+  const { status, connectionLost } = useDonationStatus(payment?.id ?? null, {
     enabled: !!payment,
   });
 
@@ -70,8 +82,11 @@ export function useDonationPayment({
     if (payment && status === "paid") {
       // `u` garante que a confirmação saiba voltar para o streamer mesmo se
       // o backend omitir streamerUsername no GET /donation/:id.
+      const safeUsername = normalizeUsername(profile.username);
       navigate(
-        `/doacao/${payment.id}?u=${encodeURIComponent(profile.username)}`,
+        safeUsername
+          ? `/doacao/${payment.id}?u=${encodeURIComponent(safeUsername)}`
+          : `/doacao/${payment.id}`,
       );
     }
   }, [payment, status, navigate, profile.username]);
@@ -92,7 +107,7 @@ export function useDonationPayment({
       setError(message);
       // Bloqueio da moderação: o formulário preserva os valores (o form vive
       // neste hook) e o doador é levado de volta ao campo da mensagem.
-      if (isModerationBlock(message)) focusDonationMessage();
+      if (isModerationBlock(e)) focusDonationMessage();
       return null;
     } finally {
       setBusy(false);
@@ -128,6 +143,7 @@ export function useDonationPayment({
     regenerating,
     error,
     status,
+    connectionLost,
     handleSubmit,
     handleRegenerate,
     handleEditDonation,

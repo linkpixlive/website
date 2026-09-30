@@ -9,10 +9,9 @@ import { DonationsSubtitle } from "./DonationsSubtitle";
 import { useDonationsPage } from "./useDonationsPage";
 import { useInfiniteHistory } from "~/hooks/useInfiniteHistory";
 import {
-  CARD_CLASS,
   LINK_CLASS,
-  SECTION_HEADING_CLASS,
 } from "~/components/ui/classes";
+import { HistorySectionShell } from "~/components/ui/HistorySectionShell";
 
 interface DonationsLivePanelProps {
   token: string | null;
@@ -89,21 +88,22 @@ export function DonationsLivePanel({
           onTest={handleTest}
         />
 
-        <section
-          aria-label="Histórico recente de doações"
-          className={CARD_CLASS}
+        <HistorySectionShell
+          title="Histórico recente"
+          total={displayTotal}
+          ariaLabel="Histórico recente de doações"
+          footer={
+            <div className="flex justify-center pt-4 border-t border-line mt-5">
+              <button
+                type="button"
+                onClick={handleOpenFullHistory}
+                className={`text-xs font-semibold ${LINK_CLASS} cursor-pointer outline-none`}
+              >
+                Ver histórico completo
+              </button>
+            </div>
+          }
         >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className={SECTION_HEADING_CLASS}>
-              Histórico recente
-            </h2>
-            {displayTotal > 0 && (
-              <span className="text-[11px] font-semibold text-ink-label">
-                {displayTotal} {displayTotal === 1 ? "registro" : "registros"}
-              </span>
-            )}
-          </div>
-
           <DonationHistoryList
             items={displayItems}
             loading={false}
@@ -120,17 +120,7 @@ export function DonationsLivePanel({
               Carregando mais doações…
             </p>
           )}
-
-          <div className="flex justify-center pt-4 border-t border-line mt-5">
-              <button
-                type="button"
-                onClick={handleOpenFullHistory}
-                className={`text-xs font-semibold ${LINK_CLASS} cursor-pointer outline-none`}
-              >
-                Ver histórico completo
-              </button>
-          </div>
-        </section>
+        </HistorySectionShell>
       </div>
     </div>
   );

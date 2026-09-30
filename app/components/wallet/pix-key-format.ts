@@ -79,7 +79,7 @@ export function displayMaskedKey(
  * Usado onde o usuário precisa confirmar o destino exato (ex. modal de saque).
  * Faz fallback para o valor informado quando o tipo não tem máscara.
  */
-export function formatPixKeyValue(
+function formatPixKeyValue(
   key: string | undefined | null,
   keyType: string | undefined | null,
 ): string {

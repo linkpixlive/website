@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Modal } from "~/components/ui/Modal";
 import { Icon } from "~/components/ui/Icon";
 import { VoiceSampleButton } from "~/components/ui/VoiceSampleButton";
+import { isSafeMediaUrl } from "~/util/safe-url";
 
 export interface VoiceOption {
   value: string;
@@ -27,7 +28,7 @@ export function VoiceOptionAvatar({
   const [failed, setFailed] = useState(false);
   const { box, icon } = AVATAR_SIZES[size];
 
-  if (imageUrl && !failed) {
+  if (imageUrl && isSafeMediaUrl(imageUrl) && !failed) {
     return (
       <img
         src={imageUrl}
@@ -104,7 +105,7 @@ export function VoicePickerModal({
                   </span>
                 )}
               </span>
-              {option.sampleUrl && (
+              {option.sampleUrl && isSafeMediaUrl(option.sampleUrl) && (
                 <VoiceSampleButton src={option.sampleUrl} voiceName={option.label} />
               )}
               {selected && (

@@ -113,40 +113,67 @@ export interface HomePageData {
   recent: DonationHistory[];
 }
 
-/** Agregação da home (8 fontes, tolerante a falha individual). */
+/** Agregação da home (8 fontes). Fail-fast: erro em fonte crítica derruba o
+ *  loader (o ErrorBoundary mostra retry) em vez de exibir número falso.
+ *  Exceção: 404 em overlay/regras = "nunca configurado", estado válido de
+ *  conta nova que vira `null` para o checklist. */
 export async function getHomePage(
   token: string | null,
   range: DashboardRange,
 ): Promise<HomePageData> {
-  const [statsRes, balancesRes, withdrawalsRes, pixKeysRes, rulesRes, overlayRes, accountRes, historyRes] =
-    await Promise.allSettled([
-      dashboardApi.getStats(token, range),
-      walletsApi.getBalances(token),
-      withdrawalsApi.list(token, { page: 1, limit: 1 }),
-      pixKeysApi.list(token),
-      donationSettingsApi.getSettings(token),
-      // Leitura pura: getSettings (404 = não configurado). Nunca ensureSettings aqui,
-      // que criaria o widget implicitamente.
-      widgetsApi.getSettings(token, "overlay"),
-      accountSettingsApi.getSettings(token),
-      dashboardApi.getHistory(token, { page: 1, limit: 5 }),
-    ]);
+  const [
+    statsRes,
+    balancesRes,
+    withdrawalsRes,
+    pixKeysRes,
+    rulesRes,
+    overlayRes,
+    accountRes,
+    historyRes,
+  ] = await Promise.all([
+    dashboardApi.getStats(token, range),
+    walletsApi.getBalances(token),
+    withdrawalsApi.list(token, { page: 1, limit: 1 }),
+    pixKeysApi.list(token),
+    donationSettingsApi.getSettings(token),
+    // Leitura pura: getSettings (404 = não configurado). Nunca ensureSettings aqui,
+    // que criaria o widget implicitamente.
+    widgetsApi.getSettings(token, "overlay"),
+    accountSettingsApi.getSettings(token),
+    dashboardApi.getHistory(token, { page: 1, limit: 5 }),
+  ]);
+
+  if (!statsRes.success) throw new Response(statsRes.error.message, { status: 502 });
+  if (!balancesRes.success) {
+    throw new Response(balancesRes.error.message, { status: 502 });
+  }
+  if (!withdrawalsRes.success) {
+    throw new Response(withdrawalsRes.error.message, { status: 502 });
+  }
+  if (!pixKeysRes.success) {
+    throw new Response(pixKeysRes.error.message, { status: 502 });
+  }
+  if (!rulesRes.success && rulesRes.error.code !== 404) {
+    throw new Response(rulesRes.error.message, { status: 502 });
+  }
+  if (!overlayRes.success && overlayRes.error.code !== 404) {
+    throw new Response(overlayRes.error.message, { status: 502 });
+  }
+  if (!accountRes.success) {
+    throw new Response(accountRes.error.message, { status: 502 });
+  }
+  if (!historyRes.success) {
+    throw new Response(historyRes.error.message, { status: 502 });
+  }
 
   return {
-    stats: statsRes.status === "fulfilled" && statsRes.value.success ? statsRes.value.data : null,
-    balances:
-      balancesRes.status === "fulfilled" && balancesRes.value.success ? balancesRes.value.data : null,
-    lastWithdrawal:
-      withdrawalsRes.status === "fulfilled" && withdrawalsRes.value.success
-        ? (withdrawalsRes.value.data.items[0] ?? null)
-        : null,
-    pixKeys: pixKeysRes.status === "fulfilled" && pixKeysRes.value.success ? pixKeysRes.value.data : [],
-    rules: rulesRes.status === "fulfilled" && rulesRes.value.success ? rulesRes.value.data : null,
-    overlay:
-      overlayRes.status === "fulfilled" && overlayRes.value.success ? overlayRes.value.data : null,
-    account:
-      accountRes.status === "fulfilled" && accountRes.value.success ? accountRes.value.data : null,
-    recent:
-      historyRes.status === "fulfilled" && historyRes.value.success ? historyRes.value.data.items : [],
+    stats: statsRes.data,
+    balances: balancesRes.data,
+    lastWithdrawal: withdrawalsRes.data.items[0] ?? null,
+    pixKeys: pixKeysRes.data,
+    rules: rulesRes.success ? rulesRes.data : null,
+    overlay: overlayRes.success ? overlayRes.data : null,
+    account: accountRes.data,
+    recent: historyRes.data.items,
   };
 }

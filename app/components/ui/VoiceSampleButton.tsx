@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Icon } from "./Icon";
 import { useExclusiveAudio } from "~/hooks/useExclusiveAudio";
+import { isSafeMediaUrl } from "~/util/safe-url";
 
 interface VoiceSampleButtonProps {
   src: string;
@@ -14,7 +15,7 @@ export function VoiceSampleButton({ src, voiceName }: VoiceSampleButtonProps) {
   const [broken, setBroken] = useState(false);
   const pauseAll = useExclusiveAudio(audioRef);
 
-  if (broken) return null;
+  if (broken || !isSafeMediaUrl(src)) return null;
 
   function handleToggle(event: React.MouseEvent) {
     event.stopPropagation();

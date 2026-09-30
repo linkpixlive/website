@@ -23,7 +23,13 @@ import { clearAuthCookie, getAuthToken } from "~/util/session.server";
 import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
 import { usePageParam } from "~/hooks/usePageParam";
 import { getPageParam } from "~/util/search-params";
-import { CARD_CLASS, SECTION_HEADING_CLASS } from "~/components/ui/classes";
+import { HistorySectionShell } from "~/components/ui/HistorySectionShell";
+import {
+  createWithdrawalSchema,
+  MAX_WITHDRAWAL_AMOUNT,
+  MIN_WITHDRAWAL_AMOUNT,
+  pixKeySchema,
+} from "~/validators/wallet-validator";
 import type { Route } from "./+types/index";
 
 export async function loader({ request }: Route.LoaderArgs) {
@@ -44,12 +50,15 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   // `has2fa` decide se o saque pede só a senha ou senha + TOTP no formulário.
   const account = await accountSettingsApi.getSettings(token);
+  if (!account.success) {
+    throw new Response(account.error.message, { status: 502 });
+  }
 
   return {
     ...walletPage,
     page,
     totalPages: walletPage.withdrawals.meta.totalPages,
-    has2fa: account.success ? account.data.has2fa : false,
+    has2fa: account.data.has2fa,
   };
 }
 
@@ -63,10 +72,23 @@ async function createWithdrawalAction(
   token: string | null,
   formData: FormData,
 ): Promise<WalletActionResult> {
-  const amount = Number(formData.get("amount"));
-  const pixId = formData.get("pixId") as string;
-  const password = String(formData.get("password") ?? "");
-  const totp = formData.get("totp") ? String(formData.get("totp")) : undefined;
+  const parsed = createWithdrawalSchema(
+    MIN_WITHDRAWAL_AMOUNT,
+    MAX_WITHDRAWAL_AMOUNT,
+  ).safeParse({
+    amount: String(formData.get("amount") ?? ""),
+    pixId: String(formData.get("pixId") ?? ""),
+    password: String(formData.get("password") ?? ""),
+    totp: formData.get("totp") ? String(formData.get("totp")) : undefined,
+  });
+  if (!parsed.success) {
+    return {
+      success: false,
+      action: "createWithdrawal",
+      error: parsed.error.issues[0].message,
+    };
+  }
+  const { amount, pixId, password, totp } = parsed.data;
   const idempotencyKey = String(formData.get("idempotencyKey") ?? "");
 
   if (!idempotencyKey) {
@@ -98,10 +120,22 @@ async function createPixKeyAction(
   token: string | null,
   formData: FormData,
 ): Promise<WalletActionResult> {
-  const key = formData.get("key") as string;
-  const alias = (formData.get("alias") as string) || undefined;
+  const parsed = pixKeySchema.safeParse({
+    key: String(formData.get("key") ?? ""),
+    alias: formData.get("alias") ? String(formData.get("alias")) : undefined,
+  });
+  if (!parsed.success) {
+    return {
+      success: false,
+      action: "createPixKey",
+      error: parsed.error.issues[0].message,
+    };
+  }
 
-  const res = await pixKeysApi.create(token, { key, alias });
+  const res = await pixKeysApi.create(token, {
+    key: parsed.data.key,
+    alias: parsed.data.alias,
+  });
 
   if (!res.success) {
     return {
@@ -118,7 +152,14 @@ async function deletePixKeyAction(
   token: string | null,
   formData: FormData,
 ): Promise<WalletActionResult> {
-  const id = formData.get("id") as string;
+  const id = String(formData.get("id") ?? "");
+  if (!id) {
+    return {
+      success: false,
+      action: "deletePixKey",
+      error: "Chave Pix inválida.",
+    };
+  }
 
   const res = await pixKeysApi.delete(token, id);
 
@@ -173,18 +214,19 @@ export default function WalletPage() {
 
   const loadingData = navigation.state === "loading";
 
-  // Handle action results (toast feedbacks & modal closing)
+  // Canal único: esta página (navegação) trata só `createWithdrawal`.
+  // `createPixKey`/`deletePixKey` chegam via `fetcher` e são tratados em
+  // `PixKeysModal`/`PixKeyCreateForm` — ignorar aqui evita toast duplo.
   useFetcherFeedback<WalletActionResult>({
     data: actionData,
     state: navigation.state,
     onResult: (result) => {
+      if (result.action !== "createWithdrawal") return;
       if (result.success) {
-        if (result.action === "createWithdrawal") {
-          toast("Saque solicitado com sucesso!", "success");
-          setModal(null);
-          setWithdrawalError(null);
-        }
-      } else if (result.error && result.action === "createWithdrawal") {
+        toast("Saque solicitado com sucesso!", "success");
+        setModal(null);
+        setWithdrawalError(null);
+      } else if (result.error) {
         setWithdrawalError(result.error);
       }
     },
@@ -223,19 +265,11 @@ export default function WalletPage() {
       </div>
 
       {/* History card */}
-      <section className={`mt-5 ${CARD_CLASS}`}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className={SECTION_HEADING_CLASS}>
-            Histórico de saques
-          </h2>
-          {withdrawals.meta.total > 0 && (
-            <span className="text-[11px] font-semibold text-ink-label">
-              {withdrawals.meta.total}{" "}
-              {withdrawals.meta.total === 1 ? "registro" : "registros"}
-            </span>
-          )}
-        </div>
-
+      <HistorySectionShell
+        title="Histórico de saques"
+        total={withdrawals.meta.total}
+        className="mt-5"
+      >
         <WithdrawalFilters />
 
         <div className="mt-5">
@@ -247,7 +281,7 @@ export default function WalletPage() {
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
-      </section>
+      </HistorySectionShell>
 
       {/* Modals */}
       <WithdrawalModal

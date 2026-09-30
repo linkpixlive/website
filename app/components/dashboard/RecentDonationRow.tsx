@@ -3,6 +3,7 @@ import { dashboardApi, type DonationHistory } from "~/api/modules/dashboard";
 import { AudioPlayer } from "~/components/ui/AudioPlayer";
 import { Icon } from "~/components/ui/Icon";
 import { formatBRLReais, buildDownloadName } from "~/util/currency";
+import { isSafeMediaUrl } from "~/util/safe-url";
 
 function formatShortDateTime(iso: string | null) {
   if (!iso) return null;
@@ -38,7 +39,7 @@ export function RecentDonationRow({ item, token }: RecentDonationRowProps) {
         {date && (
           <span className="text-[11px] font-semibold text-ink-label">{date}</span>
         )}
-        {item.voiceUrl && (
+        {item.voiceUrl && isSafeMediaUrl(item.voiceUrl) && (
           <button
             type="button"
             onClick={() => setAudioOpen((v) => !v)}
@@ -57,7 +58,7 @@ export function RecentDonationRow({ item, token }: RecentDonationRowProps) {
         </p>
       )}
 
-      {audioOpen && item.voiceUrl && (
+      {audioOpen && item.voiceUrl && isSafeMediaUrl(item.voiceUrl) && (
         <div className="mt-2 animate-fade-in">
           <AudioPlayer
             src={item.voiceUrl}

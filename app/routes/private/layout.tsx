@@ -3,6 +3,7 @@ import { Outlet } from "react-router";
 import { Sidebar } from "~/components/dashboard/Sidebar";
 import { MobileHeader } from "~/components/dashboard/MobileHeader";
 import { ToastProvider } from "~/components/ui/ToastProvider";
+import { RouteErrorState } from "~/components/ui/ErrorState";
 import { requireValidAuth } from "~/util/auth.server";
 import type { Route } from "./+types/layout";
 
@@ -13,7 +14,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export default function PrivateLayoutRoute() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
   return (
     <ToastProvider>
       <div className="min-h-screen bg-shell text-text-primary flex flex-col lg:flex-row">
@@ -33,4 +33,8 @@ export default function PrivateLayoutRoute() {
       </div>
     </ToastProvider>
   );
+}
+
+export function ErrorBoundary() {
+  return <RouteErrorState />;
 }

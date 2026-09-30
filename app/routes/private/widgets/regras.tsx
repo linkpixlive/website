@@ -10,10 +10,7 @@ import { useUnsavedChanges } from "~/components/ui/UnsavedChangesProvider";
 import { MinAmountsSection } from "~/components/widgets/MinAmountsSection";
 import { ModerationSection } from "~/components/widgets/ModerationSection";
 import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
-import {
-  parseDonationAmount,
-  parseDonationMaxLength,
-} from "~/validators/donation-settings-validator";
+import { donationSettingsSchema } from "~/validators/donation-settings-validator";
 import { getAuthToken } from "~/util/session.server";
 import type { Route } from "./+types/regras";
 
@@ -60,53 +57,25 @@ export async function action({ request }: Route.ActionArgs) {
   const token = getAuthToken(request);
   const formData = await request.formData();
 
-  const minTextAmount = parseDonationAmount(formData.get("minTextAmount"));
-  const minAudioAmount = parseDonationAmount(formData.get("minAudioAmount"));
-  const maxLength = parseDonationMaxLength(formData.get("maxLength"));
-
-  if (minTextAmount === undefined) {
-    return {
-      success: false,
-      action: "saveDonationSettings",
-      error: "Informe um valor mínimo válido para mensagem de texto (R$ 1,00 ou mais).",
-    };
-  }
-
-  if (minAudioAmount === undefined) {
-    return {
-      success: false,
-      action: "saveDonationSettings",
-      error: "Informe um valor mínimo válido para áudio (R$ 1,00 ou mais).",
-    };
-  }
-
-  if (maxLength === undefined) {
-    return {
-      success: false,
-      action: "saveDonationSettings",
-      error: "Informe um tamanho máximo de mensagem válido (entre 0 e 250).",
-    };
-  }
-
-  const customRules = String(formData.get("customRules") ?? "");
-  if (customRules.length > CUSTOM_RULES_MAX_LENGTH) {
-    return {
-      success: false,
-      action: "saveDonationSettings",
-      error: `As regras customizadas devem ter no máximo ${CUSTOM_RULES_MAX_LENGTH} caracteres.`,
-    };
-  }
-
-  const res = await donationSettingsApi.updateSettings(token, {
-    minTextAmount,
-    minAudioAmount,
-    maxLength,
+  const parsed = donationSettingsSchema.safeParse({
+    minTextAmount: formData.get("minTextAmount"),
+    minAudioAmount: formData.get("minAudioAmount"),
+    maxLength: formData.get("maxLength"),
     aiModeration: formData.get("aiModeration") === "true",
     filterProfanity: formData.get("filterProfanity") === "true",
     filterSpam: formData.get("filterSpam") === "true",
     filterHateSpeech: formData.get("filterHateSpeech") === "true",
-    customRules,
+    customRules: String(formData.get("customRules") ?? ""),
   });
+  if (!parsed.success) {
+    return {
+      success: false,
+      action: "saveDonationSettings",
+      error: parsed.error.issues[0].message,
+    };
+  }
+
+  const res = await donationSettingsApi.updateSettings(token, parsed.data);
 
   if (!res.success) {
     return {

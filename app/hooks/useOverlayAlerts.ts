@@ -3,6 +3,7 @@ import { io, type Socket } from "socket.io-client";
 import { apiUrl } from "~/api/http/client";
 import { widgetsApi, type OverlaySettings } from "~/api/modules/widgets";
 import type { OverlayDonationEntity } from "~/types/queue";
+import { resolveSettingsUpdate } from "~/util/overlay-settings";
 import { useOverlayAudio } from "./useOverlayAudio";
 
 interface UseOverlayAlertsReturn {
@@ -106,7 +107,16 @@ export function useOverlayAlerts(token: string | null): UseOverlayAlertsReturn {
 
     socket.on("pause_alerts", discardCurrent);
 
-    socket.on("settings_updated", loadSettings);
+    // W6: o evento já pode trazer as settings — GET só como fallback.
+    socket.on("settings_updated", (payload: unknown) => {
+      const next = resolveSettingsUpdate(payload);
+      if (next) {
+        setTokenInvalid(false);
+        setSettings(next);
+        return;
+      }
+      loadSettings();
+    });
 
     /**
      * Fonte oculta (ex.: "olhinho" do OBS com shutdown desligado, ou aba em

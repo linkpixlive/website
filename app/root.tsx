@@ -2,6 +2,7 @@ import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 
 import { ThemeProvider } from "~/components/ui/ThemeProvider";
 import { UnsavedChangesProvider } from "~/components/ui/UnsavedChangesProvider";
+import { RouteErrorState } from "~/components/ui/ErrorState";
 import type { Route } from "./+types/root";
 import "./app.css";
 
@@ -40,5 +41,15 @@ export default function App() {
         <Outlet />
       </UnsavedChangesProvider>
     </ThemeProvider>
+  );
+}
+
+export function ErrorBoundary() {
+  return (
+    <main className="min-h-dvh flex items-center justify-center px-4 bg-canvas">
+      <div className="w-full max-w-md">
+        <RouteErrorState />
+      </div>
+    </main>
   );
 }

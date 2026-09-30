@@ -52,7 +52,7 @@ const WEEKDAY_FULL = [
   "sábado",
 ];
 
-export function formatPeakDay(day: number | null) {
+function formatPeakDay(day: number | null) {
   if (day === null || day < 0 || day > 6) return null;
   return WEEKDAY_FULL[day];
 }

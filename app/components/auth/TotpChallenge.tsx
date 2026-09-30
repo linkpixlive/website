@@ -1,5 +1,5 @@
 import { useSubmit } from "react-router";
-import { OtpInput } from "./OtpInput";
+import { OtpField } from "./OtpField";
 import { AlertMessage } from "~/components/ui/AlertMessage";
 import { Spinner } from "~/components/ui/Spinner";
 
@@ -38,8 +38,7 @@ export function TotpChallenge({
   return (
     <div className="space-y-6">
       <div className="py-4">
-        <OtpInput
-          length={6}
+        <OtpField
           onComplete={handleTotpComplete}
           onChange={onClearError}
           disabled={loading}

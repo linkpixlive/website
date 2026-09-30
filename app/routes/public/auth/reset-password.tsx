@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useSearchParams } from "react-router";
+import { Link, useActionData, useNavigation, useSearchParams, useSubmit } from "react-router";
 import { z } from "zod";
 import { authApi } from "~/api/modules/auth";
 import { AuthCard } from "~/components/auth/AuthCard";
@@ -9,6 +8,7 @@ import { PasswordField } from "~/components/auth/PasswordField";
 import { AlertMessage } from "~/components/ui/AlertMessage";
 import { Button } from "~/components/ui/Button";
 import { SubmitButton } from "~/components/ui/SubmitButton";
+import { useActionError } from "~/hooks/useActionError";
 import { resetPasswordSchema } from "~/validators/auth-validator";
 import { getPasswordStrength } from "~/validators/password";
 import { LINK_CLASS } from "~/components/ui/classes";
@@ -18,44 +18,61 @@ export function meta({}: Route.MetaArgs) {
   return [{ title: "Redefinir senha — LinkPix" }];
 }
 
+export async function action({ request }: Route.ActionArgs) {
+  const url = new URL(request.url);
+  const token = url.searchParams.get("token");
+  if (!token) {
+    return { error: "Link inválido ou ausente." };
+  }
+
+  const formData = await request.formData();
+  const parsed = resetPasswordSchema.safeParse({
+    newPassword: String(formData.get("newPassword") ?? ""),
+    confirmPassword: String(formData.get("confirmPassword") ?? ""),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
+
+  const result = await authApi.resetPassword({
+    token,
+    newPassword: parsed.data.newPassword,
+  });
+  if (!result.success) {
+    return { error: result.error.message };
+  }
+
+  return { success: true };
+}
+
 type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
-export default function ResetPassword() {
+export default function ResetPassword({ actionData }: Route.ComponentProps) {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
-
-  const [apiError, setApiError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const submit = useSubmit();
+  const navigation = useNavigation();
+  const loading = navigation.state === "submitting";
+  const [apiError, clearApiError] = useActionError(actionData);
+  const success = actionData?.success === true;
 
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
   });
 
   const newPasswordValue = watch("newPassword");
 
-  const onSubmit = async (data: ResetPasswordFormValues) => {
-    if (!token) {
-      setApiError("Link inválido ou ausente.");
-      return;
-    }
-
-    setApiError(null);
-    const result = await authApi.resetPassword({
-      token,
-      newPassword: data.newPassword,
-    });
-
-    if (!result.success) {
-      setApiError(result.error.message);
-      return;
-    }
-
-    setSuccess(true);
+  const onSubmit = (data: ResetPasswordFormValues) => {
+    clearApiError();
+    const formData = new FormData();
+    formData.append("newPassword", data.newPassword);
+    formData.append("confirmPassword", data.confirmPassword);
+    submit(formData, { method: "post" });
   };
 
   if (!token) {
@@ -98,7 +115,7 @@ export default function ResetPassword() {
       ) : (
         <form
           onSubmit={handleSubmit(onSubmit)}
-          onChange={() => setApiError(null)}
+          onChange={clearApiError}
           className="space-y-4"
         >
           {apiError && <AlertMessage variant="error" message={apiError} />}
@@ -109,7 +126,7 @@ export default function ResetPassword() {
             error={errors.newPassword?.message}
             icon="lock"
             placeholder="Crie uma senha forte"
-            disabled={isSubmitting}
+            disabled={loading}
             showStrength
             strengthScore={getPasswordStrength(newPasswordValue || "")}
             autoFocus
@@ -121,11 +138,11 @@ export default function ResetPassword() {
             error={errors.confirmPassword?.message}
             icon="lock"
             placeholder="Confirme sua senha"
-            disabled={isSubmitting}
+            disabled={loading}
           />
 
           <div className="mt-6">
-            <SubmitButton loading={isSubmitting}>Redefinir senha</SubmitButton>
+            <SubmitButton loading={loading}>Redefinir senha</SubmitButton>
           </div>
         </form>
       )}

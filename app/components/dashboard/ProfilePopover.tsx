@@ -4,6 +4,7 @@ import { Icon, type IconName } from "~/components/ui/Icon";
 import { useTheme } from "~/components/ui/useTheme";
 import { menuRowClasses, menuRowDangerClasses } from "~/components/ui/header-styles";
 import { getPublicPageUrl } from "./menu";
+import { isSafeMediaUrl } from "~/util/safe-url";
 
 export interface LayoutUser {
   id: string;
@@ -72,7 +73,7 @@ export function ProfileMenuContent({
   return (
     <>
       <div className="mb-2 flex items-center gap-3 rounded-xl bg-wash p-3">
-        {user?.profileImageUrl ? (
+        {user?.profileImageUrl && isSafeMediaUrl(user.profileImageUrl) ? (
           <img
             src={user.profileImageUrl}
             alt=""

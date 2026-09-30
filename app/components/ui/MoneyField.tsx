@@ -7,7 +7,9 @@ import {
 } from "~/util/currency";
 
 /**
- * Campo monetário BRL não-controlado para `fetcher.Form` (sem RHF).
+ * Campo monetário BRL para Padrão B (`fetcher.Form` inline, sem RHF).
+ * Para forms RHF (`RHF + zod -> action`) use `CurrencyInput`.
+ * Visual compartilhado em `MoneyInputBase`.
  *
  * Exibe a máscara pt-BR (`1.000,00` com prefixo `R$`) enquanto o
  * `<input type="hidden">` carrega o valor normalizado ponto-decimal

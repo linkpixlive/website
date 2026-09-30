@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { isSafeMediaUrl } from "~/util/safe-url";
 
 const NO_AUDIO_FALLBACK_MS = 6000;
 /**
@@ -87,7 +88,7 @@ export function useOverlayAudio(onComplete: (id: string) => void): UseOverlayAud
       stop();
       volumeRef.current = volume;
 
-      if (!audioUrl) {
+      if (!audioUrl || !isSafeMediaUrl(audioUrl)) {
         finishTimerRef.current = setTimeout(
           () => onCompleteRef.current(id),
           NO_AUDIO_FALLBACK_MS,

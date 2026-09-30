@@ -1,4 +1,5 @@
 import { Icon } from "~/components/ui/Icon";
+import { isSafeMediaUrl } from "~/util/safe-url";
 import { cn } from "~/util/cn";
 import type { StreamerProfile } from "~/types/donation";
 
@@ -7,11 +8,11 @@ interface StreamerProfileCardProps {
   className?: string;
 }
 
-function StreamerProfileCardInner({ profile, className }: StreamerProfileCardProps & { className?: string }) {
+function StreamerProfileCard({ profile, className }: StreamerProfileCardProps) {
   return (
     <div className={cn("flex flex-row items-center text-left gap-3.5", className)}>
       <div className="relative shrink-0">
-        {profile.profileImageUrl ? (
+        {profile.profileImageUrl && isSafeMediaUrl(profile.profileImageUrl) ? (
           <img
             src={profile.profileImageUrl}
             alt={`Foto de ${profile.name}`}
@@ -52,4 +53,4 @@ function StreamerProfileCardInner({ profile, className }: StreamerProfileCardPro
   );
 }
 
-export { StreamerProfileCardInner };
+export { StreamerProfileCard };

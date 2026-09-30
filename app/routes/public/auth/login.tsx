@@ -24,13 +24,21 @@ export function meta({}: Route.MetaArgs) {
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  const email = String(formData.get("email") ?? "");
+  const password = String(formData.get("password") ?? "");
 
   if (intent === "totp") {
-    const totp = formData.get("totp") as string;
-    const nonce = formData.get("nonce") as string;
+    const totp = String(formData.get("totp") ?? "");
+    const nonce = String(formData.get("nonce") ?? "");
+    if (totp.length !== 6 || !nonce) {
+      return { error: "Código de verificação inválido." };
+    }
     return handleLogin2fa({ email, password, totp, nonce });
+  }
+
+  const parsed = loginSchema.safeParse({ email, password });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
   }
 
   const result = await authApi.login({ email, password });

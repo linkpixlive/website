@@ -2,6 +2,7 @@ import { Menu } from "@base-ui/react/menu";
 import { Icon } from "~/components/ui/Icon";
 import { popupClasses } from "~/components/ui/header-styles";
 import { getPublicPageUrl } from "./menu";
+import { isSafeMediaUrl } from "~/util/safe-url";
 import {
   getUserInitials,
   ProfileMenuContent,
@@ -34,7 +35,7 @@ export function StreamerFooter({
                 title="Abrir menu da conta"
                 className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 rounded-xl px-2 py-1.5 text-left outline-none transition-colors duration-150 hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-brand/40"
               >
-                {user.profileImageUrl ? (
+                {user.profileImageUrl && isSafeMediaUrl(user.profileImageUrl) ? (
                   <img
                     src={user.profileImageUrl}
                     alt=""

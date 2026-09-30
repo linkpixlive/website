@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Icon } from "~/components/ui/Icon";
 import { useToast } from "~/components/ui/useToast";
 import { useExclusiveAudio } from "~/hooks/useExclusiveAudio";
+import { isSafeMediaUrl } from "~/util/safe-url";
 
 interface AudioPlayerProps {
   src: string;
@@ -49,7 +50,7 @@ export function AudioPlayer({
   };
 
   const handleDownload = async () => {
-    if (downloading) return;
+    if (downloading || !isSafeMediaUrl(src)) return;
     setDownloading(true);
     try {
       const blob = getDownloadBlob
@@ -74,7 +75,7 @@ export function AudioPlayer({
     }
   };
 
-  if (hasError) {
+  if (hasError || !isSafeMediaUrl(src)) {
     return (
       <div className="flex items-center gap-2 rounded-2xl bg-card border border-line px-4 py-3">
         <Icon

@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { io } from "socket.io-client";
-import { apiUrl } from "~/api/http/client";
 import type { DonationHistory } from "~/api/modules/dashboard";
 import type { PaginatedResponse } from "~/api/modules/withdrawals";
 import {
   matchesFilters,
   type HistoryFilters,
 } from "~/util/history-filters";
+import { useDashboardSocket } from "./useDashboardSocket";
 
 interface HistoryState {
   items: DonationHistory[];
@@ -69,6 +68,7 @@ export function useDonationHistorySocket(
   initial: PaginatedResponse<DonationHistory>,
   currentPage: number,
   filters?: HistoryFilters,
+  enabled = true,
 ): HistoryState {
   const [state, setState] = useState<HistoryState>({
     items: initial.items,
@@ -89,12 +89,10 @@ export function useDonationHistorySocket(
   const limitRef = useRef(initial.meta.limit);
   limitRef.current = initial.meta.limit;
 
-  useEffect(() => {
-    if (!token) return;
+  const socket = useDashboardSocket(token, enabled);
 
-    const socket = io(`${apiUrl}/dashboard`, {
-      auth: { token },
-    });
+  useEffect(() => {
+    if (!socket) return;
 
     const dispatch = (event: HistoryEvent) =>
       setState((prev) =>
@@ -116,9 +114,8 @@ export function useDonationHistorySocket(
     return () => {
       socket.off("donation:created", onCreated);
       socket.off("donation:updated", onUpdated);
-      socket.disconnect();
     };
-  }, [token]);
+  }, [socket]);
 
   return state;
 }

@@ -1,6 +1,6 @@
 import { useLoaderData, useNavigation } from "react-router";
-import { dashboardApi, toHistoryQuery, type DonationHistory } from "~/api/modules/dashboard";
-import { DEFAULT_PAGE_LIMIT, type PaginatedResponse } from "~/api/modules/withdrawals";
+import { dashboardApi, toHistoryQuery } from "~/api/modules/dashboard";
+import { DEFAULT_PAGE_LIMIT } from "~/api/modules/withdrawals";
 import { PageHeader } from "~/components/dashboard/PageHeader";
 import { DonationHistoryFilters } from "~/components/history/DonationHistoryFilters";
 import { DonationHistoryList } from "~/components/history/DonationHistoryList";
@@ -9,7 +9,8 @@ import { Pagination } from "~/components/ui/Pagination";
 import { DonationsSubtitle } from "~/components/queue/DonationsSubtitle";
 import { useDonationsPage } from "~/components/queue/useDonationsPage";
 import { usePageParam } from "~/hooks/usePageParam";
-import { CARD_CLASS, SECTION_HEADING_CLASS } from "~/components/ui/classes";
+import { useIsPopoutOpen } from "~/hooks/usePopoutPresence";
+import { HistorySectionShell } from "~/components/ui/HistorySectionShell";
 import { DEFAULT_HISTORY_DAYS } from "~/util/history-filters";
 import { getPageParam } from "~/util/search-params";
 import { getAuthToken } from "~/util/session.server";
@@ -33,22 +34,14 @@ export async function loader({ request }: Route.LoaderArgs) {
   const search = url.searchParams.get("search") || undefined;
   const searchBy = url.searchParams.get("searchBy") || undefined;
 
-  let history: PaginatedResponse<DonationHistory> = {
-    items: [],
-    meta: { total: 0, page: 1, limit: DEFAULT_PAGE_LIMIT, totalPages: 1 },
-  };
-
-  try {
-    const res = await dashboardApi.getHistory(
-      token,
-      toHistoryQuery({ page, limit, status, days, search, searchBy }),
-    );
-    if (res.success) {
-      history = res.data;
-    }
-  } catch (err) {
-    console.error("Loader fetch error:", err);
+  const res = await dashboardApi.getHistory(
+    token,
+    toHistoryQuery({ page, limit, status, days, search, searchBy }),
+  );
+  if (!res.success) {
+    throw new Response(res.error.message, { status: 502 });
   }
+  const history = res.data;
 
   return { token, history, page, totalPages: history.meta.totalPages };
 }
@@ -63,6 +56,9 @@ export default function Donations() {
     search: searchParams.get("search") || undefined,
     searchBy: searchParams.get("searchBy") || undefined,
   };
+  // W7: com o popout aberto ele assume o tempo real; a página pausa os
+  // próprios sockets em vez de duplicar as conexões.
+  const popoutOpen = useIsPopoutOpen();
   const {
     queue,
     isPaused,
@@ -77,7 +73,7 @@ export default function Donations() {
     handleClear,
     handleTest,
     handleReplay,
-  } = useDonationsPage({ token, history, page, filters });
+  } = useDonationsPage({ token, history, page, filters, enabled: !popoutOpen });
 
   const loadingData = navigation.state === "loading";
   const displayItems = liveItems;
@@ -117,21 +113,11 @@ export default function Donations() {
           onOpenPopup={handleOpenPopup}
         />
 
-        <section
-          aria-label="Histórico de doações"
-          className={CARD_CLASS}
+        <HistorySectionShell
+          title="Histórico"
+          total={displayTotal}
+          ariaLabel="Histórico de doações"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className={SECTION_HEADING_CLASS}>
-              Histórico
-            </h2>
-            {displayTotal > 0 && (
-              <span className="text-[11px] font-semibold text-ink-label">
-                {displayTotal} {displayTotal === 1 ? "registro" : "registros"}
-              </span>
-            )}
-          </div>
-
           <DonationHistoryFilters />
 
           <div className="mt-5">
@@ -150,7 +136,7 @@ export default function Donations() {
             totalPages={totalPages}
             onPageChange={handlePageChange}
           />
-        </section>
+        </HistorySectionShell>
       </div>
     </div>
   );

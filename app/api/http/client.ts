@@ -9,6 +9,10 @@ if (!configuredApiUrl && import.meta.env.PROD) {
 
 export const apiUrl = configuredApiUrl || "http://localhost:3000";
 
+if (import.meta.env.PROD && apiUrl.startsWith("http://")) {
+  throw new Error("VITE_API_URL deve ser https em produção.");
+}
+
 // Singleton por token: um axios.create por identidade, não por chamada.
 const clients = new Map<string, AxiosInstance>();
 

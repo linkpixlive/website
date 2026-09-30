@@ -1,14 +1,14 @@
-import { useLoaderData, useActionData } from "react-router";
+import { useLoaderData, useActionData, useNavigation } from "react-router";
 import type { Route } from "./+types/overlay";
 import { getAuthToken } from "~/util/session.server";
 import { widgetsApi, type Widget } from "~/api/modules/widgets";
 import { overlayApi } from "~/api/modules/overlay";
 import { listVoices } from "~/api/modules/public-donations";
+import { overlaySchema } from "~/validators/overlay-validator";
 import type { TtsVoice } from "~/types/donation";
 import { useToast } from "~/components/ui/useToast";
 import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
-import { Button } from "~/components/ui/Button";
-import { Icon } from "~/components/ui/Icon";
+import { ErrorState } from "~/components/ui/ErrorState";
 import { OverlayWidgetConfig } from "~/components/widgets/OverlayWidgetConfig";
 
 export function meta({}: Route.MetaArgs) {
@@ -45,18 +45,27 @@ export async function action({ request }: Route.ActionArgs) {
   const intent = formData.get("intent") as string;
 
   if (intent === "saveOverlay") {
-    const volume = Number(formData.get("volume"));
-    const speakNameAmount = formData.get("speakNameAmount") === "true";
-    const audioOnly = formData.get("audioOnly") === "true";
-    const defaultNarrator = formData.get("defaultNarrator") as string;
+    const parsed = overlaySchema.safeParse({
+      volume: Number(formData.get("volume")),
+      speakNameAmount: formData.get("speakNameAmount") === "true",
+      audioOnly: formData.get("audioOnly") === "true",
+      defaultNarrator: String(formData.get("defaultNarrator") ?? ""),
+    });
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: parsed.error.issues[0].message,
+        action: "saveOverlay",
+      };
+    }
 
     // Sem `isPaused`: pausa é só via POST /overlay/toggle-pause (o PUT
     // preserva o valor atual no backend e o pipe rejeita o campo).
     const body = {
-      volume,
-      speakNameAmount,
-      audioOnly,
-      defaultNarrator,
+      volume: parsed.data.volume,
+      speakNameAmount: parsed.data.speakNameAmount,
+      audioOnly: parsed.data.audioOnly,
+      defaultNarrator: parsed.data.defaultNarrator,
     };
 
     // Upsert: cria na 1ª vez, atualiza nas demais. O PUT substitui o
@@ -104,11 +113,12 @@ export async function action({ request }: Route.ActionArgs) {
 export default function OverlayRoute() {
   const { overlayWidget, voices } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
+  const navigation = useNavigation();
   const { toast } = useToast();
 
   useFetcherFeedback<{ success: boolean; action: string; error?: string }>({
     data: actionData,
-    state: "idle",
+    state: navigation.state,
     onResult: (result) => {
       if (result.success) {
         if (result.action === "saveOverlay") {
@@ -126,22 +136,10 @@ export default function OverlayRoute() {
 
   if (!overlayWidget) {
     return (
-      <div className="rounded-[26px] bg-card border border-line shadow-xs p-5 sm:p-6 text-center flex flex-col items-center gap-4">
-        <span className="w-12 h-12 rounded-2xl bg-error/10 flex items-center justify-center text-error">
-          <Icon name="danger-circle" size={22} strokeWidth={2} />
-        </span>
-        <div>
-          <h1 className="text-base font-bold text-ink-heading">
-            Não foi possível carregar o widget
-          </h1>
-          <p className="mt-1 text-sm text-ink-secondary">
-            Verifique sua conexão e tente novamente.
-          </p>
-        </div>
-        <Button type="button" variant="secondary" size="sm" onClick={() => window.location.reload()}>
-          Tentar novamente
-        </Button>
-      </div>
+      <ErrorState
+        title="Não foi possível carregar o widget"
+        onRetry={() => window.location.reload()}
+      />
     );
   }
 

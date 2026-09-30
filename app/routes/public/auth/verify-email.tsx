@@ -9,9 +9,10 @@ import {
 } from "react-router";
 import { authApi } from "~/api/modules/auth";
 import { AuthCard } from "~/components/auth/AuthCard";
-import { OtpInput } from "~/components/auth/OtpInput";
+import { OtpField } from "~/components/auth/OtpField";
 import { AlertMessage } from "~/components/ui/AlertMessage";
 import { Spinner } from "~/components/ui/Spinner";
+import { useActionError } from "~/hooks/useActionError";
 import { createAuthCookie } from "~/util/session.server";
 import { verifyEmailSchema } from "~/validators/auth-validator";
 import type { Route } from "./+types/verify-email";
@@ -22,8 +23,13 @@ export function meta({}: Route.MetaArgs) {
 
 export async function action({ request }: Route.ActionArgs) {
   const formData = await request.formData();
-  const otp = formData.get("otp") as string;
-  const email = formData.get("email") as string;
+  const otp = String(formData.get("otp") ?? "");
+  const email = String(formData.get("email") ?? "");
+
+  const parsed = verifyEmailSchema.safeParse({ otp, email });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
 
   const result = await authApi.verifyOtp({ otp, email });
 
@@ -44,14 +50,7 @@ export default function VerifyEmail({ actionData }: Route.ComponentProps) {
   const navigation = useNavigation();
   const loading = navigation.state === "submitting";
   const [clientError, setClientError] = useState<string | null>(null);
-  const [apiError, setApiError] = useState<string | null>(null);
-
-  // Sync action error
-  useEffect(() => {
-    if (actionData?.error) {
-      setApiError(actionData.error);
-    }
-  }, [actionData]);
+  const [apiError, clearApiError] = useActionError(actionData);
 
   // If no email in URL, they shouldn't be here
   useEffect(() => {
@@ -62,7 +61,7 @@ export default function VerifyEmail({ actionData }: Route.ComponentProps) {
 
   const handleComplete = (code: string) => {
     setClientError(null);
-    setApiError(null);
+    clearApiError();
     const parsed = verifyEmailSchema.safeParse({ otp: code, email });
     if (!parsed.success) {
       setClientError(parsed.error.issues[0].message);
@@ -87,12 +86,11 @@ export default function VerifyEmail({ actionData }: Route.ComponentProps) {
     >
       <div className="space-y-6">
         <div className="py-4">
-          <OtpInput
-            length={6}
+          <OtpField
             onComplete={handleComplete}
             onChange={() => {
               setClientError(null);
-              setApiError(null);
+              clearApiError();
             }}
             disabled={loading}
             error={!!displayError}

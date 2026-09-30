@@ -6,6 +6,7 @@ import { Badge } from "~/components/ui/Badge";
 import { AudioPlayer } from "~/components/ui/AudioPlayer";
 import { CurrentBadge } from "~/components/ui/QueueBadges";
 import { formatBRLReais, buildDownloadName, formatDateTime } from "~/util/currency";
+import { isSafeMediaUrl } from "~/util/safe-url";
 
 interface DonationCardProps {
   item: DonationHistory;
@@ -64,7 +65,7 @@ export function DonationCard({
 
       {(item.voiceUrl || onReplay) && (
         <div className="mt-2.5 flex flex-wrap items-center gap-2">
-          {item.voiceUrl && (
+          {item.voiceUrl && isSafeMediaUrl(item.voiceUrl) && (
             <div className="min-w-0 flex-1 basis-48 max-w-[320px]">
               <AudioPlayer
                 src={item.voiceUrl}

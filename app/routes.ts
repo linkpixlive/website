@@ -21,7 +21,6 @@ export default [
       route("regras", "routes/private/widgets/regras.tsx"),
     ]),
     route("doacoes", "routes/private/donations.tsx"),
-    route("fila", "routes/private/queue.tsx"),
     route("perfil", "routes/private/profile.tsx"),
     route("conta", "routes/private/conta.tsx"),
     route("configuracoes", "routes/private/configuracoes/layout.tsx", [

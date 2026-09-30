@@ -1,5 +1,6 @@
 import { Outlet } from "react-router";
 import { Icon } from "~/components/ui/Icon";
+import { RouteErrorState } from "~/components/ui/ErrorState";
 import { useTheme } from "~/components/ui/useTheme";
 import { roundButtonClasses } from "~/components/ui/header-styles";
 
@@ -22,6 +23,14 @@ export default function PublicLayoutRoute() {
       <div className="flex flex-1 flex-col">
         <Outlet />
       </div>
+    </div>
+  );
+}
+
+export function ErrorBoundary() {
+  return (
+    <div className="mx-auto w-full max-w-md px-4 py-10">
+      <RouteErrorState />
     </div>
   );
 }

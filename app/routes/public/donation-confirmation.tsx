@@ -9,6 +9,7 @@ import {
 } from "~/components/donate/ConfirmationStates";
 import { PaymentConfirmedStep } from "~/components/donate/PaymentConfirmedStep";
 import { getDonationView } from "~/api/modules/public-donations";
+import { normalizeUsername } from "~/util/username";
 import { useDonationStatus } from "~/hooks/useDonationStatus";
 import type { DonationView } from "~/types/donation";
 
@@ -34,8 +35,10 @@ export async function loader({ params }: Route.LoaderArgs) {
 /** Username do streamer para voltar: API → query `u` (fallback do card de doação) → null. */
 function useStreamerUsername(view: DonationView | null): string | null {
   const [searchParams] = useSearchParams();
-  const username = view?.streamerUsername || searchParams.get("u");
-  return username || null;
+  return (
+    normalizeUsername(view?.streamerUsername) ??
+    normalizeUsername(searchParams.get("u"))
+  );
 }
 
 export default function DonationConfirmationPage() {
@@ -43,7 +46,7 @@ export default function DonationConfirmationPage() {
   const navigate = useNavigate();
   const streamerUsername = useStreamerUsername(view);
 
-  const { status } = useDonationStatus(view?.id ?? null, {
+  const { status, connectionLost } = useDonationStatus(view?.id ?? null, {
     enabled: !!view && view.status === "pending",
   });
 
@@ -91,6 +94,14 @@ export default function DonationConfirmationPage() {
       <div className="w-full max-w-md flex flex-col gap-5 animate-fade-in">
         <div className="rounded-[26px] bg-card border border-line shadow-xs overflow-hidden">
           <div className="p-5">
+            {effectiveStatus === "pending" && connectionLost && (
+              <div className="mb-4">
+                <AlertMessage
+                  variant="info"
+                  message="Conexão perdida. Tentando reconectar..."
+                />
+              </div>
+            )}
             {confirmed ? (
               <PaymentConfirmedStep
                 amount={view.amount}

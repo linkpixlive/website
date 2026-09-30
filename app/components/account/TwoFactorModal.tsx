@@ -1,6 +1,6 @@
 import { QRCodeSVG } from "qrcode.react";
 import { useState } from "react";
-import { OtpInput } from "~/components/auth/OtpInput";
+import { OtpField } from "~/components/auth/OtpField";
 import { AlertMessage } from "~/components/ui/AlertMessage";
 import { Icon } from "~/components/ui/Icon";
 import { Modal } from "~/components/ui/Modal";
@@ -23,11 +23,13 @@ interface SetupPayload {
 }
 
 function TwoFactorDisableForm({
+  isOpen,
   loading,
   error,
   onTokenChange,
   onDisable,
 }: {
+  isOpen: boolean;
   loading: boolean;
   error: string | null;
   onTokenChange: (token: string) => void;
@@ -54,16 +56,13 @@ function TwoFactorDisableForm({
         autoComplete="current-password"
         disabled={loading}
       />
-      <div className="space-y-2">
-        <span className="block text-[13px] font-medium text-ink-secondary">
-          Digite o código de 6 dígitos do app para confirmar.
-        </span>
-        <OtpInput
-          onComplete={onTokenChange}
-          disabled={loading}
-          error={Boolean(error)}
-        />
-      </div>
+      <OtpField
+        label="Digite o código de 6 dígitos do app para confirmar."
+        isOpen={isOpen}
+        onComplete={onTokenChange}
+        disabled={loading}
+        error={Boolean(error)}
+      />
       <SubmitButton loading={loading} disabled={loading}>
         Desativar 2FA
       </SubmitButton>
@@ -133,16 +132,13 @@ function TwoFactorSetupView({
           </div>
         </div>
 
-        <div className="space-y-2">
-          <span className="block text-[13px] font-medium text-ink-secondary">
-            Digite o código de 6 dígitos do app para confirmar.
-          </span>
-          <OtpInput
-            onComplete={onCodeComplete}
-            disabled={loading}
-            error={Boolean(error)}
-          />
-        </div>
+        <OtpField
+          label="Digite o código de 6 dígitos do app para confirmar."
+          isOpen={isOpen}
+          onComplete={onCodeComplete}
+          disabled={loading}
+          error={Boolean(error)}
+        />
       </div>
     );
   }
@@ -201,6 +197,7 @@ export function TwoFactorModal({ isOpen, onClose, enabled }: TwoFactorModalProps
     >
       {enabled ? (
         <TwoFactorDisableForm
+          isOpen={isOpen}
           loading={loading}
           error={error}
           onTokenChange={onTokenChange}

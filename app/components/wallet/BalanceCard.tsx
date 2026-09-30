@@ -5,7 +5,8 @@ import { Button } from "~/components/ui/Button";
 import { Skeleton } from "~/components/ui/Skeleton";
 import { popupClasses } from "~/components/ui/header-styles";
 import { EyeToggleButton } from "~/components/ui/EyeToggleButton";
-import { CARD_CLASS, ICON_TILE_CLASS, SECTION_HEADING_CLASS } from "~/components/ui/classes";
+import { CARD_CLASS, ICON_TILE_CLASS, SECTION_HEADING_CLASS, STAT_NUMBER_CLASS } from "~/components/ui/classes";
+import { HiddenValue } from "~/components/ui/HiddenValue";
 import { formatBRLReais } from "~/util/currency";
 
 interface BalanceCardProps {
@@ -56,13 +57,9 @@ export function BalanceCard({ balances, loading = false, onWithdraw }: BalanceCa
       {loading ? (
         <Skeleton className="h-8 w-40 rounded-xl" />
       ) : (
-        <span
-          className={`text-[26px] leading-tight font-extrabold tracking-tight text-ink-heading ${
-            !showBalance ? "blur-sm select-none" : ""
-          }`}
-        >
+        <HiddenValue visible={showBalance} className={STAT_NUMBER_CLASS}>
           {formatBRLReais(balances.available)}
-        </span>
+        </HiddenValue>
       )}
 
       <div className="mt-auto pt-4">
@@ -101,13 +98,12 @@ export function BalanceCard({ balances, loading = false, onWithdraw }: BalanceCa
               {loading ? (
                 <Skeleton className="h-4 w-20 ml-auto" />
               ) : (
-                <span
-                  className={`ml-auto text-sm font-semibold text-ink-body ${
-                    !showBalance ? "blur-sm select-none" : ""
-                  }`}
+                <HiddenValue
+                  visible={showBalance}
+                  className="ml-auto text-sm font-semibold text-ink-body"
                 >
                   {formatBRLReais(row.value)}
-                </span>
+                </HiddenValue>
               )}
             </div>
           ))}

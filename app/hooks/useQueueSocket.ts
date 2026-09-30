@@ -1,38 +1,43 @@
 import { useEffect, useState } from "react";
-import { io } from "socket.io-client";
-import { apiUrl } from "~/api/http/client";
 import type { OverlayDonationEntity } from "~/types/queue";
+import { useDashboardSocket } from "./useDashboardSocket";
 
 interface UseQueueSocketReturn {
   queue: OverlayDonationEntity[];
   isPaused: boolean;
 }
 
-export function useQueueSocket(token: string | null): UseQueueSocketReturn {
+export function useQueueSocket(
+  token: string | null,
+  enabled = true,
+): UseQueueSocketReturn {
   const [queue, setQueue] = useState<OverlayDonationEntity[]>([]);
   const [isPaused, setIsPaused] = useState(false);
+  const socket = useDashboardSocket(token, enabled);
 
   useEffect(() => {
-    if (!token) return;
+    if (!socket) return;
 
-    const socket = io(`${apiUrl}/dashboard`, {
-      auth: { token },
-    });
-
-    socket.on("queue_sync", (data: OverlayDonationEntity[]) => {
+    const onQueueSync = (data: OverlayDonationEntity[]) => {
       setQueue(data);
-    });
-
-    socket.on("overlay_status", (data: { online: boolean; isPaused?: boolean }) => {
+    };
+    const onOverlayStatus = (data: {
+      online: boolean;
+      isPaused?: boolean;
+    }) => {
       if (data.isPaused !== undefined) {
         setIsPaused(data.isPaused);
       }
-    });
+    };
+
+    socket.on("queue_sync", onQueueSync);
+    socket.on("overlay_status", onOverlayStatus);
 
     return () => {
-      socket.disconnect();
+      socket.off("queue_sync", onQueueSync);
+      socket.off("overlay_status", onOverlayStatus);
     };
-  }, [token]);
+  }, [socket]);
 
   return { queue, isPaused };
 }

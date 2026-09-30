@@ -11,6 +11,16 @@ import type {
 const DEFAULT_ERROR_MESSAGE =
   "Nossos sistemas estão com problemas. Tente novamente mais tarde.";
 
+/** Erro de criação de doação que preserva o `code` do backend. */
+export class DonationRequestError extends Error {
+  code: unknown;
+  constructor(message: string, code?: unknown) {
+    super(message);
+    this.name = "DonationRequestError";
+    this.code = code;
+  }
+}
+
 const PROVIDER_LABELS: Record<string, string> = {
   google: "Google",
   gradium: "Gradium",
@@ -132,6 +142,12 @@ export interface CreateDonationInput {
 
 /** `voiceId` fica de fora do corpo quando nulo (doação "Voz padrão do streamer"). */
 export function buildDonationBody(input: CreateDonationInput, username: string) {
+  if (!Number.isInteger(input.amount) || input.amount <= 0) {
+    throw new DonationRequestError("Valor da doação inválido.");
+  }
+  if (input.message.length > 250 || (input.name?.length ?? 0) > 100) {
+    throw new DonationRequestError("Dados da doação inválidos.");
+  }
   const name = input.name?.trim();
 
   return {
@@ -151,7 +167,10 @@ export async function createDonation(
     client.post("/donations/donation", buildDonationBody(input, username)),
   );
   if (!res.success) {
-    throw new Error(res.error?.message || DEFAULT_ERROR_MESSAGE);
+    throw new DonationRequestError(
+      res.error?.message || DEFAULT_ERROR_MESSAGE,
+      res.error?.code,
+    );
   }
   return mapDonationPayment(res.data);
 }

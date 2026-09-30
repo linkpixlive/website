@@ -7,7 +7,7 @@ import type {
 import type { DonationFormValues } from "~/validators/donation-validator";
 import { DonationFormInner } from "./DonationForm";
 import { PaymentStep } from "./PaymentStep";
-import { StreamerProfileCardInner } from "./StreamerProfileCard";
+import { StreamerProfileCard } from "./StreamerProfileCard";
 import { useDonationPayment } from "./useDonationPayment";
 import { cn } from "~/util/cn";
 
@@ -31,6 +31,7 @@ export function UnifiedDonationCard({
     regenerating,
     error,
     status,
+    connectionLost,
     handleSubmit,
     handleRegenerate,
     handleEditDonation,
@@ -44,13 +45,21 @@ export function UnifiedDonationCard({
       )}
     >
       <div className="sticky top-0 z-10 bg-card border-b border-line p-5">
-        <StreamerProfileCardInner profile={profile} />
+        <StreamerProfileCard profile={profile} />
       </div>
 
       <div className="p-5 pt-5">
         {error && (
           <div className="mb-4">
             <AlertMessage variant="error" message={error} />
+          </div>
+        )}
+        {!error && connectionLost && payment && (
+          <div className="mb-4">
+            <AlertMessage
+              variant="info"
+              message="Conexão perdida. Tentando reconectar..."
+            />
           </div>
         )}
 

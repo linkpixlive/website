@@ -6,6 +6,7 @@ import { Skeleton } from "~/components/ui/Skeleton";
 import { formatBRLReais } from "~/util/currency";
 import { EyeToggleButton } from "~/components/ui/EyeToggleButton";
 import { CARD_CLASS, SECTION_HEADING_CLASS, STAT_NUMBER_CLASS } from "~/components/ui/classes";
+import { HiddenValue } from "~/components/ui/HiddenValue";
 
 interface WalletResumeCardProps {
   balances: { available: number; pending: number; blocked: number } | null;
@@ -42,19 +43,17 @@ export function WalletResumeCard({ balances, lastWithdrawal, loading = false }: 
       {loading || !balances ? (
         <Skeleton className="h-9 w-40 rounded-xl" />
       ) : (
-        <span
-          className={`${STAT_NUMBER_CLASS} ${
-            !showValues ? "blur-sm select-none" : ""
-          }`}
-        >
+        <HiddenValue visible={showValues} className={STAT_NUMBER_CLASS}>
           {formatBRLReais(balances.available)}
-        </span>
+        </HiddenValue>
       )}
       <p className="mt-1 text-xs font-medium text-ink-muted">
         {loading || !balances ? (
           <Skeleton className="h-4 w-32 rounded-full" />
         ) : (
-          <>Pendente {formatBRLReais(balances.pending)} · pronto para saque</>
+          <HiddenValue visible={showValues}>
+            <>Pendente {formatBRLReais(balances.pending)} · pronto para saque</>
+          </HiddenValue>
         )}
       </p>
 

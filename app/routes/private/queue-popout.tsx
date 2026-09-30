@@ -2,11 +2,11 @@ import { useLoaderData } from "react-router";
 import type { Route } from "./+types/queue-popout";
 import { getAuthToken } from "~/util/session.server";
 import { requireValidAuth } from "~/util/auth.server";
-import { dashboardApi, type DonationHistory } from "~/api/modules/dashboard";
-import type { PaginatedResponse } from "~/api/modules/withdrawals";
+import { dashboardApi } from "~/api/modules/dashboard";
 import { DEFAULT_HISTORY_DAYS } from "~/util/history-filters";
 import { ToastProvider } from "~/components/ui/ToastProvider";
 import { DonationsLivePanel } from "~/components/queue/DonationsLivePanel";
+import { useAnnouncePopout } from "~/hooks/usePopoutPresence";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -22,34 +22,21 @@ export async function loader({ request }: Route.LoaderArgs) {
   await requireValidAuth(request);
   const token = getAuthToken(request);
 
-  let history: PaginatedResponse<DonationHistory> = {
-    items: [],
-    meta: {
-      total: 0,
-      page: 1,
-      limit: POPOUT_HISTORY_LIMIT,
-      totalPages: 1,
-    },
-  };
-
-  try {
-    const res = await dashboardApi.getHistory(token, {
-      page: 1,
-      limit: POPOUT_HISTORY_LIMIT,
-      days: DEFAULT_HISTORY_DAYS,
-    });
-    if (res.success) {
-      history = res.data;
-    }
-  } catch (err) {
-    console.error("Popout loader fetch error:", err);
+  const res = await dashboardApi.getHistory(token, {
+    page: 1,
+    limit: POPOUT_HISTORY_LIMIT,
+    days: DEFAULT_HISTORY_DAYS,
+  });
+  if (!res.success) {
+    throw new Response(res.error.message, { status: 502 });
   }
 
-  return { token, history };
+  return { token, history: res.data };
 }
 
 export default function QueuePopout() {
   const { token, history } = useLoaderData<typeof loader>();
+  useAnnouncePopout();
 
   return (
     <ToastProvider>

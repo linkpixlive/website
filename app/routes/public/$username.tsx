@@ -2,6 +2,7 @@ import { useLoaderData, useParams } from "react-router";
 import type { Route } from "./+types/$username";
 import { LogoTile } from "~/components/ui/LogoTile";
 import { createDonation, getStreamerByUsername, listVoices } from "~/api/modules/public-donations";
+import { normalizeUsername } from "~/util/username";
 import { UnifiedDonationCard } from "~/components/donate/UnifiedDonationCard";
 import { NotFoundState } from "~/components/donate/NotFoundState";
 import type { DonationFormValues } from "~/validators/donation-validator";
@@ -17,8 +18,9 @@ export function meta({ loaderData }: Route.MetaArgs) {
 }
 
 export async function loader({ params }: Route.LoaderArgs) {
+  const username = normalizeUsername(params.username);
   const [streamer, voices] = await Promise.all([
-    getStreamerByUsername(params.username),
+    username ? getStreamerByUsername(username) : null,
     listVoices(),
   ]);
   return { streamer, voices };
@@ -29,6 +31,8 @@ export default function DonationPage() {
   const { username } = useParams();
 
   async function handleCreateDonation(values: DonationFormValues) {
+    const safeUsername = normalizeUsername(username);
+    if (!safeUsername) throw new Error("Streamer inválido.");
     return createDonation(
       {
         name: values.name,
@@ -36,7 +40,7 @@ export default function DonationPage() {
         amount: values.amount,
         voiceId: values.voiceId,
       },
-      username ?? "",
+      safeUsername,
     );
   }
 

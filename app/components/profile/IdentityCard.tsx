@@ -5,6 +5,7 @@ import { PhotoCropModal } from "~/components/profile/PhotoCropModal";
 import { ProfileCard } from "./ProfileCard";
 import { useAvatarUpload } from "./useAvatarUpload";
 import { AlertMessage } from "~/components/ui/AlertMessage";
+import { isSafeMediaUrl } from "~/util/safe-url";
 import { Button } from "~/components/ui/Button";
 import { Icon } from "~/components/ui/Icon";
 import { useProfileActionFeedback } from "./useProfileActionFeedback";
@@ -58,7 +59,7 @@ export function IdentityCard({
       />
       <div className="rounded-2xl bg-wash p-4 flex items-center gap-3">
         <span className="relative shrink-0">
-          {photoUrl ? (
+          {photoUrl && isSafeMediaUrl(photoUrl) ? (
             <img
               src={photoUrl}
               alt="Foto de perfil do streamer"

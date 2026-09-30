@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidCpf } from "~/util/cpf";
 import {
   confirmPasswordField,
   strongPassword,
@@ -20,7 +21,8 @@ export const registerSchema = withPasswordConfirmation(
     email: z.email("E-mail inválido"),
     cpf: z
       .string()
-      .regex(/^\d{11}$/, "CPF deve conter exatamente 11 dígitos"),
+      .regex(/^\d{11}$/, "CPF deve conter exatamente 11 dígitos")
+      .refine(isValidCpf, "CPF inválido"),
     password: strongPassword,
     confirmPassword: confirmPasswordField,
   },

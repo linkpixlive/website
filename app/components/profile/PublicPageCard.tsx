@@ -6,6 +6,7 @@ import type { LayoutUser } from "~/components/dashboard/ProfilePopover";
 import { Icon } from "~/components/ui/Icon";
 import type { StreamerProfile } from "~/types/donation";
 import { ProfileCard } from "./ProfileCard";
+import { isSafeMediaUrl } from "~/util/safe-url";
 
 export function PublicPageCard({
   user,
@@ -24,7 +25,7 @@ export function PublicPageCard({
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <img
-              src={photoUrl ?? "/default-avatar.svg"}
+              src={photoUrl && isSafeMediaUrl(photoUrl) ? photoUrl : "/default-avatar.svg"}
               alt="Prévia da foto na página pública"
               className="h-12 w-12 shrink-0 rounded-full object-cover border border-line"
             />

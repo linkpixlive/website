@@ -1,13 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useActionData, useNavigation, useSubmit } from "react-router";
 import { z } from "zod";
 import { authApi } from "~/api/modules/auth";
 import { AuthCard } from "~/components/auth/AuthCard";
 import { AlertMessage } from "~/components/ui/AlertMessage";
 import { FormField } from "~/components/ui/FormField";
 import { SubmitButton } from "~/components/ui/SubmitButton";
+import { useActionError } from "~/hooks/useActionError";
 import { forgotPasswordSchema } from "~/validators/auth-validator";
 import { LINK_CLASS } from "~/components/ui/classes";
 import type { Route } from "./+types/forgot-password";
@@ -16,32 +16,47 @@ export function meta({}: Route.MetaArgs) {
   return [{ title: "Esqueci minha senha — LinkPix" }];
 }
 
+export async function action({ request }: Route.ActionArgs) {
+  const formData = await request.formData();
+  const parsed = forgotPasswordSchema.safeParse({
+    email: String(formData.get("email") ?? ""),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
+
+  const result = await authApi.forgotPassword({ email: parsed.data.email });
+  if (!result.success) {
+    return { error: result.error.message };
+  }
+
+  return { success: true, email: parsed.data.email };
+}
+
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
-export default function ForgotPassword() {
-  const [apiError, setApiError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const [submittedEmail, setSubmittedEmail] = useState("");
+export default function ForgotPassword({ actionData }: Route.ComponentProps) {
+  const submit = useSubmit();
+  const navigation = useNavigation();
+  const loading = navigation.state === "submitting";
+  const [apiError, clearApiError] = useActionError(actionData);
+
+  const success = actionData?.success === true;
+  const submittedEmail = success ? actionData.email as string : "";
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
   });
 
-  const onSubmit = async (data: ForgotPasswordFormValues) => {
-    setApiError(null);
-    const result = await authApi.forgotPassword({ email: data.email });
-
-    if (!result.success) {
-      setApiError(result.error.message);
-      return;
-    }
-
-    setSubmittedEmail(data.email);
-    setSuccess(true);
+  const onSubmit = (data: ForgotPasswordFormValues) => {
+    clearApiError();
+    const formData = new FormData();
+    formData.append("email", data.email);
+    submit(formData, { method: "post" });
   };
 
   return (
@@ -67,7 +82,7 @@ export default function ForgotPassword() {
       ) : (
         <form
           onSubmit={handleSubmit(onSubmit)}
-          onChange={() => setApiError(null)}
+          onChange={clearApiError}
           className="space-y-4"
         >
           {apiError && <AlertMessage variant="error" message={apiError} />}
@@ -79,12 +94,12 @@ export default function ForgotPassword() {
             error={errors.email?.message}
             icon="letter"
             placeholder="email@email.com"
-            disabled={isSubmitting}
+            disabled={loading}
             autoFocus
           />
 
           <div className="mt-6">
-            <SubmitButton loading={isSubmitting}>Enviar</SubmitButton>
+            <SubmitButton loading={loading}>Enviar</SubmitButton>
           </div>
 
           <div className="mt-4 text-center">

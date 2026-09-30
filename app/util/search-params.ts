@@ -26,7 +26,11 @@ export function setParamOrDelete(
   }
 }
 
-/** Lê `page`/`limit` numéricos da URL do loader. */
+/** Lê `page`/`limit` numéricos da URL do loader (com guarda `NaN`). */
 export function getPageParam(url: URL, key = "page", fallback = 1): number {
-  return Number(url.searchParams.get(key) || String(fallback));
+  const raw = url.searchParams.get(key);
+  if (raw === null || raw.trim() === "") return fallback;
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed) || parsed < 1) return fallback;
+  return Math.floor(parsed);
 }

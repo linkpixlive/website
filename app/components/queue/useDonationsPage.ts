@@ -10,6 +10,8 @@ interface UseDonationsPageOptions {
   history: PaginatedResponse<DonationHistory>;
   page: number;
   filters?: HistoryFilters;
+  /** `false` pausa os sockets (ex.: popout aberto — W7). */
+  enabled?: boolean;
 }
 
 /** Fiação compartilhada página Doações × painel live: sockets, ações da fila
@@ -19,13 +21,15 @@ export function useDonationsPage({
   history,
   page,
   filters,
+  enabled = true,
 }: UseDonationsPageOptions) {
-  const { queue, isPaused } = useQueueSocket(token);
+  const { queue, isPaused } = useQueueSocket(token, enabled);
   const { items: liveItems, total: liveTotal } = useDonationHistorySocket(
     token,
     history,
     page,
     filters,
+    enabled,
   );
   const {
     actionLoading,

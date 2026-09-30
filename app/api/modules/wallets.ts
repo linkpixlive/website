@@ -2,8 +2,6 @@ import type { components } from "../generated/api-schema";
 import { createApiClient, fetchApi } from "../http/client";
 import { pixKeysApi, type PixKey } from "./pix-keys";
 import {
-  DEFAULT_PAGE_LIMIT,
-  toWithdrawalStatus,
   withdrawalsApi,
   type Withdrawal,
   type WithdrawalFilters,
@@ -28,53 +26,43 @@ export interface WalletPage {
   };
 }
 
-export const EMPTY_WALLET_PAGE: WalletPage = {
-  balances: { available: 0, pending: 0, blocked: 0 },
-  pixKeys: [],
-  withdrawals: {
-    items: [],
-    meta: { total: 0, page: 1, limit: DEFAULT_PAGE_LIMIT, totalPages: 1 },
-  },
-};
-
 export const walletsApi = {
   getBalances: (token?: string | null) =>
     fetchApi<WalletBalances>(createApiClient(token).get("/wallets/balances")),
 
-  /** Agregação da página da carteira (saldos + chaves + saques). */
+  /** Agregação da página da carteira (saldos + chaves + saques). Fail-fast:
+   *  qualquer fonte com erro derruba o loader (o ErrorBoundary mostra retry)
+   *  em vez de exibir saldo zerado ou lista vazia falsos. */
   getWalletPage: async (
     token: string | null,
     filters: WalletPageFilters,
   ): Promise<WalletPage> => {
-    const page: WalletPage = {
-      balances: { ...EMPTY_WALLET_PAGE.balances },
-      pixKeys: [],
-      withdrawals: {
-        items: [],
-        meta: { ...EMPTY_WALLET_PAGE.withdrawals.meta },
-      },
-    };
+    const [balRes, keysRes, withRes] = await Promise.all([
+      walletsApi.getBalances(token),
+      pixKeysApi.list(token),
+      withdrawalsApi.list(token, {
+        page: filters.page,
+        limit: filters.limit,
+        status: filters.status,
+        startDate: filters.startDate,
+        endDate: filters.endDate,
+      }),
+    ]);
 
-    try {
-      const [balRes, keysRes, withRes] = await Promise.all([
-        walletsApi.getBalances(token),
-        pixKeysApi.list(token),
-        withdrawalsApi.list(token, {
-          page: filters.page,
-          limit: filters.limit,
-          status: filters.status,
-          startDate: filters.startDate,
-          endDate: filters.endDate,
-        }),
-      ]);
-
-      if (balRes.success) page.balances = balRes.data;
-      if (keysRes.success) page.pixKeys = keysRes.data;
-      if (withRes.success) page.withdrawals = withRes.data;
-    } catch (err) {
-      console.error("Loader fetch error:", err);
+    if (!balRes.success) {
+      throw new Response(balRes.error.message, { status: 502 });
+    }
+    if (!keysRes.success) {
+      throw new Response(keysRes.error.message, { status: 502 });
+    }
+    if (!withRes.success) {
+      throw new Response(withRes.error.message, { status: 502 });
     }
 
-    return page;
+    return {
+      balances: balRes.data,
+      pixKeys: keysRes.data,
+      withdrawals: withRes.data,
+    };
   },
 };

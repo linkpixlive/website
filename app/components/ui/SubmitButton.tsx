@@ -5,6 +5,8 @@ import { Spinner } from "./Spinner";
 interface SubmitButtonProps {
   children: ReactNode;
   loading?: boolean;
+  /** Alias para `loading` — unifica `isSubmitting` (RHF) e `navigation/fetcher.state`. */
+  isLoading?: boolean;
   disabled?: boolean;
   type?: "button" | "submit";
   onClick?: () => void;
@@ -14,12 +16,14 @@ interface SubmitButtonProps {
 export function SubmitButton({
   children,
   loading,
+  isLoading,
   disabled,
   type = "submit",
   onClick,
   className = "",
 }: SubmitButtonProps) {
-  const isDisabled = disabled || loading;
+  const busy = loading ?? isLoading ?? false;
+  const isDisabled = disabled || busy;
 
   function handleClick(event: React.MouseEvent) {
     event.stopPropagation();
@@ -45,7 +49,7 @@ export function SubmitButton({
         ${className}
       `}
     >
-      {loading && <Spinner />}
+      {busy && <Spinner />}
       {children}
     </Button>
   );

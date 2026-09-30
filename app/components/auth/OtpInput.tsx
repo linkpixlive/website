@@ -8,6 +8,8 @@ interface OtpInputProps {
   error?: boolean;
 }
 
+/** Primitivo interno das 6 caixas. Uso externo: importe `OtpField`
+ *  (única API pública — trata `name/hidden`, `onChange` RHF e reset). */
 export function OtpInput({ length = 6, onComplete, onChange, disabled, error }: OtpInputProps) {
   const [digits, setDigits] = useState<string[]>(Array(length).fill(""));
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
