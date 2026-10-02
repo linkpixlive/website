@@ -9,8 +9,6 @@ import {
 export interface AccountChecklist {
   pixCount: number;
   rulesReviewed: boolean;
-  overlayConfigured: boolean;
-  profileComplete: boolean;
   has2fa: boolean;
   emailVerified: boolean | null;
 }
@@ -63,26 +61,6 @@ export function AccountStatusCard({ checklist }: AccountStatusCardProps) {
         : "Revise valores mínimos e moderação",
       to: "/widgets/regras",
       done: checklist.rulesReviewed,
-    },
-    {
-      key: "overlay",
-      icon: "widget",
-      title: "Overlay",
-      description: checklist.overlayConfigured
-        ? "Widget criado e ativo"
-        : "Crie o widget para exibir alertas",
-      to: "/widgets/overlay",
-      done: checklist.overlayConfigured,
-    },
-    {
-      key: "profile",
-      icon: "user-circle",
-      title: "Perfil público",
-      description: checklist.profileComplete
-        ? "Foto, nome e página no ar"
-        : "Complete foto e página pública",
-      to: "/perfil",
-      done: checklist.profileComplete,
     },
     {
       key: "2fa",

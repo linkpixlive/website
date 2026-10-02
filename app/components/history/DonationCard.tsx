@@ -1,6 +1,5 @@
 import type { DonationHistory } from "~/api/modules/dashboard";
 import { dashboardApi } from "~/api/modules/dashboard";
-import { Button } from "~/components/ui/Button";
 import { Icon } from "~/components/ui/Icon";
 import { Badge } from "~/components/ui/Badge";
 import { AudioPlayer } from "~/components/ui/AudioPlayer";
@@ -78,16 +77,15 @@ export function DonationCard({
           )}
           {onReplay && (
             <div className="ml-auto shrink-0">
-              <Button
-                variant="secondary"
-                size="sm"
+              <button
+                type="button"
                 onClick={() => onReplay(item.id)}
-                loading={replayLoading}
-                className="border border-line"
+                disabled={replayLoading}
+                className="inline-flex items-center justify-center gap-1.5 px-4 h-10 text-xs font-bold rounded-full bg-card border border-line text-ink-body hover:bg-tile active:scale-[0.98] transition-all duration-150 outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-brand/40 disabled:opacity-60 disabled:cursor-wait shrink-0"
               >
                 <Icon name="repeat-one" size={16} strokeWidth={2} />
-                Repetir
-              </Button>
+                {replayLoading ? "Repetindo…" : "Repetir"}
+              </button>
             </div>
           )}
         </div>

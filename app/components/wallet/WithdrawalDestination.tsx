@@ -43,7 +43,7 @@ export function WithdrawalDestination({
     const displayValue = getPixDisplayName(pk, true);
     return {
       value: pk.id,
-      label: pk.alias ? `${pk.alias} (${displayValue})` : displayValue,
+      label: pk.alias ? `${pk.alias} - ${displayValue}` : displayValue,
     };
   });
 

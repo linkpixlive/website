@@ -51,6 +51,11 @@ export function DonationsLivePanel({
   const handleOpenFullHistory = () => {
     const opener = window.opener;
     if (opener && !opener.closed) {
+      try {
+        opener.location.href = "/doacoes";
+      } catch {
+        window.open("/doacoes", "_blank");
+      }
       opener.focus();
     } else {
       window.location.href = "/doacoes";

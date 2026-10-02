@@ -1,4 +1,4 @@
-import { NavLink } from "react-router";
+import { NavLink, useLocation } from "react-router";
 import { Icon } from "~/components/ui/Icon";
 import { menuItems, type MenuItem } from "./menu";
 
@@ -8,51 +8,67 @@ const rowClasses =
 function InternalRow({
   item,
   onNavigate,
+  forceActive,
 }: {
   item: MenuItem;
   onNavigate?: () => void;
+  forceActive?: boolean;
 }) {
   return (
     <NavLink
       to={item.to}
       end={item.end}
       onClick={onNavigate}
-      className={({ isActive }) =>
-        `${rowClasses} ${isActive ? "text-white bg-white/5" : ""}`
-      }
+      className={({ isActive }) => {
+        const active = isActive || forceActive;
+        return `${rowClasses} ${active ? "text-white bg-white/5" : ""}`;
+      }}
     >
-      {({ isActive }) => (
-        <>
-          <span
-            className={`absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-7 bg-brand rounded-r-full transition-opacity duration-150 ${
-              isActive ? "opacity-100" : "opacity-0"
-            }`}
-            aria-hidden="true"
-          />
-          <Icon
-            name={item.icon}
-            size={20}
-            strokeWidth={isActive ? 2.4 : 1.9}
-            className={`shrink-0 transition-transform duration-150 ${
-              isActive ? "scale-105 text-white" : ""
-            }`}
-          />
-          <span>{item.label}</span>
-        </>
-      )}
+      {({ isActive }) => {
+        const active = isActive || forceActive;
+        return (
+          <>
+            <span
+              className={`absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-7 bg-brand rounded-r-full transition-opacity duration-150 ${
+                active ? "opacity-100" : "opacity-0"
+              }`}
+              aria-hidden="true"
+            />
+            <Icon
+              name={item.icon}
+              size={20}
+              strokeWidth={active ? 2.4 : 1.9}
+              className={`shrink-0 transition-transform duration-150 ${
+                active ? "scale-105 text-white" : ""
+              }`}
+            />
+            <span>{item.label}</span>
+          </>
+        );
+      }}
     </NavLink>
   );
 }
 
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
+  const { pathname } = useLocation();
   return (
     <nav
       aria-label="Navegação principal"
       className="flex-1 overflow-y-auto scrollbar-thin px-3 py-4 space-y-1"
     >
-      {menuItems.map((item) => (
-        <InternalRow key={item.to} item={item} onNavigate={onNavigate} />
-      ))}
+      {menuItems.map((item) => {
+        const forceActive =
+          item.to.startsWith("/widgets") && pathname.startsWith("/widgets");
+        return (
+          <InternalRow
+            key={item.to}
+            item={item}
+            onNavigate={onNavigate}
+            forceActive={forceActive}
+          />
+        );
+      })}
     </nav>
   );
 }

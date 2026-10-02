@@ -41,15 +41,8 @@ interface HomeLoaderData extends HomePageData {
   checklist: AccountChecklist | null;
 }
 
-export function buildChecklist(
-  data: HomePageData,
-  user: {
-    username?: string | null;
-    name?: string | null;
-    profileImageUrl?: string | null;
-  } | null,
-): AccountChecklist {
-  const { pixKeys, rules, overlay, account } = data;
+export function buildChecklist(data: HomePageData): AccountChecklist {
+  const { pixKeys, rules, account } = data;
   return {
     pixCount: pixKeys.length,
     rulesReviewed: rules
@@ -58,10 +51,6 @@ export function buildChecklist(
         rules.aiModeration ||
         (rules.customRules?.trim().length ?? 0) > 0
       : false,
-    overlayConfigured: overlay ? overlay.active : false,
-    profileComplete: Boolean(
-      user?.username && user?.name && user?.profileImageUrl,
-    ),
     has2fa: account?.has2fa ?? false,
     emailVerified:
       account && typeof account.verifiedEmail === "boolean"
@@ -84,7 +73,7 @@ export async function loader({
       .split(/\s+/)[0] || "Streamer";
 
   const page = await getHomePage(token, range);
-  const checklist = buildChecklist(page, user);
+  const checklist = buildChecklist(page);
 
   return { token, range, firstName, ...page, checklist };
 }
