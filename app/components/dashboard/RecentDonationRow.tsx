@@ -25,7 +25,7 @@ export function RecentDonationRow({ item, token }: RecentDonationRowProps) {
   const date = formatShortDateTime(item.approvedAt);
 
   return (
-    <article className="rounded-2xl bg-wash px-3.5 py-2.5">
+    <li className="py-3">
       <div className="flex items-baseline justify-between gap-3">
         <h3 className="min-w-0 truncate text-sm font-bold text-ink-heading">
           {item.name}
@@ -67,6 +67,6 @@ export function RecentDonationRow({ item, token }: RecentDonationRowProps) {
           />
         </div>
       )}
-    </article>
+    </li>
   );
 }

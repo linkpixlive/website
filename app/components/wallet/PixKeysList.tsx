@@ -21,7 +21,7 @@ export function PixKeysList({ pixKeys, onDelete }: PixKeysListProps) {
           </p>
         </div>
       ) : (
-        <div className="divide-y divide-line max-h-60 overflow-y-auto scrollbar-thin pr-1">
+        <div className="divide-y divide-line/60 max-h-60 overflow-y-auto scrollbar-thin pr-1">
           {pixKeys.map((pk) => (
             <PixKeyRow key={pk.id} pixKey={pk} onDelete={onDelete} />
           ))}

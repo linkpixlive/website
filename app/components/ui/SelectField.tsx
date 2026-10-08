@@ -46,7 +46,7 @@ export function SelectField({
         </Select.Label>
         <Select.Trigger
           className={`
-              w-full bg-wash rounded-full py-2.5 px-4 text-left text-sm font-medium text-ink-heading
+              w-full bg-card rounded-full py-2.5 px-4 text-left text-sm font-medium text-ink-heading
               border transition-colors duration-150 outline-none cursor-pointer flex items-center justify-between
               ${
                 error

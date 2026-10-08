@@ -1,5 +1,4 @@
 import { Icon } from "~/components/ui/Icon";
-import { LogoTile } from "~/components/ui/LogoTile";
 
 interface MobileHeaderProps {
   onOpenMenu: () => void;
@@ -7,16 +6,25 @@ interface MobileHeaderProps {
 
 export function MobileHeader({ onOpenMenu }: MobileHeaderProps) {
   return (
-    <header className="lg:hidden sticky top-0 z-40 bg-shell border-b border-white/10 flex items-center gap-3 px-4 py-3">
+    <div className="mb-3 flex items-center gap-2.5 lg:hidden">
       <button
         type="button"
         onClick={onOpenMenu}
         aria-label="Abrir menu"
-        className="p-2 -ml-2 rounded-full text-text-secondary hover:text-white hover:bg-white/5 transition-colors duration-150 cursor-pointer outline-none active:scale-95 focus-visible:ring-2 focus-visible:ring-brand/40"
+        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-line bg-card text-ink-heading outline-none transition-colors duration-150 hover:border-ink-heading active:scale-95"
       >
-        <Icon name="hamburger-menu" size={22} strokeWidth={1.9} />
+        <Icon name="hamburger-menu" size={20} strokeWidth={1.9} />
       </button>
-      <LogoTile href="/dashboard" imgClassName="h-7" textClassName="text-xl" />
-    </header>
+      <img
+        src="/icon-dark.svg"
+        alt=""
+        aria-hidden="true"
+        draggable={false}
+        className="h-7 w-auto shrink-0 select-none"
+      />
+      <span className="text-[16px] font-extrabold tracking-tight text-ink-heading">
+        LinkPix
+      </span>
+    </div>
   );
 }

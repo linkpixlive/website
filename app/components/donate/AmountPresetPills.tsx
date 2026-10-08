@@ -30,11 +30,11 @@ export function AmountPresetPills({
             disabled={disabled}
             onClick={() => !disabled && onSelect(cents)}
             className={cn(
-              "h-8 px-3 inline-flex items-center rounded-full text-xs font-bold transition-all duration-150 cursor-pointer outline-none active:scale-95",
+              "h-8 px-3 inline-flex items-center rounded-full text-xs font-bold border transition-all duration-150 cursor-pointer outline-none active:scale-95",
               "focus-visible:ring-2 focus-visible:ring-brand/40",
               isSelected
-                ? "bg-brand-button text-on-brand shadow-sm"
-                : "bg-wash text-ink-body hover:bg-wash-hover",
+                ? "bg-brand-button text-on-brand border-transparent shadow-sm"
+                : "bg-wash text-ink-body border-line hover:bg-wash-hover",
               disabled && "opacity-50 cursor-not-allowed",
             )}
             aria-pressed={isSelected}

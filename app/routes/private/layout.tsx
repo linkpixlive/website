@@ -12,23 +12,56 @@ export async function loader({ request }: Route.LoaderArgs) {
   return { user };
 }
 
+const RAIL_STORAGE_KEY = "linkpix:sidebar-collapsed";
+
+function readStoredRailCollapsed(): boolean {
+  try {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem(RAIL_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function persistRailCollapsed(collapsed: boolean) {
+  try {
+    window.localStorage.setItem(RAIL_STORAGE_KEY, collapsed ? "1" : "0");
+  } catch {}
+}
+
 export default function PrivateLayoutRoute() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [railCollapsed, setRailCollapsed] = useState(readStoredRailCollapsed);
   return (
     <ToastProvider>
-      <div className="min-h-screen bg-shell text-text-primary flex flex-col lg:flex-row">
+      <div className="min-h-dvh w-full overflow-x-clip bg-shell text-ink-heading lg:flex lg:h-dvh lg:overflow-hidden">
         {/* Desktop rail / Mobile drawer */}
-        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          collapsed={railCollapsed}
+          onToggleCollapse={() =>
+            setRailCollapsed((v) => {
+              const next = !v;
+              persistRailCollapsed(next);
+              return next;
+            })
+          }
+        />
 
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col lg:pl-64">
-          <MobileHeader onOpenMenu={() => setIsSidebarOpen(true)} />
-          {/* Page contents container (light work surface) */}
-          <main className="flex-1 bg-canvas p-4 sm:p-6 lg:p-7">
-            <div className="mx-auto w-full max-w-7xl">
+        {/* Main Content Area (o drawer empurra o conteúdo no mobile) */}
+        <div
+          className={`min-w-0 flex-1 transition-transform duration-300 ease-out ${
+            isSidebarOpen ? "max-lg:translate-x-72" : ""
+          }`}
+        >
+          <div className="bg-canvas p-4 pb-10 sm:p-6 lg:h-dvh lg:overflow-y-auto lg:rounded-l-[24px] lg:p-8">
+            <MobileHeader onOpenMenu={() => setIsSidebarOpen(true)} />
+            {/* Page contents container (light work surface) */}
+            <main className="mx-auto w-full max-w-6xl">
               <Outlet />
-            </div>
-          </main>
+            </main>
+          </div>
         </div>
       </div>
     </ToastProvider>
@@ -36,5 +69,9 @@ export default function PrivateLayoutRoute() {
 }
 
 export function ErrorBoundary() {
-  return <RouteErrorState />;
+  return (
+    <div className="flex min-h-dvh items-center justify-center bg-canvas">
+      <RouteErrorState />
+    </div>
+  );
 }

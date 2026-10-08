@@ -25,12 +25,12 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
       }}
     >
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm transition-opacity duration-200 ease-out data-starting-style:opacity-0 data-ending-style:opacity-0" />
+        <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40 transition-opacity duration-200 ease-out data-starting-style:opacity-0 data-ending-style:opacity-0" />
 
         <div className="fixed inset-0 z-50 w-screen overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
             <Dialog.Popup
-              className={`relative w-full rounded-[26px] bg-card border border-line p-5 text-left shadow-xl transition-[opacity,scale] duration-200 ease-out sm:my-8 sm:p-6 max-h-[90vh] overflow-y-auto ${sizeStyles[size]} data-starting-style:opacity-0 data-starting-style:scale-[0.96] data-ending-style:opacity-0 data-ending-style:scale-[0.96]`}
+              className={`relative w-full rounded-[28px] bg-card border border-line p-5 text-left shadow-xl transition-[opacity,scale] duration-200 ease-out sm:my-8 sm:p-6 max-h-[90vh] overflow-y-auto ${sizeStyles[size]} data-starting-style:opacity-0 data-starting-style:scale-[0.96] data-ending-style:opacity-0 data-ending-style:scale-[0.96]`}
             >
               {/* Header */}
               <div className="flex items-center justify-between mb-5">

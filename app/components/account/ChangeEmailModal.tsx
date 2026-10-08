@@ -124,6 +124,9 @@ export function ChangeEmailModal({
             <AlertMessage variant="error" message={confirmError} />
           )}
 
+          <p className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+            Etapa 2 de 2 · confirmação
+          </p>
           <p className="text-[13px] font-medium leading-relaxed text-ink-secondary">
             Enviamos um código de 6 dígitos para o novo endereço. Informe o
             código para concluir a alteração.
@@ -156,6 +159,9 @@ export function ChangeEmailModal({
           <AlertMessage variant="error" message={requestError} />
         )}
 
+        <p className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+          Etapa 1 de 2 · provas
+        </p>
         {currentEmail && (
           <div className="rounded-2xl bg-wash px-4 py-3">
             <span className={`block ${SECTION_HEADING_CLASS}`}>
@@ -189,7 +195,7 @@ export function ChangeEmailModal({
 
         {has2fa && (
           <OtpField
-            label="Código do autenticador"
+            label="Código atual do app (6 dígitos)"
             isOpen={isOpen}
             disabled={busy}
             error={Boolean(requestError) && !totp}

@@ -1,7 +1,6 @@
 import { AlertMessage } from "~/components/ui/AlertMessage";
 import { MoneyField } from "~/components/ui/MoneyField";
-import { CARD_CLASS, SECTION_HEADING_CLASS } from "~/components/ui/classes";
-import { cn } from "~/util/cn";
+import { SECTION_HEADING_CLASS } from "~/components/ui/classes";
 import type { DonationSettings } from "~/api/modules/donation-settings";
 
 export function MinAmountsSection({
@@ -16,29 +15,42 @@ export function MinAmountsSection({
   onDirtyChange?: () => void;
 }) {
   return (
-    <section aria-label="Valores mínimos" className={cn(CARD_CLASS, "flex flex-col")}>
-      <h2 className={cn(SECTION_HEADING_CLASS, "mb-4")}>Valores mínimos</h2>
+    <section aria-labelledby="donation-amounts-heading">
+      <p className={SECTION_HEADING_CLASS}>01 · O que chega</p>
+      <h2
+        id="donation-amounts-heading"
+        className="mt-1.5 text-lg font-extrabold tracking-tight text-ink-heading"
+      >
+        Valores mínimos por tipo
+      </h2>
 
-      <div className="space-y-3.5 flex-1">
-        {formError && <AlertMessage variant="error" message={formError} />}
+      {formError && (
+        <div className="mt-3">
+          <AlertMessage variant="error" message={formError} />
+        </div>
+      )}
 
-        <MoneyField
-          label="Mensagem de texto"
-          name="minTextAmount"
-          defaultValue={String(settings.minTextAmount)}
-          hint="Abaixo desse valor, doações de texto serão bloqueadas."
-          disabled={loading}
-          onChange={() => onDirtyChange?.()}
-        />
-
-        <MoneyField
-          label="Narração em áudio"
-          name="minAudioAmount"
-          defaultValue={String(settings.minAudioAmount)}
-          hint="Abaixo desse valor, doações por áudio serão bloqueadas."
-          disabled={loading}
-          onChange={() => onDirtyChange?.()}
-        />
+      <div className="mt-5 divide-y divide-line/60 border-t border-line">
+        <div className="py-4">
+          <MoneyField
+            label="Mensagem de texto"
+            name="minTextAmount"
+            defaultValue={String(settings.minTextAmount)}
+            hint="Abaixo desse valor, doações de texto serão bloqueadas."
+            disabled={loading}
+            onChange={() => onDirtyChange?.()}
+          />
+        </div>
+        <div className="py-4">
+          <MoneyField
+            label="Narração em áudio"
+            name="minAudioAmount"
+            defaultValue={String(settings.minAudioAmount)}
+            hint="Abaixo desse valor, doações por áudio serão bloqueadas."
+            disabled={loading}
+            onChange={() => onDirtyChange?.()}
+          />
+        </div>
       </div>
     </section>
   );

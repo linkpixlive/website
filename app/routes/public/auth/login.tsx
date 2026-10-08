@@ -5,7 +5,8 @@ import {
   authApi,
   type Login2faPayload,
 } from "~/api/modules/auth";
-import { AuthCard } from "~/components/auth/AuthCard";
+import { AuthShell } from "~/components/auth/AuthShell";
+import { AuthSplit } from "~/components/auth/AuthSplit";
 import { LoginForm } from "~/components/auth/LoginForm";
 import { TotpChallenge } from "~/components/auth/TotpChallenge";
 import { createAuthCookie, getAuthToken } from "~/util/session.server";
@@ -90,11 +91,14 @@ export default function Login({ actionData }: Route.ComponentProps) {
     actionData && "requires2fa" in actionData ? actionData.nonce : null;
 
   useEffect(() => {
-    if (actionData && "requires2fa" in actionData) {
+    if (actionData && "error" in actionData && actionData.error) {
+      setApiError(actionData.error);
+      if ("requires2fa" in actionData) {
+        setStep("totp");
+      }
+    } else if (actionData && "requires2fa" in actionData) {
       setStep("totp");
       setApiError(null);
-    } else if (actionData && "error" in actionData && actionData.error) {
-      setApiError(actionData.error);
     }
   }, [actionData]);
 
@@ -113,9 +117,15 @@ export default function Login({ actionData }: Route.ComponentProps) {
 
   if (step === "totp" && nonce && credentials) {
     return (
-      <AuthCard
-        title="Verificação em duas etapas"
-        subtitle={`Digite o código de 6 dígitos do seu app autenticador para ${credentials.email}`}
+      <AuthShell
+        eyebrow="Segurança"
+        title="Digite o código"
+        lede={
+          <>
+            Código de 6 dígitos do seu app autenticador para{" "}
+            <span className="font-semibold text-ink-heading">{credentials.email}</span>.
+          </>
+        }
       >
         <TotpChallenge
           credentials={credentials}
@@ -125,18 +135,24 @@ export default function Login({ actionData }: Route.ComponentProps) {
           onClearError={() => setApiError(null)}
           onBack={handleBack}
         />
-      </AuthCard>
+      </AuthShell>
     );
   }
 
   return (
-    <AuthCard title="Bem-vindo de volta!" subtitle="Entre em sua conta">
+    <AuthSplit
+      tone="login"
+      eyebrow="Entrar"
+      title="Bem-vindo de volta"
+      lede="Entre para ver seu saldo e seus alertas."
+      aside={{ to: "/auth/register", label: "Criar conta" }}
+    >
       <LoginForm
         loading={loading}
         apiError={apiError}
         onClearError={() => setApiError(null)}
         onSubmit={onSubmit}
       />
-    </AuthCard>
+    </AuthSplit>
   );
 }

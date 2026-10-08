@@ -4,6 +4,7 @@ import { Button } from "~/components/ui/Button";
 import { useCountdown } from "~/hooks/useCountdown";
 import { CopyButton } from "~/components/ui/CopyButton";
 import { SECTION_HEADING_CLASS } from "~/components/ui/classes";
+import { ConfirmationShell } from "./ConfirmationStates";
 import type { DonationPayment } from "~/types/donation";
 
 export interface DonationSummary {
@@ -31,34 +32,27 @@ export function PaymentStep({
 
   return (
     <div className="flex flex-col items-center text-center gap-4 animate-fade-in">
-      <span className={`block ${SECTION_HEADING_CLASS}`}>
-        Pagamento
-      </span>
-
       {paymentFailed ? (
-        <div className="flex flex-col items-center gap-3 py-4">
-          <Icon name="danger-circle" size={32} strokeWidth={1.9} className="text-error" />
-          <p className="text-lg font-extrabold tracking-tight text-ink-heading">
-            Não conseguimos confirmar o pagamento
-          </p>
-          <p className="text-xs font-medium text-ink-muted leading-relaxed max-w-[32ch]">
-            Houve um problema ao processar sua doação. Se você pagou, fale com o
-            streamer — ou gere um novo QR Code para tentar novamente.
-          </p>
-        </div>
+        <ConfirmationShell
+          kicker="Pagamento"
+          icon={<Icon name="danger-circle" size={32} strokeWidth={1.9} className="text-error" />}
+          title="Não conseguimos confirmar o pagamento"
+          description="Houve um problema ao processar sua doação. Se você pagou, fale com o streamer — ou gere um novo QR Code para tentar novamente."
+        />
       ) : isExpired ? (
-        <div className="flex flex-col items-center gap-3 py-4">
-          <Icon name="danger-circle" size={32} strokeWidth={1.9} className="text-error" />
-          <p className="text-lg font-extrabold tracking-tight text-ink-heading">
-            QR Code expirado
-          </p>
-          <p className="text-xs font-medium text-ink-muted leading-relaxed max-w-[32ch]">
-            O tempo para pagamento acabou. Gere um novo QR Code para concluir sua doação.
-          </p>
-        </div>
+        <ConfirmationShell
+          kicker="Pagamento"
+          icon={<Icon name="danger-circle" size={32} strokeWidth={1.9} className="text-error" />}
+          title="QR Code expirado"
+          description="O tempo para pagamento acabou. Gere um novo QR Code para concluir sua doação."
+        />
       ) : (
         <>
-          <div className="inline-block rounded-2xl border border-line bg-card p-4 shadow-2xs">
+          <span className={`block ${SECTION_HEADING_CLASS}`}>
+            Pagamento
+          </span>
+          {/* QR exige fundo claro fixo para leitura em ambos os temas. */}
+          <div className="inline-block rounded-2xl border border-line bg-white p-4">
             <QRCodeSVG value={payment.pix} size={180} fgColor="#11151e" bgColor="#ffffff" />
           </div>
 

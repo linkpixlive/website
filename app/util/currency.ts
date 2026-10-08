@@ -16,8 +16,29 @@ export function formatBRLReais(value: number): string {
   }).format(value);
 }
 
-/** "14:32" a partir de ISO. Usado nas linhas de fila. */
-export function formatTimestamp(dateString: string): string {
+/** Limiar do "Agora" nas linhas de fila/histórico (90s). */
+export const JUST_NOW_THRESHOLD_MS = 90_000;
+
+/** ISO aconteceu há menos que o limiar em relação a `now`? */
+export function isJustNow(
+  dateString: string | null | undefined,
+  now: number,
+  thresholdMs: number = JUST_NOW_THRESHOLD_MS,
+): boolean {
+  if (!dateString) return false;
+  const time = new Date(dateString).getTime();
+  if (Number.isNaN(time)) return false;
+  const age = now - time;
+  return age >= 0 && age < thresholdMs;
+}
+
+/** "14:32" a partir de ISO ("Agora" se fresco e `now` informado).
+ *  Usado nas linhas de fila. */
+export function formatTimestamp(
+  dateString: string,
+  now?: number | null,
+): string {
+  if (now != null && isJustNow(dateString, now)) return "Agora";
   return new Date(dateString).toLocaleTimeString("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",

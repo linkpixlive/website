@@ -1079,6 +1079,16 @@ export interface components {
              */
             peakHour: number | null;
             /**
+             * @description Data do pico de doações (dia do bucket data+hora com mais doações)
+             * @example 2026-10-07
+             */
+            peakDate: string | null;
+            /**
+             * @description Quantidade de doações no bucket data+hora do pico
+             * @example 6
+             */
+            peakCount: number | null;
+            /**
              * @description Valor de doação mais frequente
              * @example 10
              */

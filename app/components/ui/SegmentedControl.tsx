@@ -30,7 +30,7 @@ export function SegmentedControl<T extends string>({
     <Tabs.Root value={value} onValueChange={(next) => onChange(next as T)}>
       <Tabs.List
         aria-label={label}
-        className="inline-flex items-center gap-1 rounded-full bg-wash p-1"
+        className="inline-flex items-center gap-1 rounded-full border border-line bg-card p-1"
       >
         {options.map((opt) => (
           <Tabs.Tab
@@ -40,7 +40,7 @@ export function SegmentedControl<T extends string>({
               "rounded-full outline-none transition-all duration-150 cursor-pointer active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-brand/40",
               SIZES[size].button,
               "text-ink-secondary hover:text-ink-heading",
-              "data-active:bg-inverse data-active:text-white data-active:shadow-xs data-active:hover:text-white",
+              "data-active:bg-inverse data-active:text-on-inverse data-active:shadow-xs data-active:hover:text-on-inverse",
             )}
           >
             {opt.label}

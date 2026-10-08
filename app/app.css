@@ -19,69 +19,81 @@
 }
 
 @theme {
-  /* ── Legacy token names remapped to the design system ────────────── */
-  --color-background: #111216; /* shell */
-  --color-surface: #181a1f; /* inset dark */
-  --color-surface-hover: #23252c; /* ~white/5 solid on inset */
-  --color-border: #2a2d35; /* ~white/10 solid on dark */
-  --color-border-focus: #fcc717;
+  /* ── Tokens do layout.md (extraídos do protótipo /novo) ────────────
+     Marca azul (#AEC6E8) em ativos/identidade; amarelo (#F5D85D) só no
+     CTA primário e no badge pendente. Creme #FBF8EF no canvas e nos
+     preenchimentos aninhados. */
+  --color-background: #111111; /* shell */
+  --color-surface: #111111; /* inset dark */
+  --color-surface-hover: #242424; /* ~white/5 solid on inset */
+  --color-border: #2a2a2a; /* ~white/10 solid on dark */
+  --color-border-focus: #aec6e8;
 
-  --color-primary: #fed130;
-  --color-primary-hover: #fcc717;
-  --color-primary-active: #f5bd0f;
-  --color-primary-disabled: #e8eaef;
+  --color-primary: #f5d85d;
+  --color-primary-hover: #eac93f;
+  --color-primary-active: #d9b62e;
+  --color-primary-disabled: #e8e4db;
 
-  --color-secondary: #eceef3; /* wash field fill */
+  --color-secondary: #fbf8ef; /* == wash */
 
   --color-text-heading: #ffffff;
-  --color-text-primary: #9ca3af;
-  --color-text-secondary: #7f8594;
-  --color-text-muted: #707684;
+  --color-text-primary: #8f887c;
+  --color-text-secondary: #8f887c;
+  --color-text-muted: #8f887c;
 
-  --color-success: #10b981;
-  --color-success-hover: #059669;
-  --color-info: #2563eb;
-  --color-info-hover: #1d4ed8;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-error-hover: #dc2626;
+  --color-success: #4c5e27;
+  --color-success-hover: #3b4a1e;
+  --color-success-solid: #4c5e27; /* preenchimento sólido, texto branco */
+  --color-success-solid-hover: #3b4a1e;
+  --color-info: #2b4b7a;
+  --color-info-hover: #1f3a5f;
+  --color-warning: #d9a400;
+  --color-error: #a02a2a;
+  --color-error-hover: #7a1f1f;
+  --color-error-solid: #a02a2a; /* preenchimento sólido, texto branco */
+  --color-error-solid-hover: #7a1f1f;
 
-  /* ── Shell (dark chrome) ─────────────────────────────────────────── */
-  --color-shell: #111216;
-  --color-inset-dark: #181a1f;
+  /* ── Shell (dark chrome, igual nos dois temas) ───────────────────── */
+  --color-shell: #111111;
+  --color-inset-dark: #111111;
   --color-media-void: #1e232d;
-  --color-inverse: #16181e;
+  --color-inverse: #111111;
   --color-inverse-hover: #000000;
+  --color-on-inverse: #fbf8ef; /* texto no botão escuro */
+  --color-hero: #111111; /* cartão-escuro de destaque (igual nos temas) */
+  --color-on-hero: #fbf8ef; /* texto sobre o hero — fixo nos temas */
 
-  /* ── Canvas (light surfaces) ─────────────────────────────────────── */
-  --color-canvas: #edf0f7;
+  /* ── Canvas (superfícies creme) ──────────────────────────────────── */
+  --color-canvas: #fbf8ef;
   --color-card: #ffffff;
-  --color-wash: #eceef3;
-  --color-tile: #f9fafb;
+  --color-wash: #fbf8ef;
+  --color-tile: #fbf8ef;
 
-  /* ── Accent yellow (scarce) ──────────────────────────────────────── */
-  --color-brand: #ffd037;
-  --color-brand-button: #fed130;
-  --color-brand-hover: #fcc717;
-  --color-yellow-ink: #b58a00;
-  --color-yellow-wash: #fff7d6;
-  --color-on-brand: #11151e; /* text on yellow — fixed in both themes */
+  /* ── Marca azul (ativos/identidade) + amarelo (só CTA/pendente) ──── */
+  --color-brand: #aec6e8;
+  --color-brand-button: #f5d85d;
+  --color-brand-hover: #eac93f;
+  --color-yellow-ink: #d9a400;
+  --color-yellow-wash: #f5d85d;
+  --color-on-brand: #111111; /* texto sobre azul/amarelo — fixo nos temas */
+  --color-pending: #f5d85d; /* badge pendente, igual nos dois temas */
+  --color-on-pending: #111111;
 
   /* ── Ink scale ───────────────────────────────────────────────────── */
-  --color-ink-heading: #11151e;
-  --color-ink-body: #333945;
-  --color-ink-body-strong: #222834;
-  --color-ink-secondary: #707684;
-  --color-ink-muted: #828896;
-  --color-ink-label: #9ca3af;
-  --color-ink-placeholder: #707684;
-  --color-chrome-icon: #3e4452;
+  --color-ink-heading: #111111;
+  --color-ink-body: #6b6558;
+  --color-ink-body-strong: #111111;
+  --color-ink-secondary: #6b6558;
+  --color-ink-muted: #8f887c;
+  --color-ink-label: #8f887c;
+  --color-ink-placeholder: #8f887c;
+  --color-chrome-icon: #6b6558;
 
-  /* ── Hairlines (whisper borders) ─────────────────────────────────── */
-  --color-line: rgb(243 244 246 / 0.72); /* ~gray-100/70 */
-  --color-line-input: #dfe3ea; /* composer input border */
-  --color-danger-wash: #fef2f2; /* destructive menu row hover */
-  --color-wash-hover: #e2e5ec; /* secondary button hover (one step into the surface) */
+  /* ── Hairlines ───────────────────────────────────────────────────── */
+  --color-line: #e8e4db;
+  --color-line-input: #9a8b6f; /* borda de controle: ≥3:1 no branco (WCAG 1.4.11) */
+  --color-danger-wash: #fad9d9; /* hover da linha destrutiva no menu */
+  --color-wash-hover: #eee7d4; /* um passo para dentro da superfície */
 
   /* ── Typography ──────────────────────────────────────────────────── */
   --font-sans: "Satoshi", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
@@ -181,53 +193,64 @@
 }
 
 /* ── Dark theme ────────────────────────────────────────────────────────
-   Palette derived from the shell tones in design.md: the canvas merges
-   with the shell (#111216), cards lift to inset-dark (#181a1f) and nested
-   fills step up from there. Yellow, shell chrome and radius are unchanged.
-   Utilities resolve var(--color-*) at runtime, so overriding these tokens
-   under .dark re-themes every semantic class app-wide. */
+    Mesmos princípios do /novo, sem inversão mecânica: o canvas funde no
+    marrom-escuro (#1D1913), cards sobem para #292420 e o rail segue #111111
+    nos dois temas. Utilities resolvem var(--color-*) em runtime, então a
+    troca desses tokens re-tema o app inteiro sem variantes dark:. */
 
 .dark {
   color-scheme: dark;
 
   /* Legacy token names */
-  --color-secondary: #20232a;
-  --color-text-muted: #9aa0ac;
+  --color-secondary: #1d1913;
+  --color-text-muted: #8c8271;
 
-  /* Canvas (light surfaces → dark surfaces) */
-  --color-canvas: #111216;
-  --color-card: #181a1f;
-  --color-wash: #20232a;
-  --color-tile: #262a33;
+  /* Canvas (creme → superfícies escuras) */
+  --color-canvas: #1d1913;
+  --color-card: #292420;
+  --color-wash: #1d1913;
+  --color-tile: #1d1913;
 
-  /* Inverse actions stay dark but must read on dark cards */
-  --color-inverse: #272b33;
-  --color-inverse-hover: #31353d;
+  /* Ações escuras viram claras no botão primário escuro */
+  --color-inverse: #f6f5ee;
+  --color-inverse-hover: #ffffff;
+  --color-on-inverse: #111111;
 
-  /* Ink scale flips to light */
-  --color-ink-heading: #f5f6f8;
-  --color-ink-body: #c6cad2;
-  --color-ink-body-strong: #dfe2e8;
-  --color-ink-secondary: #9aa0ac;
-  --color-ink-muted: #7f8594;
-  --color-ink-placeholder: #6b7180;
-  --color-chrome-icon: #aab0bc;
+  /* Inset escuro aprofunda no dark */
+  --color-inset-dark: #0c0a07;
 
-  /* Semantic (brightened for dark; error stays #ef4444 — white text pill) */
-  --color-success: #34d399;
-  --color-info: #60a5fa;
-  --color-warning: #fbbf24;
-  --color-yellow-wash: rgb(245 158 11 / 0.14);
-  --color-yellow-ink: #fbbf24;
+  /* Hero de destaque aprofunda junto */
+  --color-hero: #0c0a07;
 
-  /* Hairlines become white-based whispers */
-  --color-line: rgb(255 255 255 / 0.07);
-  --color-line-input: rgb(255 255 255 / 0.12);
-  --color-danger-wash: rgb(239 68 68 / 0.12);
-  --color-wash-hover: #262a33;
+  /* Ink scale vira clara */
+  --color-ink-heading: #f6f5ee;
+  --color-ink-body: #b7ab97;
+  --color-ink-body-strong: #f6f5ee;
+  --color-ink-secondary: #b7ab97;
+  --color-ink-muted: #8c8271;
+  --color-ink-label: #8c8271;
+  --color-ink-placeholder: #8c8271;
+  --color-chrome-icon: #b7ab97;
 
-  /* Disabled primary fills stop glowing on dark cards */
-  --color-primary-disabled: #262a33;
+  /* Semânticas (texto/preenchimento suave; sólidos não mudam) */
+  --color-success: #c2d197;
+  --color-success-hover: #a4b56c;
+  --color-info: #aec6e8;
+  --color-info-hover: #d3e2f7;
+  --color-warning: #f5d85d;
+  --color-error: #f0a6a6;
+  --color-error-hover: #f0a6a6;
+  --color-yellow-wash: #f5d85d;
+  --color-yellow-ink: #f5d85d;
+
+  /* Hairlines viram sussurros quentes */
+  --color-line: #3b342a;
+  --color-line-input: #8c8271; /* == ink-muted: ≥3:1 no card */
+  --color-danger-wash: #472425;
+  --color-wash-hover: #2e2820;
+
+  /* Preenchimento primário desabilitado apaga no card escuro */
+  --color-primary-disabled: #3b342a;
 }
 
 html {
@@ -239,7 +262,7 @@ body {
 }
 
 ::selection {
-  background-color: rgb(255 208 55 / 0.4);
+  background-color: rgb(174 198 232 / 0.4);
   color: #000000;
 }
 
@@ -292,7 +315,7 @@ body {
     to right,
     var(--color-brand-button) 0%,
     var(--color-brand-button) var(--slider-fill, 50%),
-    var(--color-wash) var(--slider-fill, 50%)
+    var(--color-wash-hover) var(--slider-fill, 50%)
   );
 }
 
@@ -311,7 +334,7 @@ body {
 .slider-primary::-moz-range-track {
   height: 6px;
   border-radius: 9999px;
-  background: var(--color-wash);
+  background: var(--color-wash-hover);
 }
 
 .slider-primary::-moz-range-progress {
@@ -335,11 +358,11 @@ body {
 }
 
 .slider-primary:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 4px rgb(254 209 48 / 0.35);
+  box-shadow: 0 0 0 4px rgb(245 216 93 / 0.35);
 }
 
 .slider-primary:focus-visible::-moz-range-thumb {
-  box-shadow: 0 0 0 4px rgb(254 209 48 / 0.35);
+  box-shadow: 0 0 0 4px rgb(245 216 93 / 0.35);
 }
 
 /* ── Dense-panel scrollbars ─────────────────────────────────────────── */
@@ -355,17 +378,17 @@ body {
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
+    background: #e8e4db;
     border-radius: 9999px;
   }
   &::-webkit-scrollbar-thumb:hover {
-    background: #cbd5e1;
+    background: #d6cdb5;
   }
 
   .dark &::-webkit-scrollbar-thumb {
-    background: #2e323b;
+    background: #3b342a;
   }
   .dark &::-webkit-scrollbar-thumb:hover {
-    background: #3a3f4a;
+    background: #4a4234;
   }
 }

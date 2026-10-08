@@ -43,7 +43,7 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
             <span
               ref={prefixRef}
               aria-hidden="true"
-              className="pointer-events-none absolute left-4 whitespace-nowrap text-sm font-medium text-ink-placeholder"
+              className="pointer-events-none absolute left-4 whitespace-nowrap text-sm font-medium text-ink-placeholder/60"
             >
               {prefix}
             </span>
@@ -56,11 +56,11 @@ export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
             aria-invalid={error ? true : undefined}
             style={
               showPrefix
-                ? { ...style, paddingLeft: 16 + prefixWidth + 6 }
+                ? { ...style, paddingLeft: 16 + prefixWidth + 2 }
                 : style
             }
             className={`
-              w-full bg-wash rounded-full py-2.5 text-sm font-medium text-ink-heading placeholder:text-ink-placeholder
+              w-full bg-card rounded-full py-2.5 text-sm font-medium text-ink-heading placeholder:text-ink-placeholder
               border transition-colors duration-150 outline-none
               ${icon ? "pl-10 pr-4" : ""}
               ${showPrefix ? "pr-4" : ""}

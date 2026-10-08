@@ -82,7 +82,7 @@ export default function DonationConfirmationPage() {
   return (
     <main className="flex flex-1 items-center justify-center px-4 py-6 sm:py-10">
       <div className="w-full max-w-md flex flex-col gap-5 animate-fade-in">
-        <div className="rounded-[26px] bg-card border border-line shadow-xs overflow-hidden">
+        <div className="rounded-[28px] bg-card border border-line overflow-hidden">
           <div className="p-5">
             {effectiveStatus === "pending" && connectionLost && (
               <div className="mb-4">

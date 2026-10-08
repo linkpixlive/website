@@ -1,4 +1,3 @@
-import { SelectField } from "~/components/ui/SelectField";
 import { LINK_CLASS } from "~/components/ui/classes";
 import type { PixKey } from "~/api/modules/pix-keys";
 import { getPixDisplayName } from "./pix-key-format";
@@ -39,25 +38,46 @@ export function WithdrawalDestination({
     );
   }
 
-  const options = pixKeys.map((pk) => {
-    const displayValue = getPixDisplayName(pk, true);
-    return {
-      value: pk.id,
-      label: pk.alias ? `${pk.alias} - ${displayValue}` : displayValue,
-    };
-  });
-
   return (
     <div className="space-y-1">
-      <SelectField
-        label="Destinatário (Chave Pix)"
-        options={options}
-        value={value}
-        onChange={onChange}
-        placeholder="Selecione a chave Pix..."
-        error={error}
-        disabled={disabled}
-      />
+      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-ink-muted">
+        Receber em
+      </p>
+      <div className="divide-y divide-line/60" role="radiogroup" aria-label="Receber em">
+        {pixKeys.map((pk) => {
+          const display = getPixDisplayName(pk, true);
+          const selected = value === pk.id;
+          return (
+            <button
+              key={pk.id}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              disabled={disabled}
+              onClick={() => onChange(pk.id)}
+              className={`flex w-full cursor-pointer items-center gap-3 py-3.5 text-left outline-none transition-colors duration-150 disabled:opacity-60 ${
+                selected
+                  ? "-mx-2 px-2 rounded-xl bg-wash"
+                  : "hover:bg-wash/60"
+              }`}
+            >
+              <span
+                aria-hidden="true"
+                className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border transition-colors duration-150 ${
+                  selected ? "border-brand" : "border-line-input"
+                }`}
+              >
+                {selected && <span className="h-2.5 w-2.5 rounded-full bg-brand" />}
+              </span>
+              <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-ink-body">
+                {pk.alias ? `${pk.alias} · ` : ""}
+                <span className="font-mono font-medium">{display}</span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      {error && <p className="text-error text-xs font-medium">{error}</p>}
       <div className="flex justify-end pt-1">
         <button
           type="button"

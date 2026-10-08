@@ -8,8 +8,8 @@ export default function PublicLayoutRoute() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="min-h-dvh flex flex-col">
-      <div className="flex justify-end px-4 pt-4">
+    <div className="min-h-dvh flex flex-col relative">
+      <div className="absolute top-4 right-4 z-10">
         <button
           type="button"
           aria-label={theme === "dark" ? "Ativar tema claro" : "Ativar tema escuro"}
@@ -29,7 +29,7 @@ export default function PublicLayoutRoute() {
 
 export function ErrorBoundary() {
   return (
-    <div className="mx-auto w-full max-w-md px-4 py-10">
+    <div className="flex min-h-dvh items-center justify-center">
       <RouteErrorState />
     </div>
   );

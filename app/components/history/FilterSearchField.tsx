@@ -53,7 +53,7 @@ export function FilterSearchField({
       >
         {label}
       </label>
-      <div className="flex items-center w-full bg-wash rounded-full border border-line-input focus-within:border-border-focus focus-within:ring-2 focus-within:ring-brand/30 transition-all overflow-hidden">
+      <div className="flex items-center w-full bg-card rounded-full border border-line-input focus-within:border-border-focus focus-within:ring-2 focus-within:ring-brand/30 transition-all overflow-hidden">
         <Menu.Root modal={false}>
           <Menu.Trigger
             aria-label={`Tipo de busca: ${selectedOption?.label ?? ""}`}

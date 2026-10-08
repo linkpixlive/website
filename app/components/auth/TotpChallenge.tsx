@@ -36,14 +36,12 @@ export function TotpChallenge({
 
   return (
     <div className="space-y-6">
-      <div className="py-4">
-        <OtpField
-          onComplete={handleTotpComplete}
-          onChange={onClearError}
-          disabled={loading}
-          error={Boolean(apiError)}
-        />
-      </div>
+      <OtpField
+        onComplete={handleTotpComplete}
+        onChange={onClearError}
+        disabled={loading}
+        error={Boolean(apiError)}
+      />
 
       {apiError && <AlertMessage variant="error" message={apiError} />}
 

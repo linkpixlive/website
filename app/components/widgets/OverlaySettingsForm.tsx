@@ -5,8 +5,8 @@ import {
   type OverlayFormValues,
 } from "~/validators/overlay-validator";
 import { Switch } from "~/components/ui/Switch";
-import { CARD_CLASS, SECTION_HEADING_CLASS } from "~/components/ui/classes";
-import { cn } from "~/util/cn";
+import { AlertMessage } from "~/components/ui/AlertMessage";
+import { SECTION_HEADING_CLASS } from "~/components/ui/classes";
 import { VoiceSelectField } from "~/components/donate/VoiceSelectField";
 import { RangeSlider } from "~/components/ui/RangeSlider";
 import { SubmitButton } from "~/components/ui/SubmitButton";
@@ -24,10 +24,10 @@ function ToggleField({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-1">
+    <div className="flex items-center justify-between gap-4 py-3.5">
       <div>
         <p className="text-sm font-bold text-ink-heading">{title}</p>
-        <p className="text-[13px] font-medium text-ink-secondary mt-0.5">
+        <p className="mt-0.5 text-[13px] font-medium text-ink-secondary">
           {description}
         </p>
       </div>
@@ -47,11 +47,13 @@ export function OverlaySettingsForm({
   loading: boolean;
   onSubmit: (data: OverlayFormValues) => void;
 }) {
-  const initialNarrator = voices.some(
-    (v) => v.id === widget.settings.defaultNarrator,
-  )
-    ? widget.settings.defaultNarrator
-    : (voices[0]?.id ?? widget.settings.defaultNarrator);
+  const savedNarrator = widget.settings.defaultNarrator;
+  const savedVoiceMissing =
+    savedNarrator !== "" && !voices.some((v) => v.id === savedNarrator);
+  const initialNarrator = savedVoiceMissing
+    ? (voices[0]?.id ?? savedNarrator)
+    : savedNarrator;
+  const fallbackVoiceName = voices[0]?.name;
 
   const {
     control,
@@ -72,61 +74,71 @@ export function OverlaySettingsForm({
   useUnsavedChanges(isDirty);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className={CARD_CLASS}>
-        <span className={cn(SECTION_HEADING_CLASS, "block mb-4")}>
-          Configurações
-        </span>
+    <section aria-labelledby="widgets-sound-heading">
+      <p className={SECTION_HEADING_CLASS}>02 · Como soa</p>
+      <h2
+        id="widgets-sound-heading"
+        className="mt-1.5 text-lg font-extrabold tracking-tight text-ink-heading"
+      >
+        O som do alerta
+      </h2>
 
-        <div className="flex flex-col gap-6">
+      {savedVoiceMissing && (
+        <div className="mt-3">
+          <AlertMessage
+            variant="info"
+            message={`A voz salva não existe mais — usando ${fallbackVoiceName ?? "a primeira disponível"}. Salve para confirmar a troca.`}
+          />
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-5">
+        <Controller
+          name="defaultNarrator"
+          control={control}
+          render={({ field }) => (
+            <VoiceSelectField
+              label="Narrador padrão (TTS)"
+              voices={voices}
+              value={field.value}
+              onChange={(voiceId) => field.onChange(voiceId ?? "")}
+              error={errors.defaultNarrator?.message}
+              disabled={loading || voices.length === 0}
+              hint="Voz usada quando o doador não escolher nenhuma personalizada."
+              includeDefaultOption={false}
+            />
+          )}
+        />
+
+        <div className="mt-6 flex max-w-sm flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <label className="text-[13px] font-medium text-ink-secondary">
+              Volume do áudio
+            </label>
+            <span className="text-sm font-bold text-ink-heading">
+              {volumeValue}%
+            </span>
+          </div>
           <Controller
-            name="defaultNarrator"
+            name="volume"
             control={control}
             render={({ field }) => (
-              <VoiceSelectField
-                label="Narrador padrão (TTS)"
-                voices={voices}
+              <RangeSlider
+                min={0}
+                max={100}
                 value={field.value}
-                onChange={(voiceId) => field.onChange(voiceId ?? "")}
-                error={errors.defaultNarrator?.message}
-                disabled={loading || voices.length === 0}
-                hint="Voz usada por padrão quando o doador não escolher nenhuma voz personalizada."
-                includeDefaultOption={false}
+                onChange={field.onChange}
+                disabled={loading}
+                aria-label="Volume do áudio"
               />
             )}
           />
+        </div>
 
-          <div className="flex flex-col gap-2 max-w-xs">
-            <div className="flex items-center justify-between">
-              <label className="text-[13px] font-medium text-ink-secondary">
-                Volume do áudio
-              </label>
-              <span className="text-sm font-bold text-ink-heading">
-                {volumeValue}%
-              </span>
-            </div>
-            <Controller
-              name="volume"
-              control={control}
-              render={({ field }) => (
-                <RangeSlider
-                  min={0}
-                  max={100}
-                  value={field.value}
-                  onChange={field.onChange}
-                  disabled={loading}
-                  aria-label="Volume do áudio"
-                />
-              )}
-            />
-            <p className="text-xs font-medium text-ink-muted">
-              Controle o volume dos alertas.
-            </p>
-          </div>
-
+        <div className="mt-6 divide-y divide-line/60 border-t border-line">
           <ToggleField
             title="Narrar nome e valor"
-            description="O TTS dirá o nome do doador e o valor antes de ler a mensagem."
+            description="O TTS diz quem doou e quanto antes de ler a mensagem."
           >
             <Controller
               name="speakNameAmount"
@@ -159,14 +171,20 @@ export function OverlaySettingsForm({
               )}
             />
           </ToggleField>
-
-          <div className="flex justify-end pt-4 border-t border-line">
-            <SubmitButton loading={loading} className="w-full sm:w-auto">
-              Salvar Configurações
-            </SubmitButton>
-          </div>
         </div>
-      </div>
-    </form>
+
+        <div className="mt-2 flex flex-col gap-2 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <p
+            aria-live="polite"
+            className={`text-xs font-semibold ${isDirty ? "text-ink-secondary" : "invisible"}`}
+          >
+            Alterações não salvas
+          </p>
+          <SubmitButton loading={loading} className="w-full sm:w-auto">
+            Salvar
+          </SubmitButton>
+        </div>
+      </form>
+    </section>
   );
 }

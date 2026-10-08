@@ -1,21 +1,28 @@
 import { useEffect } from "react";
 import { useFetcher } from "react-router";
-import { getUserInitials, type LayoutUser } from "~/components/dashboard/ProfilePopover";
-import { PhotoCropModal } from "~/components/profile/PhotoCropModal";
-import { ProfileCard } from "./ProfileCard";
-import { useAvatarUpload } from "./useAvatarUpload";
+import { PUBLIC_PAGE_BASE } from "~/components/dashboard/menu";
+import {
+  getUserInitials,
+  type LayoutUser,
+} from "~/components/dashboard/ProfilePopover";
 import { AlertMessage } from "~/components/ui/AlertMessage";
-import { isSafeMediaUrl } from "~/util/safe-url";
 import { Button } from "~/components/ui/Button";
 import { Icon } from "~/components/ui/Icon";
-import { useProfileActionFeedback } from "./useProfileActionFeedback";
+import { isSafeMediaUrl } from "~/util/safe-url";
+import { PhotoCropModal } from "./PhotoCropModal";
 import type { ProfileActionResult } from "./profile-result";
+import { useAvatarUpload } from "./useAvatarUpload";
+import { useProfileActionFeedback } from "./useProfileActionFeedback";
 
-export function IdentityCard({
+export function ProfileShowcaseHeader({
   user,
+  displayName,
+  displayUsername,
   photoUrl,
 }: {
   user: LayoutUser;
+  displayName: string;
+  displayUsername: string;
   photoUrl: string | null;
 }) {
   const photoFetcher = useFetcher<ProfileActionResult>();
@@ -44,8 +51,10 @@ export function IdentityCard({
     if (photoFetcher.state === "idle") setConfirmingRemove(false);
   }, [photoFetcher.state]);
 
+  const hasPhoto = photoUrl && isSafeMediaUrl(photoUrl);
+
   return (
-    <ProfileCard label="Identidade" className="lg:col-span-5 xl:col-span-4">
+    <div>
       <input
         ref={fileInputRef}
         type="file"
@@ -57,20 +66,20 @@ export function IdentityCard({
           e.target.value = "";
         }}
       />
-      <div className="rounded-2xl bg-wash p-4 flex items-center gap-3">
+      <div className="flex items-center gap-5">
         <span className="relative shrink-0">
-          {photoUrl && isSafeMediaUrl(photoUrl) ? (
+          {hasPhoto ? (
             <img
               src={photoUrl}
               alt="Foto de perfil do streamer"
-              className="h-14 w-14 rounded-full object-cover border border-white shadow-2xs"
+              className="h-24 w-24 rounded-full object-cover border border-line"
             />
           ) : (
             <span
               aria-hidden="true"
-              className="grid h-14 w-14 place-items-center rounded-full bg-brand text-[15px] font-extrabold text-on-brand border border-white shadow-2xs"
+              className="grid h-24 w-24 place-items-center rounded-full bg-brand text-2xl font-extrabold text-on-brand"
             >
-              {getUserInitials(user.name)}
+              {getUserInitials(displayName || user.name)}
             </span>
           )}
           <button
@@ -79,22 +88,28 @@ export function IdentityCard({
             aria-label="Trocar foto de perfil"
             disabled={uploading}
             onClick={openPicker}
-            className="absolute -bottom-1 -right-1 grid h-7 w-7 place-items-center rounded-full bg-inverse text-white shadow-xs outline-none transition-all hover:bg-inverse-hover active:scale-95 disabled:opacity-60 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand/40"
+            className="absolute -bottom-1 -right-1 grid h-8 w-8 place-items-center rounded-full bg-inverse text-on-inverse shadow-xs outline-none transition-all hover:bg-inverse-hover active:scale-95 disabled:opacity-60 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand/40"
           >
-            <Icon name="camera-add" size={14} strokeWidth={2} />
+            <Icon name="camera-add" size={15} strokeWidth={2} />
           </button>
         </span>
         <div className="min-w-0">
-          <p className="truncate text-base font-bold text-ink-heading leading-tight">
-            {user.name}
+          <p className="truncate text-xl sm:text-2xl font-extrabold tracking-tight leading-tight text-ink-heading">
+            {displayName || user.name}
           </p>
-          <p className="truncate text-xs font-medium text-ink-muted mt-0.5">
-            {user.username ? `@${user.username}` : user.email}
+          <p className="truncate text-sm font-medium text-ink-muted mt-1">
+            {displayUsername ? `@${displayUsername}` : user.email}
           </p>
+          {displayUsername && (
+            <p className="truncate font-mono text-xs text-ink-muted mt-0.5">
+              {PUBLIC_PAGE_BASE}
+              {displayUsername}
+            </p>
+          )}
         </div>
       </div>
 
-      <div className="mt-4 flex flex-col gap-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         <Button
           type="button"
           variant="secondary"
@@ -108,13 +123,12 @@ export function IdentityCard({
 
         {photoUrl &&
           (confirmingRemove ? (
-            <div className="flex items-center gap-2">
+            <>
               <Button
                 type="button"
                 variant="danger-soft"
                 size="sm"
                 disabled={uploading}
-                className="flex-1"
                 onClick={() =>
                   photoFetcher.submit(
                     { intent: "removePhoto" },
@@ -133,7 +147,7 @@ export function IdentityCard({
               >
                 Cancelar
               </Button>
-            </div>
+            </>
           ) : (
             <Button
               type="button"
@@ -150,14 +164,23 @@ export function IdentityCard({
               Remover foto
             </Button>
           ))}
-
-        {removeError && <AlertMessage variant="error" message={removeError} />}
-        {pickerError && <AlertMessage variant="error" message={pickerError} />}
-
-        <p className="text-[11px] font-medium leading-relaxed text-ink-muted">
-          JPG, PNG ou WebP. Você ajusta o enquadramento antes de salvar.
-        </p>
       </div>
+
+      {removeError && (
+        <div className="mt-3 max-w-md">
+          <AlertMessage variant="error" message={removeError} />
+        </div>
+      )}
+      {pickerError && (
+        <div className="mt-3 max-w-md">
+          <AlertMessage variant="error" message={pickerError} />
+        </div>
+      )}
+
+      <p className="mt-3 text-xs font-medium leading-relaxed text-ink-muted">
+        JPG, PNG ou WebP · até 10 MB · você ajusta o enquadramento antes de
+        salvar.
+      </p>
 
       {isCropOpen && cropSrc && (
         <PhotoCropModal
@@ -178,6 +201,6 @@ export function IdentityCard({
           }}
         />
       )}
-    </ProfileCard>
+    </div>
   );
 }

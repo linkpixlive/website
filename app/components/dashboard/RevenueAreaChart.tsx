@@ -1,8 +1,7 @@
 import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  ReferenceDot,
+  Bar,
+  BarChart,
+  Cell,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -55,13 +54,12 @@ export function RevenueAreaChart({ series, mode }: RevenueAreaChartProps) {
   return (
     <div>
       <div
-        className="h-[220px] w-full [&_.recharts-wrapper]:outline-none [&_.recharts-surface]:outline-none"
+        className="h-[220px] w-full [&_.recharts-wrapper]:outline-none [&_.recharts-surface]:outline-none [&_*]:outline-none [&_*:focus]:outline-none"
         role="img"
         aria-label={mode === "amount" ? "Evolução do valor recebido por dia" : "Evolução da quantidade de doações por dia"}
       >
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={series} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
-            <CartesianGrid stroke="var(--color-line)" vertical={false} />
+          <BarChart data={series} margin={{ top: 8, right: 4, bottom: 0, left: 0 }} barCategoryGap="28%">
             <XAxis
               dataKey="date"
               tickFormatter={formatShortDate}
@@ -85,29 +83,21 @@ export function RevenueAreaChart({ series, mode }: RevenueAreaChartProps) {
             />
             <Tooltip
               content={<ChartTooltip mode={mode} />}
-              cursor={false}
+              cursor={{ fill: "var(--color-line)", opacity: 0.35 }}
             />
-            <Area
-              type="monotone"
-              dataKey={dataKey}
-              stroke="var(--color-ink-heading)"
-              strokeWidth={2}
-              fill="var(--color-wash)"
-              fillOpacity={1}
-              activeDot={{ r: 4, fill: "var(--color-brand-button)", stroke: "var(--color-on-brand)", strokeWidth: 2 }}
-              dot={false}
-            />
-            {maxPoint && maxPoint[dataKey] > 0 && (
-              <ReferenceDot
-                x={maxPoint.date}
-                 y={maxPoint[dataKey]}
-                 r={4}
-                 fill="var(--color-brand-button)"
-                 stroke="var(--color-on-brand)"
-                 strokeWidth={2}
-              />
-            )}
-          </AreaChart>
+            <Bar dataKey={dataKey} radius={[6, 6, 0, 0]}>
+              {series.map((p) => (
+                <Cell
+                  key={p.date}
+                  fill={
+                    maxPoint && maxPoint[dataKey] > 0 && p.date === maxPoint.date
+                      ? "var(--color-brand-button)"
+                      : "var(--color-ink-heading)"
+                  }
+                />
+              ))}
+            </Bar>
+          </BarChart>
         </ResponsiveContainer>
       </div>
       {!hasData && (
@@ -115,19 +105,20 @@ export function RevenueAreaChart({ series, mode }: RevenueAreaChartProps) {
           Sem doações pagas neste período — o gráfico preenche assim que a primeira cair.
         </p>
       )}
-      {/* Leitor de tela: tabela com os valores da série. */}
-      <table className="sr-only">
-        <caption>Evolução diária no período</caption>
-        <tbody>
-          {series.map((p) => (
-            <tr key={p.date}>
-              <th scope="row">{p.date}</th>
-              <td>{p.amount}</td>
-              <td>{p.count}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="sr-only">
+        <table>
+          <caption>Evolução diária no período</caption>
+          <tbody>
+            {series.map((p) => (
+              <tr key={p.date}>
+                <th scope="row">{p.date}</th>
+                <td>{p.amount}</td>
+                <td>{p.count}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

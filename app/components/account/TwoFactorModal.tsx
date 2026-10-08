@@ -45,9 +45,12 @@ function TwoFactorDisableForm({
       className="space-y-4"
     >
       {error && <AlertMessage variant="error" message={error} />}
+      <p className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+        Etapa única · prova dupla
+      </p>
       <p className="text-[13px] font-medium text-ink-secondary leading-relaxed">
-        Confirme sua senha e o código do app autenticador para desativar a
-        proteção extra no login.
+        Para desligar a proteção, prove senha e código atual do app — as duas
+        coisas, uma vez só.
       </p>
       <PasswordField
         label="Senha"
@@ -94,6 +97,9 @@ function TwoFactorSetupView({
   if (setupPayload) {
     return (
       <div className="space-y-4">
+        <p className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+          Etapa 2 de 2 · vincule o app
+        </p>
         <p className="text-[13px] font-medium text-ink-secondary leading-relaxed">
           Aponte a câmera do seu app autenticador para o código abaixo.
         </p>
@@ -153,6 +159,9 @@ function TwoFactorSetupView({
     >
       {setupError && <AlertMessage variant="error" message={setupError} />}
 
+      <p className="text-[11px] font-extrabold uppercase tracking-wider text-ink-label">
+        Etapa 1 de 2 · prove que é você
+      </p>
       <p className="text-[13px] font-medium text-ink-secondary leading-relaxed">
         Confirme sua senha para gerar o código de configuração do app
         autenticador.

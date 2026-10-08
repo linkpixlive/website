@@ -1,65 +1,7 @@
-import type { ReactNode } from "react";
 import { Button } from "~/components/ui/Button";
-import { Icon, type IconName } from "~/components/ui/Icon";
-import { CARD_CLASS, SECTION_HEADING_CLASS } from "~/components/ui/classes";
-import { cn } from "~/util/cn";
+import { Icon } from "~/components/ui/Icon";
+import { LINK_CLASS, SECTION_HEADING_CLASS } from "~/components/ui/classes";
 import type { AccountSettings } from "~/api/modules/account-settings";
-
-export function TwoFactorBadge({ enabled }: { enabled: boolean }) {
-  return (
-    <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold shrink-0 ${
-        enabled
-          ? "bg-success/10 text-success"
-          : "bg-wash text-ink-secondary border border-line-input"
-      }`}
-    >
-      {enabled ? "Ativa" : "Inativa"}
-    </span>
-  );
-}
-
-export function SettingRow({
-  icon,
-  title,
-  description,
-  trailing,
-  onClick,
-  disabled,
-}: {
-  icon: IconName;
-  title: string;
-  description?: string;
-  trailing?: ReactNode;
-  onClick?: () => void;
-  disabled?: boolean;
-}) {
-  return (
-    <li>
-      <button
-        type="button"
-        onClick={onClick}
-        disabled={disabled}
-        className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-left hover:bg-wash transition-colors duration-150 cursor-pointer outline-none disabled:opacity-60 disabled:cursor-not-allowed"
-      >
-        <span className="w-9 h-9 rounded-lg bg-tile grid place-items-center shrink-0">
-          <Icon name={icon} size={18} strokeWidth={1.9} className="text-chrome-icon" />
-        </span>
-        <span className="flex-1 min-w-0">
-          <span className="block text-[13px] font-semibold text-ink-body leading-tight">
-            {title}
-          </span>
-          {description && (
-            <span className="block text-xs font-medium text-ink-muted mt-0.5">
-              {description}
-            </span>
-          )}
-        </span>
-        {trailing}
-      </button>
-    </li>
-  );
-}
 
 export function AccountPanel({
   settings,
@@ -75,67 +17,121 @@ export function AccountPanel({
   onDeactivate: () => void;
 }) {
   const has2fa = settings?.has2fa ?? false;
+  const email = settings?.email || "Carregando...";
+  const verified = settings?.verifiedEmail ?? false;
 
   return (
     <div>
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 items-stretch">
-        <section aria-label="Segurança" className={cn(CARD_CLASS, "lg:col-span-12")}>
-          <h2 className={cn(SECTION_HEADING_CLASS, "mb-2")}>Segurança</h2>
-
-          <ul className="space-y-0.5">
-            <SettingRow
-              icon="lock"
-              title="Alterar senha"
-              description="Recomendamos senhas fortes e únicas"
-              onClick={onChangePassword}
-              trailing={
-                <Icon name="alt-arrow-right" size={16} strokeWidth={1.9} className="text-ink-label shrink-0" />
-              }
-            />
-            <SettingRow
-              icon="letter"
-              title="E-mail"
-              description={settings?.email || "Carregando..."}
-              onClick={onChangeEmail}
-              trailing={
-                <Icon name="alt-arrow-right" size={16} strokeWidth={1.9} className="text-ink-label shrink-0" />
-              }
-            />
-            <SettingRow
-              icon="key-minimalistic-square"
-              title="Autenticação em dois fatores"
-              description="Proteção extra no login"
-              onClick={onToggleTwoFactor}
-              trailing={<TwoFactorBadge enabled={has2fa} />}
-            />
-          </ul>
-        </section>
-
-        <section aria-label="Zona de risco" className={cn(CARD_CLASS, "lg:col-span-12")}>
-          <div className="rounded-[20px] border border-error/30 bg-error/[0.06] p-4 sm:p-5">
-            <h2 className="flex items-center gap-2 text-sm font-extrabold text-error">
-              <Icon name="danger-circle" size={16} strokeWidth={2} />
-              Zona de risco
-            </h2>
-            <p className="mt-1 max-w-md text-xs font-medium leading-relaxed text-ink-secondary">
-              Ao desativar a conta, seus widgets e links deixam de funcionar e
-              todas as sessões são encerradas. É possível{" "}
-              <strong className="font-bold text-error">reativar</strong> fazendo
-              login novamente.
+      <section
+        aria-label="Autenticação em dois fatores"
+        className="rounded-[28px] bg-hero border border-line text-on-hero p-6 sm:p-8"
+      >
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_auto] md:items-center">
+          <div className="min-w-0">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-on-hero/60">
+              Segunda camada
             </p>
-            <div className="mt-4">
-              <Button
-                variant="danger-soft"
-                size="sm"
-                type="button"
-                onClick={onDeactivate}
-              >
-                Desativar conta
-              </Button>
-            </div>
+            <p className="mt-2 text-2xl sm:text-[28px] font-extrabold tracking-tight leading-tight">
+              {has2fa ? "Proteção extra ativa" : "Proteção extra desligada"}
+            </p>
+            <p className="mt-2 max-w-md text-[13px] font-medium leading-relaxed text-on-hero/70">
+              {has2fa
+                ? "Pedimos um código do seu app a cada login. É o que protege seus saques."
+                : "Ao ativar, toda ação crítica exigirá um código do seu app autenticador."}
+            </p>
           </div>
-        </section>
-      </div>
+          <div className="flex flex-row items-center gap-3 md:flex-col md:items-end">
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-extrabold ${
+                has2fa
+                  ? "bg-on-hero text-hero"
+                  : "bg-error-solid text-white"
+              }`}
+            >
+              <span
+                aria-hidden="true"
+                className="h-1.5 w-1.5 rounded-full bg-current"
+              />
+              {has2fa ? "Ativa" : "Inativa"}
+            </span>
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={onToggleTwoFactor}
+              className="px-6"
+            >
+              {has2fa ? "Gerenciar" : "Ativar proteção"}
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <section aria-label="Credenciais" className="mt-10">
+        <h2 className={SECTION_HEADING_CLASS}>Credenciais</h2>
+        <dl className="mt-2 divide-y divide-line/60 border-y border-line/60">
+          <div className="flex flex-col gap-1.5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+            <div className="min-w-0">
+              <dt className="text-xs font-medium text-ink-muted">E-mail</dt>
+              <dd className="mt-0.5 truncate text-[15px] font-bold tracking-tight text-ink-heading">
+                {email}{" "}
+                <span
+                  className={`ml-1 text-xs font-bold ${verified ? "text-success" : "text-warning"}`}
+                >
+                  · {verified ? "Verificado" : "Pendente"}
+                </span>
+              </dd>
+            </div>
+            <button
+              type="button"
+              onClick={onChangeEmail}
+              className={`${LINK_CLASS} shrink-0 self-start text-sm font-bold sm:self-auto cursor-pointer`}
+            >
+              Alterar
+            </button>
+          </div>
+          <div className="flex flex-col gap-1.5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+            <div className="min-w-0">
+              <dt className="text-xs font-medium text-ink-muted">Senha</dt>
+              <dd className="mt-0.5 text-[15px] font-bold tracking-tight text-ink-heading">
+                ••••••••
+              </dd>
+            </div>
+            <button
+              type="button"
+              onClick={onChangePassword}
+              className={`${LINK_CLASS} shrink-0 self-start text-sm font-bold sm:self-auto cursor-pointer`}
+            >
+              Alterar
+            </button>
+          </div>
+        </dl>
+      </section>
+
+      <section
+        aria-label="Zona de risco"
+        className="mt-10 rounded-[28px] border border-error/30 bg-error/[0.06] p-5 sm:p-6"
+      >
+        <h2 className="flex items-center gap-2 text-sm font-extrabold text-error">
+          <Icon name="danger-circle" size={16} strokeWidth={2} />
+          Zona de risco
+        </h2>
+        <ul className="mt-2 max-w-md list-disc space-y-1 pl-5 text-xs font-medium leading-relaxed text-ink-secondary">
+          <li>Widgets e links param de funcionar.</li>
+          <li>Todas as sessões são encerradas.</li>
+          <li>Reativação fazendo login novamente.</li>
+        </ul>
+        <div className="mt-4">
+          <Button
+            variant="danger-soft"
+            size="sm"
+            type="button"
+            onClick={onDeactivate}
+          >
+            Desativar conta
+          </Button>
+        </div>
+      </section>
     </div>
   );
 }

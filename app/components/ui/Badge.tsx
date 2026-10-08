@@ -8,10 +8,14 @@ interface BadgeProps {
 const statusMap: Record<string, { label: string; className: string }> = {
   pending: {
     label: "Pendente",
-    className: "text-yellow-ink bg-yellow-wash",
+    className: "text-on-pending bg-pending",
+  },
+  processing: {
+    label: "Processando",
+    className: "text-info bg-info/10",
   },
   success: {
-    label: "Aprovado",
+    label: "Concluído",
     className: "text-success bg-success/10",
   },
   approved: {
@@ -19,7 +23,7 @@ const statusMap: Record<string, { label: string; className: string }> = {
     className: "text-success bg-success/10",
   },
   failed: {
-    label: "Rejeitado",
+    label: "Falhou",
     className: "text-error bg-error/10",
   },
   rejected: {

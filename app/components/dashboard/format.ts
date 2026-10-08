@@ -30,6 +30,16 @@ export function formatLongDate(isoDate: string) {
   });
 }
 
+/** "YYYY-MM-DD" → "07/10/2026" (data local, sem shift de fuso). */
+export function formatPeakDateBR(isoDate: string | null | undefined) {
+  if (!isoDate) return null;
+  const date = parseLocalDate(isoDate.slice(0, 10));
+  if (!date) return null;
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  return `${dd}/${mm}/${date.getFullYear()}`;
+}
+
 const WEEKDAY_FULL = [
   "domingo",
   "segunda-feira",

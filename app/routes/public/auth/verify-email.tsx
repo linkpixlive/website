@@ -8,7 +8,7 @@ import {
   useSubmit,
 } from "react-router";
 import { authApi } from "~/api/modules/auth";
-import { AuthCard } from "~/components/auth/AuthCard";
+import { AuthShell } from "~/components/auth/AuthShell";
 import { OtpField } from "~/components/auth/OtpField";
 import { AlertMessage } from "~/components/ui/AlertMessage";
 import { Spinner } from "~/components/ui/Spinner";
@@ -80,22 +80,26 @@ export default function VerifyEmail({ actionData }: Route.ComponentProps) {
   if (!email) return null; // Avoid flicker before redirect
 
   return (
-    <AuthCard
-      title="Verifique seu e-mail"
-      subtitle={`Informe o código de 6 dígitos enviado para ${email}`}
+    <AuthShell
+      eyebrow="Quase lá"
+      title="Digite o código"
+      lede={
+        <>
+          Enviamos 6 dígitos para{" "}
+          <span className="font-semibold text-ink-heading">{email}</span>.
+        </>
+      }
     >
       <div className="space-y-6">
-        <div className="py-4">
-          <OtpField
-            onComplete={handleComplete}
-            onChange={() => {
-              setClientError(null);
-              clearApiError();
-            }}
-            disabled={loading}
-            error={!!displayError}
-          />
-        </div>
+        <OtpField
+          onComplete={handleComplete}
+          onChange={() => {
+            setClientError(null);
+            clearApiError();
+          }}
+          disabled={loading}
+          error={!!displayError}
+        />
 
         {displayError && (
           <AlertMessage variant="error" message={displayError} />
@@ -107,16 +111,16 @@ export default function VerifyEmail({ actionData }: Route.ComponentProps) {
           </div>
         )}
 
-        <div className="mt-6 text-center text-sm font-medium text-ink-secondary">
-          <p>Não recebeu o código?</p>
+        <p className="text-center text-sm font-medium text-ink-secondary">
+          Não recebeu o código?{" "}
           <Link
             to="/auth/login"
-            className="inline-block mt-1 text-info hover:text-info-hover font-semibold underline transition-colors duration-150"
+            className="text-info hover:text-info-hover font-semibold underline transition-colors duration-150"
           >
             Reenviar
           </Link>
-        </div>
+        </p>
       </div>
-    </AuthCard>
+    </AuthShell>
   );
 }

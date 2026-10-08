@@ -32,7 +32,7 @@ export function OtpInput({ length = 6, onComplete, onChange, disabled, error }: 
           ref={index === 0 ? firstRef : undefined}
           inputMode="numeric"
           className={`
-            w-11 h-12 text-center text-lg font-mono font-semibold bg-wash rounded-full text-ink-heading
+            w-11 h-12 text-center text-lg font-mono font-semibold bg-card rounded-full text-ink-heading
             border transition-colors duration-150 outline-none
             ${
               error

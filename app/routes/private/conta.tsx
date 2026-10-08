@@ -28,6 +28,16 @@ const FALLBACK_SETTINGS: AccountSettings = {
   verifiedEmail: false,
 };
 
+export function meta() {
+  return [
+    { title: "Conta — LinkPix" },
+    {
+      name: "description",
+      content: "Senha, e-mail e segunda camada — o cofre da sua operação.",
+    },
+  ];
+}
+
 export async function loader({ request }: Route.LoaderArgs) {
   const token = getAuthToken(request);
 
@@ -186,10 +196,9 @@ export default function AccountPage() {
 
   return (
     <div>
-      {/* Title block */}
       <PageHeader
         title="Conta"
-        subtitle="Gerencie seu e-mail, senha e segurança da conta."
+        subtitle="Gerencie suas credenciais e proteja sua conta."
       />
 
       <AccountPanel

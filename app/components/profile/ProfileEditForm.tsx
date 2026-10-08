@@ -4,22 +4,33 @@ import { PUBLIC_PAGE_BASE } from "~/components/dashboard/menu";
 import type { LayoutUser } from "~/components/dashboard/ProfilePopover";
 import { AlertMessage } from "~/components/ui/AlertMessage";
 import { Button } from "~/components/ui/Button";
+import { SECTION_HEADING_CLASS } from "~/components/ui/classes";
 import { FormField } from "~/components/ui/FormField";
-import { useToast } from "~/contexts/useToast";
 import { useUnsavedChanges } from "~/components/ui/UnsavedChangesProvider";
+import { useToast } from "~/contexts/useToast";
+import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
+import { cn } from "~/util/cn";
 import {
   diffPublicData,
   getUsernameCooldown,
 } from "~/validators/profile-validator";
-import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
-import { ProfileCard } from "./ProfileCard";
 import type { ProfileActionResult } from "./profile-result";
 
-export function PublicDataCard({ user }: { user: LayoutUser }) {
+export function ProfileEditForm({
+  user,
+  name,
+  setName,
+  username,
+  setUsername,
+}: {
+  user: LayoutUser;
+  name: string;
+  setName: (value: string) => void;
+  username: string;
+  setUsername: (value: string) => void;
+}) {
   const saver = useFetcher<ProfileActionResult>();
   const saving = saver.state === "submitting";
-  const [name, setName] = useState(user.name);
-  const [username, setUsername] = useState(user.username ?? "");
   const [fieldErrors, setFieldErrors] = useState<{
     name?: string;
     username?: string;
@@ -60,9 +71,10 @@ export function PublicDataCard({ user }: { user: LayoutUser }) {
   useUnsavedChanges(hasChanges);
 
   return (
-    <ProfileCard label="Dados públicos" className="lg:col-span-7 xl:col-span-8">
+    <section aria-label="Dados públicos" className="flex flex-col">
+      <h2 className={cn(SECTION_HEADING_CLASS, "mb-5")}>Dados públicos</h2>
       <form
-        className="flex flex-col gap-5 flex-1"
+        className="flex flex-col gap-5"
         onSubmit={(e) => {
           e.preventDefault();
           saver.submit(
@@ -75,9 +87,9 @@ export function PublicDataCard({ user }: { user: LayoutUser }) {
           );
         }}
       >
-          <FormField
-            name="name"
-            label="Nome público"
+        <FormField
+          name="name"
+          label="Nome público"
           icon="user-circle"
           value={name}
           maxLength={100}
@@ -108,14 +120,17 @@ export function PublicDataCard({ user }: { user: LayoutUser }) {
               message={`Você trocou de username recentemente. A próxima troca fica disponível em ${availableLabel} (${cooldown.remainingDays} ${cooldown.remainingDays === 1 ? "dia" : "dias"}).`}
             />
           ) : (
-            <p className="-mt-1 text-[11px] font-medium leading-relaxed text-ink-muted">
+            <p className="-mt-1 text-xs font-medium leading-relaxed text-ink-muted">
               Letras, números e underline (_), 3 a 30 caracteres. Após a troca
               há uma carência de 15 dias e seu @ antigo fica reservado.
             </p>
           )}
         </div>
 
-        <div className="mt-auto pt-2 flex justify-end">
+        <div className="flex items-center justify-between gap-3 pt-1">
+          <p aria-live="polite" className="min-h-4 text-xs font-medium text-ink-muted">
+            {hasChanges ? "Alterações não salvas" : ""}
+          </p>
           <Button
             type="submit"
             size="sm"
@@ -126,6 +141,6 @@ export function PublicDataCard({ user }: { user: LayoutUser }) {
           </Button>
         </div>
       </form>
-    </ProfileCard>
+    </section>
   );
 }

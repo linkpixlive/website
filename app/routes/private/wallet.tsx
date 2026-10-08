@@ -4,6 +4,7 @@ import {
   useActionData,
   useLoaderData,
   useNavigation,
+  useSearchParams,
 } from "react-router";
 import { accountSettingsApi } from "~/api/modules/account-settings";
 import { pixKeysApi } from "~/api/modules/pix-keys";
@@ -14,18 +15,18 @@ import {
   withdrawalsApi,
 } from "~/api/modules/withdrawals";
 import { PageHeader } from "~/components/dashboard/PageHeader";
-import { HistorySectionShell } from "~/components/ui/HistorySectionShell";
+import { DatePicker } from "~/components/ui/DatePicker";
+import { EyeToggleButton } from "~/components/ui/EyeToggleButton";
+import { FilterShell } from "~/components/ui/FilterShell";
+import { SelectField } from "~/components/ui/SelectField";
 import { Pagination } from "~/components/ui/Pagination";
-import { useToast } from "~/contexts/useToast";
-import { BalanceCard } from "~/components/wallet/BalanceCard";
-import { PixKeysCard } from "~/components/wallet/PixKeysCard";
 import { PixKeysModal } from "~/components/wallet/PixKeysModal";
-import { WithdrawalFilters } from "~/components/wallet/WithdrawalFilters";
-import { WithdrawalHistoryTable } from "~/components/wallet/WithdrawalHistoryTable";
+import { WalletHero } from "~/components/wallet/WalletHero";
+import { WithdrawalHistoryList } from "~/components/wallet/WithdrawalHistoryList";
 import { WithdrawalModal } from "~/components/wallet/WithdrawalModal";
 import { useFetcherFeedback } from "~/hooks/useFetcherFeedback";
 import { usePageParam } from "~/hooks/usePageParam";
-import { getPageParam } from "~/util/search-params";
+import { getPageParam, setParamOrDelete, updateParams } from "~/util/search-params";
 import { clearAuthCookie, getAuthToken } from "~/util/session.server";
 import {
   createWithdrawalSchema,
@@ -190,17 +191,28 @@ function ok(action: string): WalletActionResult {
   return { success: true, action };
 }
 
+const STATUS_OPTIONS = [
+  { value: "all", label: "Todos" },
+  { value: "pending", label: "Pendente" },
+  { value: "processing", label: "Processando" },
+  { value: "success", label: "Concluído" },
+  { value: "failed", label: "Falhou" },
+];
+
 export default function WalletPage() {
   const { balances, pixKeys, withdrawals, page, totalPages, has2fa } =
     useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const { handlePageChange } = usePageParam();
   const navigation = useNavigation();
-  const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [modal, setModal] = useState<"withdraw" | "pixKeys" | null>(null);
 
   const [withdrawalError, setWithdrawalError] = useState<string | null>(null);
+  const [withdrawSuccess, setWithdrawSuccess] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [showFullKeys, setShowFullKeys] = useState(false);
 
   const loadingData = navigation.state === "loading";
 
@@ -210,8 +222,7 @@ export default function WalletPage() {
     onResult: (result) => {
       if (result.action !== "createWithdrawal") return;
       if (result.success) {
-        toast("Saque solicitado com sucesso!", "success");
-        setModal(null);
+        setWithdrawSuccess(true);
         setWithdrawalError(null);
       } else if (result.error) {
         setWithdrawalError(result.error);
@@ -221,66 +232,153 @@ export default function WalletPage() {
 
   const openWithdrawal = () => {
     setWithdrawalError(null);
+    setWithdrawSuccess(false);
     setModal("withdraw");
   };
 
+  const closeModals = () => {
+    setModal(null);
+    setWithdrawSuccess(false);
+    setWithdrawalError(null);
+  };
+
+  const status = searchParams.get("status") || "all";
+  const startDate = searchParams.get("startDate")
+    ? new Date(searchParams.get("startDate")!)
+    : null;
+  const endDate = searchParams.get("endDate")
+    ? new Date(searchParams.get("endDate")!)
+    : null;
+
+  const handleStatusChange = (value: string) => {
+    updateParams(searchParams, setSearchParams, (params) => {
+      setParamOrDelete(params, "status", value, "all");
+      params.delete("page");
+    });
+  };
+
+  const handleDateChange = (key: "startDate" | "endDate") => (date: Date | null) => {
+    updateParams(searchParams, setSearchParams, (params) => {
+      if (date) {
+        params.set(key, date.toISOString().split("T")[0]);
+      } else {
+        params.delete(key);
+      }
+      params.delete("page");
+    });
+  };
+
+  const handleClearFilters = () => {
+    updateParams(searchParams, setSearchParams, (params) => {
+      params.delete("status");
+      params.delete("startDate");
+      params.delete("endDate");
+      params.delete("page");
+    });
+  };
+
+  const hasActiveFilters =
+    status !== "all" ||
+    searchParams.has("startDate") ||
+    searchParams.has("endDate");
+
   return (
     <div>
-      {/* Title block */}
       <PageHeader
         title="Carteira"
-        subtitle="Acompanhe seu saldo disponível e o histórico de saques."
+        subtitle="Seu saldo, seus saques e suas chaves Pix em um só lugar."
       />
 
-      {/* Primary + secondary columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-        <div className="lg:col-span-7 xl:col-span-8">
-          <BalanceCard
-            balances={balances}
-            loading={loadingData}
-            onWithdraw={openWithdrawal}
-          />
-        </div>
-        <aside className="lg:col-span-5 xl:col-span-4">
-          <PixKeysCard pixKeys={pixKeys} onManage={() => setModal("pixKeys")} />
-        </aside>
+      <div className="mt-2">
+        <WalletHero
+          balances={balances}
+          loading={loadingData}
+          onWithdraw={openWithdrawal}
+          onManageKeys={() => setModal("pixKeys")}
+        />
       </div>
 
-      {/* History card */}
-      <HistorySectionShell
-        title="Histórico de saques"
-        total={withdrawals.meta.total}
-        className="mt-5"
-      >
-        <WithdrawalFilters />
-
-        <div className="mt-5">
-          <WithdrawalHistoryTable
-            items={withdrawals.items}
-            loading={loadingData}
+        <section aria-label="Extrato de saques" className="mt-8 border-t border-line pt-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-base font-bold text-ink-heading">
+              Extrato de saques{" "}
+              <span className="ml-1 rounded-full bg-wash px-2 py-0.5 text-[11px] font-extrabold text-ink-secondary">
+                {withdrawals.meta.total}
+              </span>
+            </h2>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[12px] font-semibold text-ink-secondary">
+                {showFullKeys ? "Ocultar chaves" : "Revelar chaves"}
+              </span>
+              <EyeToggleButton
+                visible={showFullKeys}
+                onToggle={() => setShowFullKeys((v) => !v)}
+                iconSize={14}
+                showLabel="Revelar chaves"
+                hideLabel="Ocultar chaves"
+              />
+            </div>
+          </div>
+          <div className="mt-4">
+            <FilterShell
+              hasActiveFilters={hasActiveFilters}
+              onClearFilters={handleClearFilters}
+              isOpen={filtersOpen}
+              onToggleOpen={() => setFiltersOpen((v) => !v)}
+            >
+              <div className="w-full sm:w-44">
+                <SelectField
+                  label="Status"
+                  options={STATUS_OPTIONS}
+                  value={status}
+                  onChange={handleStatusChange}
+                />
+              </div>
+              <div className="w-full sm:w-48">
+                <DatePicker
+                  label="Data de Início"
+                  value={startDate}
+                  onChange={handleDateChange("startDate")}
+                />
+              </div>
+              <div className="w-full sm:w-48">
+                <DatePicker
+                  label="Data Final"
+                  value={endDate}
+                  onChange={handleDateChange("endDate")}
+                />
+              </div>
+            </FilterShell>
+          </div>
+          <div className="mt-2">
+            <WithdrawalHistoryList
+              items={withdrawals.items}
+              loading={loadingData}
+              showFull={showFullKeys}
+            />
+          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
           />
-        </div>
-
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
-      </HistorySectionShell>
+      </section>
 
       {/* Modals */}
       <WithdrawalModal
         isOpen={modal === "withdraw"}
-        onClose={() => setModal(null)}
+        onClose={closeModals}
         pixKeys={pixKeys}
         onOpenManageKeys={() => setModal("pixKeys")}
         error={withdrawalError}
         has2fa={has2fa}
+        available={balances.available}
+        success={withdrawSuccess}
       />
 
       <PixKeysModal
         isOpen={modal === "pixKeys"}
-        onClose={() => setModal(null)}
+        onClose={closeModals}
         pixKeys={pixKeys}
       />
     </div>

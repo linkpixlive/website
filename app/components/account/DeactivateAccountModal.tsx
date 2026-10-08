@@ -63,10 +63,16 @@ export function DeactivateAccountModal({
 
         {actionError && <AlertMessage variant="error" message={actionError} />}
 
-        <p className="text-[13px] font-medium leading-relaxed text-ink-secondary">
-          Sua conta será desativada e todas as sessões serão encerradas. Você
-          pode reativá-la fazendo login novamente.
-        </p>
+        <div className="space-y-2">
+          <p className="text-[13px] font-bold text-ink-heading">
+            Isso vai acontecer na hora:
+          </p>
+          <ul className="list-disc space-y-1 pl-5 text-[13px] font-medium leading-relaxed text-ink-secondary">
+            <li>Widgets e links param de funcionar.</li>
+            <li>Todas as sessões são encerradas.</li>
+            <li>Para voltar, basta fazer login de novo.</li>
+          </ul>
+        </div>
 
         <PasswordField
           label="Senha"

@@ -114,7 +114,7 @@ export function DatePicker({
         <Popover.Trigger
           disabled={disabled}
           className={`
-                w-full bg-wash rounded-full py-2.5 pl-10 pr-4 text-left text-sm font-medium text-ink-heading
+                w-full bg-card rounded-full py-2.5 pl-10 pr-4 text-left text-sm font-medium text-ink-heading
                 border transition-colors duration-150 outline-none cursor-pointer flex items-center relative min-w-0
                 ${
                   error

@@ -40,11 +40,11 @@ export function UnifiedDonationCard({
   return (
     <div
       className={cn(
-        "rounded-[26px] bg-card border border-line shadow-xs overflow-hidden animate-fade-in",
+        "rounded-[28px] bg-card border border-line overflow-hidden animate-fade-in",
         className,
       )}
     >
-      <div className="sticky top-0 z-10 bg-card border-b border-line p-5">
+      <div className="px-5 pt-5">
         <StreamerProfileCard profile={profile} />
       </div>
 

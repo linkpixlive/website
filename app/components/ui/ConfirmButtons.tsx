@@ -21,7 +21,7 @@ export function ConfirmButtons({
         type={onConfirm ? "button" : "submit"}
         onClick={onConfirm}
         disabled={loading}
-        className="w-full px-3 py-2.5 rounded-full bg-error text-white text-[11px] font-bold hover:bg-error-hover active:scale-[0.98] transition-all duration-150 cursor-pointer outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-full px-3 py-2.5 rounded-full bg-error-solid text-white text-[11px] font-bold hover:bg-error-solid-hover active:scale-[0.98] transition-all duration-150 cursor-pointer outline-none disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {loading && loadingLabel ? loadingLabel : confirmLabel}
       </button>

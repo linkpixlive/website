@@ -1,17 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Link, useActionData, useNavigation, useSearchParams, useSubmit } from "react-router";
+import { Link, useNavigation, useSearchParams, useSubmit } from "react-router";
 import { z } from "zod";
 import { authApi } from "~/api/modules/auth";
-import { AuthCard } from "~/components/auth/AuthCard";
+import { AuthShell } from "~/components/auth/AuthShell";
+import { AuthSuccess } from "~/components/auth/AuthSuccess";
 import { PasswordField } from "~/components/auth/PasswordField";
 import { AlertMessage } from "~/components/ui/AlertMessage";
-import { Button } from "~/components/ui/Button";
+import { FormField } from "~/components/ui/FormField";
 import { SubmitButton } from "~/components/ui/SubmitButton";
 import { useActionError } from "~/hooks/useActionError";
 import { resetPasswordSchema } from "~/validators/auth-validator";
 import { getPasswordStrength } from "~/validators/password";
-import { LINK_CLASS } from "~/components/ui/classes";
 import type { Route } from "./+types/reset-password";
 
 export function meta({}: Route.MetaArgs) {
@@ -77,75 +77,82 @@ export default function ResetPassword({ actionData }: Route.ComponentProps) {
 
   if (!token) {
     return (
-      <AuthCard
+      <AuthShell
+        eyebrow="Recuperação"
         title="Link inválido"
-        subtitle="Este link de redefinição é inválido ou está ausente."
+        lede="Este link de redefinição é inválido ou está ausente."
+        aside={{ to: "/auth/login", label: "Entrar" }}
       >
         <div className="space-y-6">
           <AlertMessage variant="error" message="Token de redefinição ausente." />
           <div className="text-center">
             <Link
               to="/auth/forgot-password"
-              className={`text-[13px] font-semibold ${LINK_CLASS} transition-colors duration-150`}
+              className="text-[13px] font-semibold text-info hover:text-info-hover transition-colors duration-150"
             >
               Solicitar novo link
             </Link>
           </div>
         </div>
-      </AuthCard>
+      </AuthShell>
+    );
+  }
+
+  if (success) {
+    return (
+      <AuthShell
+        eyebrow="Recuperação"
+        title="Senha alterada"
+        aside={{ to: "/auth/login", label: "Entrar" }}
+      >
+        <AuthSuccess
+          message={<p>Sua senha foi alterada com sucesso.</p>}
+          ctaTo="/auth/login"
+          ctaLabel="Ir para o login"
+        />
+      </AuthShell>
     );
   }
 
   return (
-    <AuthCard title="Definir nova senha" subtitle="Escolha uma senha forte">
-      {success ? (
-        <div className="space-y-6">
-          <AlertMessage
-            variant="success"
-            message="Sua senha foi alterada com sucesso."
-          />
-          <div className="text-center mt-6">
-            <Link to="/auth/login" className="inline-block w-full">
-              <Button variant="primary" className="w-full">
-                Ir para o login
-              </Button>
-            </Link>
-          </div>
+    <AuthShell
+      eyebrow="Recuperação"
+      title="Defina sua nova senha"
+      lede="Escolha uma senha forte — em seguida é só entrar."
+      aside={{ to: "/auth/login", label: "Entrar" }}
+    >
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        onChange={clearApiError}
+        className="space-y-4"
+      >
+        {apiError && <AlertMessage variant="error" message={apiError} />}
+
+        <PasswordField
+          label="Nova senha"
+          {...register("newPassword")}
+          error={errors.newPassword?.message}
+          icon="lock"
+          placeholder="Crie uma senha forte"
+          disabled={loading}
+          showStrength
+          strengthScore={getPasswordStrength(newPasswordValue || "")}
+          autoFocus
+        />
+
+        <PasswordField
+          label="Confirmar senha"
+          {...register("confirmPassword")}
+          error={errors.confirmPassword?.message}
+          icon="lock"
+          placeholder="Confirme sua senha"
+          disabled={loading}
+        />
+
+        <div className="mt-6">
+          <SubmitButton loading={loading}>Redefinir senha</SubmitButton>
         </div>
-      ) : (
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          onChange={clearApiError}
-          className="space-y-4"
-        >
-          {apiError && <AlertMessage variant="error" message={apiError} />}
-
-          <PasswordField
-            label="Nova senha"
-            {...register("newPassword")}
-            error={errors.newPassword?.message}
-            icon="lock"
-            placeholder="Crie uma senha forte"
-            disabled={loading}
-            showStrength
-            strengthScore={getPasswordStrength(newPasswordValue || "")}
-            autoFocus
-          />
-
-          <PasswordField
-            label="Confirmar senha"
-            {...register("confirmPassword")}
-            error={errors.confirmPassword?.message}
-            icon="lock"
-            placeholder="Confirme sua senha"
-            disabled={loading}
-          />
-
-          <div className="mt-6">
-            <SubmitButton loading={loading}>Redefinir senha</SubmitButton>
-          </div>
-        </form>
-      )}
-    </AuthCard>
+      </form>
+    </AuthShell>
   );
 }

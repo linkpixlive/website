@@ -1,4 +1,4 @@
-import { useLoaderData } from "react-router";
+import { useState } from "react";
 import type { Route } from "./+types/profile";
 import { PageHeader } from "~/components/dashboard/PageHeader";
 import { useCurrentUser } from "~/components/dashboard/ProfilePopover";
@@ -9,10 +9,8 @@ import {
   validateAvatarFile,
   validateUsernameFormat,
 } from "~/validators/profile-validator";
-import { getStreamerByUsername } from "~/api/modules/public-donations";
-import { IdentityCard } from "~/components/profile/IdentityCard";
-import { PublicDataCard } from "~/components/profile/PublicDataCard";
-import { PublicPageCard } from "~/components/profile/PublicPageCard";
+import { ProfileEditForm } from "~/components/profile/ProfileEditForm";
+import { ProfileShowcaseHeader } from "~/components/profile/ProfileShowcaseHeader";
 import type { ProfileActionResult } from "~/components/profile/profile-result";
 import { requireValidAuth } from "~/util/auth.server";
 import { getAuthToken } from "~/util/session.server";
@@ -25,21 +23,6 @@ export function meta({}: Route.MetaArgs) {
       content: "Gerencie sua foto, nome e username públicos",
     },
   ];
-}
-
-export async function loader({ request }: Route.LoaderArgs) {
-  const user = await requireValidAuth(request);
-
-  let publicProfile: Awaited<ReturnType<typeof getStreamerByUsername>> = null;
-  if (user?.username) {
-    try {
-      publicProfile = await getStreamerByUsername(user.username);
-    } catch {
-      publicProfile = null;
-    }
-  }
-
-  return { publicProfile };
 }
 
 function isUploadableFile(
@@ -193,34 +176,40 @@ async function uploadPhotoAction(
 }
 
 export default function Profile() {
-  const { publicProfile } = useLoaderData<typeof loader>();
   const user = useCurrentUser();
+  const [name, setName] = useState(user?.name ?? "");
+  const [username, setUsername] = useState(user?.username ?? "");
 
   if (!user) return null;
+
+  const displayName = name.trim() || user.name;
+  const displayUsername = username.trim();
+  const photoUrl = user.profileImageUrl ?? null;
 
   return (
     <div>
       <PageHeader
         title="Perfil"
-        subtitle={
-          <>
-            Gerencie sua{" "}
-            <strong className="font-bold text-ink-heading">
-              foto, nome e username
-            </strong>{" "}
-            públicos.
-          </>
-        }
+        subtitle="Os dados que aparecem na sua página de contribuições."
       />
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 items-stretch">
-        <IdentityCard
-          key={`identity-${user.profileImageUrl ?? "none"}`}
+      <ProfileShowcaseHeader
+        user={user}
+        displayName={displayName}
+        displayUsername={displayUsername}
+        photoUrl={photoUrl}
+      />
+
+      <div className="my-8 h-px bg-line" aria-hidden="true" />
+
+      <div className="max-w-2xl">
+        <ProfileEditForm
           user={user}
-          photoUrl={user.profileImageUrl ?? null}
+          name={name}
+          setName={setName}
+          username={username}
+          setUsername={setUsername}
         />
-        <PublicDataCard user={user} />
-        <PublicPageCard user={user} publicProfile={publicProfile} />
       </div>
     </div>
   );

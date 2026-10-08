@@ -1,5 +1,4 @@
-export const CARD_CLASS =
-  "rounded-[26px] bg-card border border-line shadow-xs p-5";
+export const CARD_CLASS = "rounded-[28px] bg-card border border-line p-5";
 
 export const SECTION_HEADING_CLASS =
   "text-[11px] font-extrabold uppercase tracking-wider text-ink-label";

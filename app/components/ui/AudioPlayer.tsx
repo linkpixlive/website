@@ -68,7 +68,6 @@ export function AudioPlayer({
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch {
-      // Nunca navega para fora da página: apenas informa a falha.
       toast("Não foi possível baixar o áudio. Tente novamente.", "error");
     } finally {
       setDownloading(false);
@@ -77,14 +76,14 @@ export function AudioPlayer({
 
   if (hasError || !isSafeMediaUrl(src)) {
     return (
-      <div className="flex items-center gap-2 rounded-2xl bg-card border border-line px-4 py-3">
+      <div className="flex items-center gap-2 rounded-2xl border bg-card border-line px-4 py-3 text-ink-muted">
         <Icon
           name="danger-circle"
           size={16}
           strokeWidth={2}
-          className="text-ink-muted shrink-0"
+          className="shrink-0"
         />
-        <span className="text-xs font-medium text-ink-muted">
+        <span className="text-xs font-medium">
           Áudio indisponível
         </span>
       </div>
@@ -94,7 +93,7 @@ export function AudioPlayer({
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="flex min-w-0 items-center gap-2.5 rounded-2xl bg-card border border-line px-2.5 py-2">
+    <div className="flex min-w-0 items-center gap-2.5 rounded-2xl border bg-card border-line px-2.5 py-2">
       <audio
         ref={audioRef}
         src={src}
@@ -117,7 +116,7 @@ export function AudioPlayer({
         type="button"
         onClick={handleToggle}
         aria-label={isPlaying ? "Pausar áudio" : "Reproduzir áudio"}
-        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-inverse text-white hover:bg-inverse-hover active:scale-[0.98] transition-all duration-150 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
+        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-inverse text-on-inverse transition-all duration-150 cursor-pointer outline-none hover:bg-inverse-hover focus-visible:ring-2 focus-visible:ring-brand/40 active:scale-[0.98]"
       >
         <Icon
           name={isPlaying ? "pause" : "play"}
@@ -153,7 +152,7 @@ export function AudioPlayer({
         disabled={downloading}
         title="Baixar áudio"
         aria-label={downloading ? "Baixando áudio" : "Baixar áudio"}
-        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-wash text-ink-body hover:bg-wash-hover transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-brand/40 cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-wash text-ink-body transition-colors duration-150 outline-none hover:bg-wash-hover focus-visible:ring-2 focus-visible:ring-brand/40 cursor-pointer disabled:opacity-60 disabled:cursor-wait"
       >
         {downloading ? (
           <span className="h-4 w-4 rounded-full border-2 border-current/30 border-t-current animate-spin" />

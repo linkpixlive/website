@@ -16,15 +16,15 @@ function StreamerProfileCard({ profile, className }: StreamerProfileCardProps) {
           <img
             src={profile.profileImageUrl}
             alt={`Foto de ${profile.name}`}
-            className="size-[64px] rounded-full object-cover border-2 border-white shadow-2xs"
+            className="size-[56px] rounded-full object-cover border-2 border-line"
           />
         ) : (
-          <span className="size-[64px] rounded-full object-cover border-2 border-white shadow-2xs bg-media-void flex items-center justify-center overflow-hidden">
+          <span className="size-[56px] rounded-full object-cover border-2 border-line bg-media-void flex items-center justify-center overflow-hidden">
             <Icon name="user" size={28} strokeWidth={1.9} className="text-white" />
           </span>
         )}
         {profile.overlayActive && (
-          <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-error text-white text-[10px] font-extrabold uppercase tracking-wide shadow-xs whitespace-nowrap">
+          <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-error-solid text-white text-[10px] font-extrabold uppercase tracking-wide whitespace-nowrap">
             <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
             Ao vivo
           </span>

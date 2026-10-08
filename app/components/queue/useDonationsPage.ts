@@ -38,7 +38,6 @@ export function useDonationsPage({
     handleReplay,
   } = useQueueActions(token, isPaused);
 
-  const pendingCount = queue.filter((d) => !d.isCurrent).length;
   const currentId = queue.find((d) => d.isCurrent)?.id ?? null;
 
   return {
@@ -46,7 +45,6 @@ export function useDonationsPage({
     isPaused,
     liveItems,
     liveTotal,
-    pendingCount,
     currentId,
     actionLoading,
     replayLoading,

@@ -64,7 +64,7 @@ export function VoiceSelectField({
     return (
       <div className="flex flex-col gap-1.5 w-full">
         <span className="text-[13px] font-medium text-ink-secondary">{label}</span>
-        <div className="w-full bg-wash rounded-full py-2.5 px-4 text-sm font-medium text-ink-muted border border-line-input opacity-50">
+        <div className="w-full bg-card rounded-full py-2.5 px-4 text-sm font-medium text-ink-muted border border-line-input opacity-50">
           Nenhuma voz disponível no momento
         </div>
         <FieldError message={error} />
@@ -90,7 +90,7 @@ export function VoiceSelectField({
         disabled={disabled}
         aria-haspopup="dialog"
         className={`
-            w-full bg-wash rounded-full py-2.5 px-4 text-left text-sm font-medium text-ink-heading
+            w-full bg-card rounded-full py-2.5 px-4 text-left text-sm font-medium text-ink-heading
             border transition-colors duration-150 outline-none cursor-pointer flex items-center
             ${
               error

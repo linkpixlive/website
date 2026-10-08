@@ -42,7 +42,7 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
             disabled={disabled}
             aria-invalid={error ? true : undefined}
             className={`
-              w-full bg-wash rounded-full py-2.5 text-sm font-medium text-ink-heading placeholder:text-ink-placeholder
+              w-full bg-card rounded-full py-2.5 text-sm font-medium text-ink-heading placeholder:text-ink-placeholder
               border transition-colors duration-150 outline-none
               ${icon ? "pl-10" : "pl-4"} pr-11
               ${

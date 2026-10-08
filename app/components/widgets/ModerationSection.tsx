@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { AlertMessage } from "~/components/ui/AlertMessage";
 import { AutoGrowTextarea } from "~/components/ui/AutoGrowTextarea";
 import { RangeSlider } from "~/components/ui/RangeSlider";
 import { ToggleRow } from "~/components/ui/Switch";
-import { CARD_CLASS, SECTION_HEADING_CLASS } from "~/components/ui/classes";
+import { SECTION_HEADING_CLASS } from "~/components/ui/classes";
 import { cn } from "~/util/cn";
 import type { DonationSettings } from "~/api/modules/donation-settings";
 
@@ -21,20 +20,8 @@ function MaxLengthField({
   );
   const sliderMax = 250;
 
-  const handleMaxLengthNumber = (raw: string) => {
-    onDirtyChange?.();
-    if (raw === "") {
-      setMaxLength(0);
-      return;
-    }
-    const value = Number(raw);
-    if (Number.isFinite(value)) {
-      setMaxLength(Math.min(250, Math.max(0, Math.floor(value))));
-    }
-  };
-
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex max-w-sm flex-col gap-2">
       <div className="flex items-center justify-between gap-3">
         <label
           htmlFor="donation-max-length"
@@ -42,31 +29,18 @@ function MaxLengthField({
         >
           Tamanho máximo
         </label>
-        <span className="flex items-center gap-1.5">
-          <input
-            type="number"
-            min={0}
-            max={250}
-            step={1}
-            inputMode="numeric"
-            aria-label="Tamanho máximo em caracteres"
-            value={maxLength}
-            onChange={(event) =>
-              handleMaxLengthNumber(event.target.value)
-            }
-            disabled={disabled}
-            className="w-20 rounded-full bg-wash border border-line-input px-3 py-1.5 text-sm font-bold text-ink-heading text-center outline-none transition-colors duration-150 focus:border-border-focus focus:ring-2 focus:ring-brand/30 disabled:opacity-50 disabled:cursor-not-allowed"
-          />
-          <span className="text-xs font-medium text-ink-muted">
-            caracteres
-          </span>
+        <span
+          aria-live="polite"
+          className="text-sm font-bold text-ink-heading"
+        >
+          {maxLength} caracteres
         </span>
       </div>
       <RangeSlider
         id="donation-max-length"
         min={0}
         max={sliderMax}
-        step={10}
+        step={1}
         value={Math.min(maxLength, sliderMax)}
         onChange={(value) => {
           setMaxLength(value);
@@ -147,81 +121,88 @@ export function ModerationSection({
   ];
 
   return (
-    <section aria-label="Mensagem e moderação" className={cn(CARD_CLASS, "flex flex-col")}>
-      <h2 className={cn(SECTION_HEADING_CLASS, "mb-4")}>Mensagem e moderação</h2>
+    <section aria-labelledby="donation-moderation-heading">
+      <p className={SECTION_HEADING_CLASS}>02 · O que é barrado</p>
+      <h2
+        id="donation-moderation-heading"
+        className="mt-1.5 text-lg font-extrabold tracking-tight text-ink-heading"
+      >
+        Mensagem e moderação
+      </h2>
 
-      <div className="space-y-3.5 flex-1">
+      <div className="mt-5">
         <MaxLengthField
           defaultValue={settings.maxLength}
           disabled={loading}
           onDirtyChange={markDirty}
         />
+      </div>
 
-        <div className="rounded-2xl border border-line bg-wash/40 p-2">
-          <ToggleRow
-            label="Moderação por IA"
-            description="Quando desligada, nenhum filtro é aplicado"
-            name="aiModeration"
-            checked={aiModeration}
-            onToggle={() => {
-              setAiModeration((v) => !v);
-              markDirty();
-            }}
-            disabled={loading}
-          />
+      <div className="mt-6 border-t border-line pt-2">
+        <ToggleRow
+          label="Moderação por IA"
+          description="Desligada, nada é filtrado — nem as regras personalizadas"
+          name="aiModeration"
+          checked={aiModeration}
+          onToggle={() => {
+            setAiModeration((v) => !v);
+            markDirty();
+          }}
+          disabled={loading}
+        />
 
-          <div
-            aria-disabled={filtersDisabled}
-            className={
-              filtersDisabled ? "opacity-60" : undefined
-            }
-          >
-            {filterToggles.map((toggle) => (
-              <ToggleRow
-                key={toggle.name}
-                label={toggle.label}
-                description={toggle.description}
-                name={toggle.name}
-                checked={toggle.checked}
-                onToggle={toggle.onToggle}
-                disabled={filtersDisabled}
-              />
-            ))}
+        <div
+          aria-disabled={filtersDisabled}
+          className={cn(
+            "ml-4 pl-2",
+            filtersDisabled && "opacity-50",
+          )}
+        >
+          {filterToggles.map((toggle) => (
+            <ToggleRow
+              key={toggle.name}
+              label={toggle.label}
+              description={toggle.description}
+              name={toggle.name}
+              checked={toggle.checked}
+              onToggle={toggle.onToggle}
+              disabled={filtersDisabled}
+            />
+          ))}
 
-            <div className="px-3.5 pb-2 pt-1">
-              <label
-                htmlFor="donation-custom-rules"
-                className="block text-[13px] font-semibold text-ink-body leading-tight"
-              >
-                Regras personalizadas
-              </label>
-              <p className="block text-xs font-medium text-ink-muted mt-0.5 mb-2">
-                Uma palavra por linha e/ou instruções livres. Variações com
-                acento, números ou letras repetidas também são detectadas.
-              </p>
-              {!aiModeration && (
-                <input
-                  type="hidden"
-                  name="customRules"
-                  value={customRules}
-                />
-              )}
-              <AutoGrowTextarea
-                id="donation-custom-rules"
-                name={aiModeration ? "customRules" : undefined}
+          <div className="pb-1 pt-1">
+            <label
+              htmlFor="donation-custom-rules"
+              className="block text-[13px] font-semibold text-ink-body leading-tight"
+            >
+              Regras personalizadas
+            </label>
+            <p className="block text-xs font-medium text-ink-muted mt-0.5 mb-2">
+              Uma palavra por linha e/ou instruções livres. Variações com
+              acento, números ou letras repetidas também são detectadas.
+            </p>
+            {!aiModeration && (
+              <input
+                type="hidden"
+                name="customRules"
                 value={customRules}
-                onChange={(value) => {
-                  setCustomRules(value);
-                  markDirty();
-                }}
-                maxLength={customRulesMaxLength}
-                placeholder={"casino\nSem divulgação de outros canais"}
-                disabled={filtersDisabled}
-                showCounter
-                minRows={3}
-                maxRows={6}
               />
-            </div>
+            )}
+            <AutoGrowTextarea
+              id="donation-custom-rules"
+              name={aiModeration ? "customRules" : undefined}
+              value={customRules}
+              onChange={(value) => {
+                setCustomRules(value);
+                markDirty();
+              }}
+              maxLength={customRulesMaxLength}
+              placeholder={"casino\nSem divulgação de outros canais"}
+              disabled={filtersDisabled}
+              showCounter
+              minRows={3}
+              maxRows={6}
+            />
           </div>
         </div>
       </div>

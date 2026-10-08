@@ -4,9 +4,7 @@ import type { PaginatedResponse } from "../http/types";
 import { accountSettingsApi, type AccountSettings } from "./account-settings";
 import { donationSettingsApi, type DonationSettings } from "./donation-settings";
 import { pixKeysApi, type PixKey } from "./pix-keys";
-import { walletsApi, type WalletBalances } from "./wallets";
 import { widgetsApi, type Widget } from "./widgets";
-import { withdrawalsApi, type Withdrawal } from "./withdrawals";
 
 export type DonationHistory = components["schemas"]["DonationHistoryEntity"];
 
@@ -107,8 +105,7 @@ export const dashboardApi = {
 
 export interface HomePageData {
   stats: DashboardStats | null;
-  balances: WalletBalances | null;
-  lastWithdrawal: Withdrawal | null;
+  insights: DashboardStats | null;
   pixKeys: PixKey[];
   rules: DonationSettings | null;
   overlay: Widget | null;
@@ -122,22 +119,20 @@ export async function getHomePage(
 ): Promise<HomePageData> {
   const [
     statsRes,
-    balancesRes,
-    withdrawalsRes,
     pixKeysRes,
     rulesRes,
     overlayRes,
     accountRes,
     historyRes,
+    insightsRes,
   ] = await Promise.all([
     dashboardApi.getStats(token, range),
-    walletsApi.getBalances(token),
-    withdrawalsApi.list(token, { page: 1, limit: 1 }),
     pixKeysApi.list(token),
     donationSettingsApi.getSettings(token),
     widgetsApi.getSettings(token, "overlay"),
     accountSettingsApi.getSettings(token),
     dashboardApi.getHistory(token, { page: 1, limit: 5 }),
+    range === "30" ? null : dashboardApi.getStats(token, "30"),
   ]);
 
   if (!rulesRes.success && rulesRes.error.code !== 404) {
@@ -149,8 +144,8 @@ export async function getHomePage(
 
   return {
     stats: dataOrThrow(statsRes),
-    balances: dataOrThrow(balancesRes),
-    lastWithdrawal: dataOrThrow(withdrawalsRes).items[0] ?? null,
+    insights:
+      insightsRes === null ? dataOrThrow(statsRes) : dataOrThrow(insightsRes),
     pixKeys: dataOrThrow(pixKeysRes),
     rules: rulesRes.success ? rulesRes.data : null,
     overlay: overlayRes.success ? overlayRes.data : null,

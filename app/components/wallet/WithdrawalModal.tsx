@@ -12,6 +12,7 @@ import { SubmitButton } from "~/components/ui/SubmitButton";
 import { Icon } from "~/components/ui/Icon";
 import { Button } from "~/components/ui/Button";
 import { WithdrawalDestination } from "./WithdrawalDestination";
+import { getPixDisplayName } from "./pix-key-format";
 import {
   MAX_WITHDRAWAL_AMOUNT,
   MIN_WITHDRAWAL_AMOUNT,
@@ -33,6 +34,15 @@ interface WithdrawalModalProps {
   onOpenManageKeys: () => void;
   error?: string | null;
   has2fa?: boolean;
+  available: number;
+  success?: boolean;
+}
+
+interface WithdrawalReceipt {
+  amount: number;
+  fee: number;
+  net: number;
+  dest: string;
 }
 
 export function WithdrawalModal({
@@ -42,16 +52,19 @@ export function WithdrawalModal({
   onOpenManageKeys,
   error,
   has2fa,
+  available,
+  success = false,
 }: WithdrawalModalProps) {
   const submit = useSubmit();
   const navigation = useNavigation();
   const loading = navigation.state === "submitting";
 
   const feePercentage = WITHDRAWAL_FEE_PERCENTAGE;
-  const minAmount = MIN_WITHDRAWAL_AMOUNT;
   const maxAmount = MAX_WITHDRAWAL_AMOUNT;
 
   const [amountDisplay, setAmountDisplay] = useState("");
+  const [step, setStep] = useState<"details" | "confirm">("details");
+  const [receipt, setReceipt] = useState<WithdrawalReceipt | null>(null);
 
   const idempotencyRef = useRef<{
     key: string;
@@ -64,6 +77,7 @@ export function WithdrawalModal({
     setValue,
     watch,
     register,
+    trigger,
     formState: { errors },
     reset,
   } = useForm({
@@ -119,8 +133,17 @@ export function WithdrawalModal({
   useResetOnOpen(isOpen, () => {
     reset({ amount: "", pixId: "", password: "" });
     setAmountDisplay("");
+    setStep("details");
+    setReceipt(null);
     idempotencyRef.current = null;
   });
+
+  const handleContinue = async () => {
+    const valid = await trigger(["amount", "pixId"]);
+    if (valid) setStep("confirm");
+  };
+
+  const selectedKey = pixKeys.find((pk) => pk.id === pixIdWatch);
 
   const onSubmit = (data: {
     amount: number;
@@ -135,6 +158,14 @@ export function WithdrawalModal({
         : { key: crypto.randomUUID(), amount: data.amount, pixId: data.pixId };
     idempotencyRef.current = attempt;
 
+    const destKey = pixKeys.find((pk) => pk.id === data.pixId);
+    setReceipt({
+      amount: data.amount,
+      fee: feeAmount,
+      net: netAmount,
+      dest: destKey ? getPixDisplayName(destKey, true) : "—",
+    });
+
     const formData = new FormData();
     formData.append("intent", "createWithdrawal");
     formData.append("amount", data.amount.toString());
@@ -146,114 +177,201 @@ export function WithdrawalModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Solicitar Saque">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {error && <AlertMessage variant="error" message={error} />}
-
-        <FormField
-          label="Valor do Saque"
-          name="amount"
-          type="text"
-          inputMode="numeric"
-          placeholder="R$ 0,00"
-          value={amountDisplay}
-          onChange={handleAmountChange}
-          error={errors.amount?.message}
-          disabled={loading}
-        />
-
-        <WithdrawalDestination
-          pixKeys={pixKeys}
-          value={pixIdWatch}
-          onChange={(val) =>
-            setValue("pixId", val, { shouldValidate: true })
-          }
-          error={errors.pixId?.message}
-          disabled={loading}
-          onManageKeys={onOpenManageKeys}
-        />
-
-        <PasswordField
-          label="Senha"
-          icon="lock"
-          autoComplete="current-password"
-          error={errors.password?.message}
-          disabled={loading}
-          {...register("password")}
-        />
-
-        {has2fa && (
-          <OtpField
-            label="Código do autenticador"
-            isOpen={isOpen}
-            disabled={loading}
-            error={Boolean(error) && !totpWatch}
-            onChange={(code) => setValue("totp", code)}
-          />
-        )}
-
-        <div className="flex items-start gap-2.5 bg-wash rounded-2xl p-3.5">
-          <Icon
-            name="info-circle"
-            size={16}
-            strokeWidth={1.9}
-            className="text-chrome-icon shrink-0 mt-0.5"
-          />
-          <div className="text-[13px] font-medium text-ink-secondary">
-            <p>
-              Valor mínimo para saques:{" "}
-              <span className="text-ink-body font-bold">
-                {formatBRLReais(minAmount)}
-              </span>
-            </p>
-            <p className="mt-1">
-              Taxa de saque aplicada:{" "}
-              <span className="text-ink-body font-bold">{feePercentage}%</span>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={
+        success ? "Saque solicitado" : step === "details" ? "Solicitar Saque" : "Confirmar saque"
+      }
+    >
+      {success && receipt ? (
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-success/10 text-success">
+              <Icon name="check-circle" size={20} strokeWidth={2} />
+            </span>
+            <p className="text-sm font-medium text-ink-secondary">
+              Seu saque foi registrado e será processado.
             </p>
           </div>
-        </div>
-
-        {netAmount > 0 && (
-          <div className="bg-wash rounded-2xl p-4 space-y-2">
-            <div className="flex justify-between text-[13px] font-medium text-ink-secondary">
-              <span>Desconto da taxa ({feePercentage}%)</span>
-              <span className="text-error font-semibold">
-                -{formatBRLReais(feeAmount)}
-              </span>
+          <dl className="divide-y divide-line/60">
+            <div className="flex items-center justify-between gap-4 py-2.5">
+              <dt className="text-[13px] font-medium text-ink-secondary">
+                Valor do saque
+              </dt>
+              <dd className="text-sm font-bold text-ink-heading tabular-nums">
+                {formatBRLReais(receipt.amount)}
+              </dd>
             </div>
-            <div className="flex justify-between pt-2 border-t border-line">
-              <span className="text-sm font-bold text-ink-heading">
+            <div className="flex items-center justify-between gap-4 py-2.5">
+              <dt className="text-[13px] font-medium text-ink-secondary">
+                Taxa ({feePercentage}%)
+              </dt>
+              <dd className="text-sm font-semibold text-error tabular-nums">
+                -{formatBRLReais(receipt.fee)}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between gap-4 py-2.5">
+              <dt className="text-[13px] font-medium text-ink-secondary">
+                Destino
+              </dt>
+              <dd className="min-w-0 truncate font-mono text-[13px] font-medium text-ink-body">
+                {receipt.dest}
+              </dd>
+            </div>
+            <div className="flex items-center justify-between gap-4 py-2.5">
+              <dt className="text-sm font-bold text-ink-heading">
                 Você receberá
-              </span>
-              <span className="text-sm font-bold text-ink-heading">
-                {formatBRLReais(netAmount)}
-              </span>
+              </dt>
+              <dd className="text-base font-extrabold text-ink-heading tabular-nums">
+                {formatBRLReais(receipt.net)}
+              </dd>
             </div>
-          </div>
-        )}
-
-        <div className="flex gap-3 pt-4 border-t border-line">
+          </dl>
+          <p className="flex items-center gap-1.5 text-[12px] font-medium text-ink-secondary">
+            <Icon
+              name="clock-circle"
+              size={14}
+              strokeWidth={1.9}
+              className="text-ink-muted shrink-0"
+            />
+            O valor cai na chave selecionada em até 1 dia útil.
+          </p>
           <Button
             type="button"
-            variant="secondary"
+            variant="primary"
             onClick={onClose}
-            className="flex-1"
+            className="w-full"
           >
-            Cancelar
+            Entendido
           </Button>
-          <SubmitButton
-            loading={loading}
-            disabled={
-              pixKeys.length === 0 ||
-              loading ||
-              (has2fa && totpWatch?.length !== 6)
-            }
-            className="flex-1"
-          >
-            Confirmar Saque
-          </SubmitButton>
         </div>
+      ) : (
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {step === "details" ? (
+          <>
+            <p className="text-[13px] font-medium text-ink-secondary">
+              Disponível:{" "}
+              <strong className="font-bold text-ink-heading tabular-nums">
+                {formatBRLReais(available)}
+              </strong>
+            </p>
+
+            <FormField
+              label="Valor do Saque"
+              name="amount"
+              type="text"
+              inputMode="numeric"
+              placeholder="R$ 0,00"
+              value={amountDisplay}
+              onChange={handleAmountChange}
+              error={errors.amount?.message}
+              disabled={loading}
+            />
+
+            <WithdrawalDestination
+              pixKeys={pixKeys}
+              value={pixIdWatch}
+              onChange={(val) =>
+                setValue("pixId", val, { shouldValidate: true })
+              }
+              error={errors.pixId?.message}
+              disabled={loading}
+              onManageKeys={onOpenManageKeys}
+            />
+
+            <SubmitButton
+              type="button"
+              onClick={handleContinue}
+              disabled={loading}
+              className="w-full"
+            >
+              Continuar
+            </SubmitButton>
+          </>
+        ) : (
+          <>
+            <dl className="divide-y divide-line/60">
+              <div className="flex items-center justify-between gap-4 py-2.5">
+                <dt className="text-[13px] font-medium text-ink-secondary">
+                  Valor do saque
+                </dt>
+                <dd className="text-sm font-bold text-ink-heading tabular-nums">
+                  {formatBRLReais(Number(amountWatch))}
+                </dd>
+              </div>
+              <div className="flex items-center justify-between gap-4 py-2.5">
+                <dt className="text-[13px] font-medium text-ink-secondary">
+                  Taxa ({feePercentage}%)
+                </dt>
+                <dd className="text-sm font-semibold text-error tabular-nums">
+                  -{formatBRLReais(feeAmount)}
+                </dd>
+              </div>
+              <div className="flex items-center justify-between gap-4 py-2.5">
+                <dt className="text-[13px] font-medium text-ink-secondary">
+                  Destino
+                </dt>
+                <dd className="min-w-0 truncate font-mono text-[13px] font-medium text-ink-body">
+                  {selectedKey ? getPixDisplayName(selectedKey, true) : "—"}
+                </dd>
+              </div>
+              <div className="flex items-center justify-between gap-4 py-2.5">
+                <dt className="text-sm font-bold text-ink-heading">
+                  Você receberá
+                </dt>
+                <dd className="text-base font-extrabold text-ink-heading tabular-nums">
+                  {formatBRLReais(netAmount)}
+                </dd>
+              </div>
+            </dl>
+
+            {error && <AlertMessage variant="error" message={error} />}
+
+            <PasswordField
+              label="Senha"
+              icon="lock"
+              autoComplete="current-password"
+              error={errors.password?.message}
+              disabled={loading}
+              {...register("password")}
+            />
+
+            {has2fa && (
+              <OtpField
+                label="Código do autenticador"
+                isOpen={isOpen}
+                disabled={loading}
+                error={Boolean(error) && !totpWatch}
+                onChange={(code) => setValue("totp", code)}
+              />
+            )}
+
+            <div className="flex gap-3 pt-4 border-t border-line">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setStep("details")}
+                className="flex-1"
+              >
+                Voltar
+              </Button>
+              <SubmitButton
+                loading={loading}
+                disabled={
+                  pixKeys.length === 0 ||
+                  loading ||
+                  (has2fa && totpWatch?.length !== 6)
+                }
+                className="flex-1"
+              >
+                Confirmar Saque
+              </SubmitButton>
+            </div>
+          </>
+        )}
       </form>
+      )}
     </Modal>
   );
 }

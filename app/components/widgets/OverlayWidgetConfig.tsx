@@ -1,6 +1,6 @@
 import { useSubmit, useNavigation } from "react-router";
 import type { OverlayFormValues } from "~/validators/overlay-validator";
-import { ConnectionUrlCard } from "./ConnectionUrlCard";
+import { ConnectionSecret } from "./ConnectionSecret";
 import { OverlaySettingsForm } from "./OverlaySettingsForm";
 import type { Widget, OverlaySettings } from "~/api/modules/widgets";
 import type { TtsVoice } from "~/types/donation";
@@ -32,26 +32,16 @@ export function OverlayWidgetConfig({
     });
   };
 
-  const handleResetToken = () => {
-    if (!confirm("Deseja realmente resetar o token de conexão do widget? A URL atual deixará de funcionar.")) {
-      return;
-    }
-    postIntent("resetToken");
-  };
-
   return (
-    <div className="flex flex-col gap-5">
-      <p className="text-sm text-ink-secondary">
-        Configure o overlay de alertas da sua{" "}
-        <span className="font-bold text-ink-heading">transmissão</span>.
-      </p>
-
-      <ConnectionUrlCard
+    <div className="min-w-0">
+      <ConnectionSecret
         widget={widget}
         loading={isLoading}
-        onResetToken={handleResetToken}
+        onResetToken={() => postIntent("resetToken")}
         onTestAlert={() => postIntent("testAlert")}
       />
+
+      <div aria-hidden="true" className="my-8 border-t border-line" />
 
       <OverlaySettingsForm
         widget={widget}

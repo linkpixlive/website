@@ -91,6 +91,15 @@ function formatPixKeyValue(
   return key;
 }
 
+/**
+ * Oculta só os 4 últimos caracteres do ID da transação.
+ * IDs curtos (<=4) viram só a máscara.
+ */
+export function maskTransactionId(id: string | undefined | null): string {
+  if (!id) return "—";
+  return id.length > 4 ? `${id.slice(0, -4)}····` : "····";
+}
+
 export interface PixKeyDisplay {
   key?: string | null;
   keyMasked?: string | null;

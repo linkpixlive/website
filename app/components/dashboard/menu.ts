@@ -8,7 +8,7 @@ export interface MenuItem {
 }
 
 export const menuItems: MenuItem[] = [
-  { label: "Dashboard", to: "/dashboard", icon: "widget-2", end: true },
+  { label: "Visão geral", to: "/dashboard", icon: "widget-2", end: true },
   { label: "Carteira", to: "/carteira", icon: "wallet" },
   { label: "Integrações", to: "/widgets/overlay", icon: "link-minimalistic" },
   { label: "Doações", to: "/doacoes", icon: "list" },

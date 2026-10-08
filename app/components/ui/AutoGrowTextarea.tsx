@@ -91,7 +91,7 @@ export const AutoGrowTextarea = forwardRef<HTMLTextAreaElement, AutoGrowTextarea
           placeholder={placeholder}
           maxLength={maxLength}
           className={cn(
-            "w-full bg-wash border rounded-2xl px-4 py-2.5 text-sm font-medium text-ink-heading placeholder:text-ink-placeholder outline-none transition-all duration-120 ease-out resize-none",
+            "w-full bg-card border rounded-2xl px-4 py-2.5 text-sm font-medium text-ink-heading placeholder:text-ink-placeholder outline-none transition-all duration-120 ease-out resize-none",
             "border-line-input focus:border-border-focus focus:ring-2 focus:ring-brand/30",
             disabled && "opacity-50 cursor-not-allowed",
             className,

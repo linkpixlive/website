@@ -1,395 +1,452 @@
-# Visual Design System
+# Design System — LinkPix
 
-Source of truth: the home page (`src/app/page.tsx` and its components). These rules apply to **every** screen — settings, lists, detail views, empty states, auth, overlays — not only the current layout.
+## 1. Objetivo
 
-If a new screen looks like a generic Tailwind dashboard (Inter, indigo, 8px cards, gray-900 on white), it is wrong. Match this file, not a default template.
+Diretrizes visuais para criar novas páginas do LinkPix mantendo uma identidade consistente, reconhecível e com aparência de produto real.
 
----
+A referência visual é uma interface SaaS moderna, editorial e minimalista, com bastante respiro, tipografia forte, superfícies bem definidas e uso intencional de cor.
 
-## Tone
+**Não transformar toda página em uma coleção de cards.** A composição deve ser definida pelo conteúdo e pela função da página.
 
-Quiet, dense, slightly warm product UI. Dark chrome around a cool-gray canvas of oversized, softly padded white cards. One yellow punch. Rounded almost to the point of being pillowy — never sharp, never “enterprise gray box.”
+## 2. Princípios
 
-It should feel like a lived-in collaboration tool: compact type, real avatars, hairline borders, almost no drop shadow. Friendly because of its soft radii and the yellow, not because of illustrations, blobs, or gradients.
+### Conteúdo antes da decoração
 
-**This is not:** a marketing landing page, a glassmorphism concept, a purple SaaS kit, or an airy “AI app” with huge empty space and a centered hero.
+Priorizar:
 
-**This is:** a dark shell + light work surface. Information sits close together. Accent is scarce. Motion is short. Corners are large.
+1. hierarquia da informação;
+2. clareza das ações;
+3. leitura rápida;
+4. agrupamento lógico;
+5. consistência.
 
----
+Evitar elementos decorativos sem função.
 
-## Color
+### Anti-AI-slop
 
-Use these hex values. Do not approximate with Tailwind’s default `gray-*` / `yellow-*` / `black` except where noted.
+Evitar:
 
-### Shell (dark)
+- excesso de cards independentes;
+- repetição de `ícone + título + descrição`;
+- excesso de badges;
+- gradientes decorativos;
+- sombras exageradas;
+- glassmorphism sem função;
+- elementos flutuantes aleatórios;
+- grandes números usados apenas para preencher espaço;
+- bento grid como solução padrão.
 
-| Token | Hex | Use |
+A interface deve parecer desenhada para aquela funcionalidade específica.
+
+### Uma ideia visual dominante por página
+
+Exemplos:
+
+- carteira → saldo + saque + histórico;
+- doações → fila de alertas + histórico + controles;
+- integrações → conexões + configuração;
+- landing page → proposta de valor + demonstração + funcionalidades + como funciona + FAQ + CTA.
+
+## 3. Identidade visual
+
+### Cor de marca
+
+A cor principal é **azul**.
+
+Usar o azul principalmente em:
+
+- CTAs primários;
+- links;
+- estados ativos;
+- elementos de destaque;
+- indicadores importantes.
+
+Não transformar toda a interface em azul. A maior parte deve usar neutros.
+
+### Cores semânticas
+
+- verde → sucesso/concluído;
+- amarelo/âmbar → pendente/atenção;
+- vermelho → erro/perigo;
+- azul → ação, informação ou identidade.
+
+Cores semânticas não devem ser usadas apenas como decoração.
+
+## 4. Tipografia
+
+A tipografia deve criar uma hierarquia forte e simples.
+
+**Títulos:** grandes, pesados, curtos e de alto contraste.
+
+**Subtítulos:** menores e usados para contextualizar.
+
+**Corpo:** confortável para leitura e com contraste suficiente.
+
+**Valores financeiros:** podem receber destaque tipográfico significativo quando forem a informação principal.
+
+## 5. Layout
+
+Usar uma área principal centralizada, com largura máxima adequada para desktop e bastante respiro.
+
+Evitar:
+
+- conteúdo espremido;
+- excesso de colunas;
+- margens inconsistentes;
+- componentes ocupando espaço sem necessidade.
+
+### Grid
+
+Grid deve organizar relações entre conteúdos, não preencher espaço.
+
+Uma página pode misturar:
+
+- bloco principal;
+- coluna secundária;
+- lista;
+- tabela;
+- seção de destaque;
+- área livre.
+
+A composição não precisa ser simétrica.
+
+### Bento grid
+
+Bento grid é permitido, mas não obrigatório.
+
+Usar quando diferentes funcionalidades independentes realmente se beneficiam de uma composição modular.
+
+Para páginas transacionais, preferir estruturas mais claras, como listas e tabelas, quando forem mais adequadas.
+
+## 6. Cards e superfícies
+
+Um card deve representar uma unidade real de informação ou interação.
+
+Exemplos adequados:
+
+- saldo disponível;
+- chaves Pix;
+- status da conta;
+- funcionalidade independente;
+- demonstração de produto.
+
+Evitar repetir `ícone + título + descrição` apenas para preencher uma grade.
+
+Nem todo conteúdo precisa estar dentro de uma caixa.
+
+### Superfícies
+
+Usar níveis de superfície para criar hierarquia:
+
+- página;
+- seção;
+- bloco principal;
+- elemento interativo.
+
+### Bordas
+
+Preferir bordas discretas e consistentes.
+
+Elementos maiores podem ter raio maior que controles pequenos.
+
+## 7. Dashboard
+
+A interface autenticada deve priorizar produtividade.
+
+Estrutura geral:
+
+- navegação;
+- cabeçalho da página;
+- conteúdo principal;
+- ações relevantes;
+- dados e histórico.
+
+### Desktop
+
+Usar sidebar persistente.
+
+### Mobile
+
+Adaptar a navegação ao espaço disponível. Não simplesmente reduzir o desktop até caber.
+
+## 8. Páginas financeiras
+
+Devem transmitir:
+
+- confiança;
+- precisão;
+- estabilidade;
+- clareza;
+- controle.
+
+Evitar visual excessivamente lúdico.
+
+### Carteira
+
+Hierarquia recomendada:
+
+1. saldo disponível;
+2. ação de saque;
+3. valores pendentes/bloqueados;
+4. chaves Pix;
+5. histórico de saques.
+
+O saldo deve ser o principal elemento visual.
+
+O histórico deve priorizar leitura e comparação, usando tabela ou lista estruturada quando apropriado.
+
+**Não transformar cada saque em um grande card colorido.**
+
+### Doações
+
+Priorizar:
+
+- visualizar fila;
+- pausar;
+- pular alerta;
+- testar alerta;
+- repetir;
+- ouvir áudio;
+- consultar histórico;
+- filtrar.
+
+A interface deve favorecer operação rápida e alta densidade de informação.
+
+## 9. Landing page
+
+A landing page deve apresentar o produto, e não simplesmente reproduzir o dashboard.
+
+### Hero
+
+Pode utilizar texto centralizado.
+
+Estrutura:
+
+- eyebrow/contexto;
+- título forte;
+- descrição curta;
+- CTA principal;
+- CTA secundário opcional;
+- demonstração visual real do produto.
+
+Deve comunicar rapidamente:
+
+**o que é + para quem é + por que é útil.**
+
+### Demonstração
+
+Preferir exemplos reais do produto:
+
+- dashboard;
+- fila de doações;
+- alerta;
+- pagamento;
+- mensagem recebida;
+- configuração.
+
+Evitar mockups genéricos que poderiam representar qualquer SaaS.
+
+### Funcionalidades
+
+As funcionalidades devem ser apresentadas por exemplos concretos de uso.
+
+Bento grid pode ser usado aqui.
+
+Exemplos:
+
+- uma doação chegando;
+- alerta de áudio sendo reproduzido;
+- regras sendo configuradas;
+- histórico de pagamentos;
+- integração com OBS.
+
+Evitar uma grade formada apenas por ícones e descrições.
+
+### Como funciona
+
+Mostrar o fluxo real em poucos passos.
+
+Exemplo:
+
+1. crie sua conta;
+2. conecte seu Pix;
+3. configure os alertas;
+4. receba sua primeira doação.
+
+### FAQ
+
+Usar estrutura simples e escaneável.
+
+### CTA final
+
+Reforçar a ação principal sem criar uma nova linguagem visual.
+
+## 10. Estados
+
+Componentes devem considerar:
+
+- default;
+- hover;
+- focus;
+- active;
+- disabled;
+- loading;
+- success;
+- warning;
+- error.
+
+Não depender exclusivamente de cor para comunicar estados.
+
+## 11. Dark mode
+
+O dark mode não deve ser uma simples inversão das cores.
+
+Adaptar:
+
+- fundo;
+- superfícies;
+- bordas;
+- contraste;
+- texto;
+- cores semânticas;
+- azul de marca.
+
+Evitar preto puro em toda a interface.
+
+Usar diferentes níveis de superfícies escuras para preservar a hierarquia.
+
+A composição e a hierarquia do light mode devem continuar reconhecíveis.
+
+## 12. Responsividade
+
+Projetar a hierarquia antes de adaptar o layout.
+
+### Desktop
+
+Permitir sidebar, múltiplas colunas, áreas de apoio, tabelas e demonstrações maiores.
+
+### Tablet
+
+Reduzir colunas e priorizar o conteúdo principal.
+
+### Mobile
+
+Priorizar:
+
+1. informação principal;
+2. ação principal;
+3. conteúdo essencial;
+4. conteúdo secundário.
+
+Não simplesmente reduzir todos os componentes proporcionalmente.
+
+## 13. Regras para gerar novas páginas com IA
+
+Ao criar uma nova página:
+
+1. entender a função;
+2. identificar a informação mais importante;
+3. definir a hierarquia;
+4. escolher a composição;
+5. escolher componentes;
+6. aplicar a identidade visual;
+7. revisar espaçamento e alinhamento;
+8. revisar responsividade;
+9. revisar dark mode;
+10. eliminar elementos decorativos sem função.
+
+A IA deve preservar a linguagem visual do sistema, mas não repetir mecanicamente a mesma estrutura.
+
+Uma nova página pode ter composição diferente quando isso melhorar a experiência.
+
+## 14. Checklist anti-slop
+
+- [ ] A hierarquia é clara?
+- [ ] O elemento mais importante recebe maior destaque?
+- [ ] Cada card possui uma razão real para existir?
+- [ ] Existem cards que poderiam ser conteúdo normal?
+- [ ] Existe repetição excessiva de `ícone + título + descrição`?
+- [ ] O bento grid realmente melhora a apresentação?
+- [ ] As cores possuem função?
+- [ ] Há elementos decorativos sem propósito?
+- [ ] A página parece específica para o LinkPix?
+- [ ] A composição funciona sem depender de efeitos visuais?
+- [ ] O layout funciona em telas menores?
+- [ ] O dark mode preserva a hierarquia?
+- [ ] As ações principais são imediatamente identificáveis?
+- [ ] O resultado parece uma interface de produto real, e não uma coleção de componentes de demonstração?
+
+## 15. Regra final
+
+**Não existe uma estrutura obrigatória para todas as páginas.**
+
+O que deve ser consistente:
+
+- identidade visual;
+- tipografia;
+- espaçamento;
+- tratamento de superfícies;
+- cores;
+- componentes;
+- estados;
+- responsividade;
+- simplicidade;
+- hierarquia.
+
+A composição deve mudar de acordo com o conteúdo.
+
+**Consistência não significa repetição.**
+
+## 16. Tokens normativos (extraídos do protótipo `/novo`)
+
+Valores exatos. Componentes usam os tokens semânticos (`app/app.css @theme`),
+nunca estes hex literais — exceto o `/novo`, que é protótipo isolado de arquivo
+único e referência visual desta tabela.
+
+### Light
+
+| Token | Hex | Uso |
 |---|---|---|
-| Shell | `#111216` | Page outer, nav rail, bottom bar, drawers |
-| Inset dark | `#181a1f` | Banners, floating pills, media chrome |
-| Media void | `#1e232d` | Video / image wells, empty media frames |
-| Inverse action | `#16181e` | Dark circular / pill actions on light cards; hover `#000000` |
-
-On dark surfaces, inactive icons are `#7f8594`. Active icons are white (desktop rail) or yellow (mobile bar). Hover wash is `white/5`, never a light gray panel.
-
-### Canvas (light)
-
-| Token | Hex | Use |
-|---|---|---|
-| Canvas | `#edf0f7` | The work area behind cards. Content never full-bleeds white. |
-| Surface | `#ffffff` | Cards, modals, popovers, sheets, inputs-on-white |
-| Wash | `#eceef3` | Nested wells, list hover, secondary buttons, search fields, chat bubbles |
-| Tile | `#f9fafb` (`gray-50`) | Tiny icon tiles only |
-
-### Text
-
-| Role | Hex | Weight |
-|---|---|---|
-| Heading / names | `#11151e` | bold / extrabold |
-| Inline emphasis | `#141822` / `#12151f` | bold, inside muted sentences |
-| Body | `#333945` / `#222834` | medium / semibold |
-| Secondary | `#707684` | medium |
-| Muted | `#828896` | medium |
-| Label / meta | `#9ca3af` | medium, or extrabold + uppercase for section labels |
-| Placeholder | `#707684` | medium |
-| Chrome icon (on white) | `#3e4452` | — |
-
-Do not use `#000000` or `gray-900` for text. Do not use `gray-500` as a catch-all muted.
-
-On dark surfaces: white for titles, `#9ca3af` for supporting lines.
-
-### Accent — yellow, used sparingly
-
-| Token | Hex | Use |
-|---|---|---|
-| Brand | `#ffd037` | Logo tile, active-nav tick, badges, unread dots, selection highlight |
-| Button | `#fed130` | Primary pills and circular send/confirm |
-| Button hover | `#fcc717` | Primary hover |
-| Yellow ink | `#b58a00` | Icons sitting on a yellow wash |
-| Yellow wash | `#fff7d6` | Rare: a 36px icon tile that *is* about a yellow-coded object (e.g. calendar) |
-
-Yellow is a **signal**, not a theme. A page should have at most a handful of yellow objects: one primary action, maybe a badge, maybe the logo. Never yellow section backgrounds, never yellow text on white, never yellow borders around cards.
-
-Text on yellow is always `#11151e` (or `#111216` on the logo). Never white on yellow.
-
-### Semantic (not brand)
-
-| Role | Hex | Notes |
-|---|---|---|
-| Destructive | `#ef4444` | Hover `#dc2626`. On dark chrome, idle `#f87171` → hover `#ef4444`. |
-| Success | `#10b981` | Inline confirmation only (“Copied”, “Invite sent”). Hover `#059669` (`--color-success-hover`). |
-| Link / info | `#2563eb` | Hover `#1d4ed8` (`--color-info-hover`). Underline links in running text. |
-| Warning tint | `#f59e0b` | Icon-only, in notification tiles. |
-
-Destructive actions are isolated: last in a menu, separated by a hairline, `text-[#ef4444] hover:bg-red-50`. Confirmations that destroy (leave, delete) use a full red pill, not yellow.
-
-Avatar identity rings (pink `#ec4899`, gold `#eab308`, blue `#3b82f6`, cyan `#06b6d4`) are **person color**, not UI accent. Do not reuse them for buttons or badges.
-
-### Dark theme
-
-Shipped, not aspirational. `.dark` remaps the canvas tokens in `app.css`: canvas `#111216`, card `#181a1f`, wash `#20232a`, tile `#262a33`; ink flips to light; success `#34d399`, info `#60a5fa`, warning `#fbbf24`; hairlines become white whispers. Yellow, shell chrome and radius are unchanged. Semantic utilities (`bg-card`, `text-ink-body`, …) resolve at runtime, so no `dark:` variants in components.
-
-### Selection
-
-`selection:bg-[#ffd037]/40 selection:text-black`
-
----
-
-## Typography
-
-**Families (two-role system), both from Fontshare (ITF Free Font License), self-hosted via `next/font/local` from `src/app/fonts/` (license texts kept alongside the files):**
-
-- **UI / body — Satoshi** (variable, wght 300–900; intermediate weights such as semibold interpolate cleanly). The default family: exposed through the `--font-sans` token (`--font-satoshi` CSS variable on `<html>`). Every role below uses Satoshi unless marked display.
-- **Display — Clash Display** (variable, wght 200–700). Exposed as the `--font-display` token → `font-display` utility (`--font-clash-display` CSS variable on `<html>`). **Reserved exclusively for marketing/landing surfaces — not used in the product UI today.** When that surface is built, its headlines use Clash Display while body copy stays Satoshi. Its weight axis caps at 700; never fake heavier weights with transforms. Exception: the `LogoTile` wordmark (default 22px, semibold) — a brand lockup, not UI text. Rail/drawer overrides cap at `text-2xl` so the H1 ≤ 26px rule still holds.
-
-**Rendering:** `antialiased`.
-
-Do not apply the display family to menus, labels, badges, buttons, or running text. No Inter, Geist, Roboto, system-ui stacks, or display serifs. Exception: `font-mono` only for Pix keys, codes and URLs (masked values, copy surfaces, 2FA secrets).
-
-### Scale
-
-| Role | Size | Weight | Tracking / leading |
-|---|---|---|---|
-| Page title | `text-xl` → `sm:text-2xl` → `lg:text-[26px]` | extrabold | `tracking-tight leading-tight` |
-| Overlay / empty title | `text-lg` | extrabold | `tracking-tight` |
-| Card title | `text-base` (16px) | bold | default |
-| Item title | `text-[15px]` | bold | `leading-snug` |
-| Panel title | `text-sm` | bold | `leading-tight` |
-| Menu / list name | `text-[13px]` | bold or semibold | `leading-tight` / `leading-snug` |
-| Body / notes | `text-xs` ~ `text-[13px]` | medium | `leading-snug` or `leading-relaxed` |
-| Chat | `text-xs` / `sm:text-[12.5px]` | medium | `leading-relaxed` |
-| Supporting line | `text-xs` ~ `text-sm` | medium | — |
-| Section label | `text-[11px]` | extrabold | `uppercase tracking-wider` `#9ca3af` |
-| Badge / micro | `text-[10px]`–`text-[11px]` | extrabold | — |
-| Timestamp | `text-[11px]` | semibold | `text-gray-400` |
-
-Page titles are the only large type. Do not invent an H1 > 26px. Do not use `font-light` or `font-black`.
-
-**Weight meaning:** medium = running text, semibold = controls and meta, bold = titles and names, extrabold = the few things that must punch (page title, uppercase labels, numeric badges).
-
----
-
-## Borders
-
-Borders are **hairlines**, almost atmospheric. If you can see a border from across the room, it is too strong.
-
-| Context | Token |
-|---|---|
-| Card, modal, popover | `border border-gray-100/70` |
-| White icon button | `border-gray-100/80` |
-| White-on-white input / composer | `border-gray-200/90` |
-| Nested attachment / tile | `border-gray-100` or `border-gray-100/90` |
-| Dividers (lists, destructive menu group) | `border-t border-gray-100` |
-| Dark pills on media | `border-white/10` |
-| Mobile nav top edge | `border-t border-white/10` |
-| Avatar on light | `border border-white` + `shadow-2xs` |
-| Avatar stacked / on media | `border-2 border-white` |
-| Focus (inputs) | `border-[#fcc717]` + `ring-2 ring-[#ffd037]/30` |
-| Destructive well | `border-[#ef4444]/20` or `/30` |
-| Yellow tile | `border-[#ffd037]/40` |
-
-No 2px gray frames around cards. No `border-gray-300`. No colored outlines as decoration.
-
-**Radius is part of the border language.** Prefer rounding over stroking: a card is defined by its fill + radius + whisper border, not by a box.
-
----
-
-## Radius
-
-This system is aggressively round. Default Tailwind `rounded` / `rounded-md` / `rounded-lg` on a card is a defect.
-
-| Token | Value | Use |
-|---|---|---|
-| Pill | `rounded-full` | Buttons, text fields, OTP cells, icon buttons, badges, avatars, chips, send controls, skeleton line bars |
-| Media | `rounded-[28px]` | Large image / video wells |
-| Card | `rounded-[26px]` | Surfaces, modals, mobile sheets (`rounded-t-[26px]`) |
-| Nested chrome | `rounded-[20px]` | Dark banners inside a card, desktop popovers |
-| Nested surface | `rounded-2xl` (16px) | Profile wells, file-type icons, inner cards, multiline textarea, chart tooltips |
-| Row | `rounded-xl` (12px) | Menu items, search hits, list rows |
-| Tile | `rounded-[12px]` / `rounded-lg` | 36px icon squares |
-| Logo | `rounded-2xl` | Brand mark on the shell |
-| Bubble notch | `rounded-2xl` + `rounded-tr-xs` or `rounded-tl-xs` | Chat: flatten only the corner that faces the avatar |
-
-Sheets coming from the bottom keep the 26px radius on the **top** corners only.
-
----
-
-## Shadow
-
-Shadows are small. Elevation is implied by the canvas/card contrast, not by a drop.
-
-| Level | Token | Use |
-|---|---|---|
-| Whisper | `shadow-2xs` | Nested chips, composers, avatars, send buttons |
-| Card | `shadow-xs` | White cards, header icon buttons, dark banners |
-| Control | `shadow-sm` / `shadow-md` | Floating controls on media |
-| Accent glow | `shadow-lg shadow-[#ffd037]/20` | Logo only |
-| Danger glow | `shadow-md shadow-[#ef4444]/30`–`/40` | End-call / destructive primary only |
-| Overlay | `shadow-xl` (modal), `shadow-2xl` (drawer / sheet) | — |
-
-No stacked “soft UI” shadows. No `shadow-2xl` on resting cards. No colored glows except the two accent cases above.
-
----
-
-## Spacing
-
-Dense product spacing. Padding is generous *inside* round cards; gaps *between* regions stay moderate. Do not pad like a landing page.
-
-### Page
-
-- Work-area padding: `p-4 sm:p-6 lg:p-7`
-- Mobile extra bottom: `pb-20` so content clears the bottom nav (`md:pb-6`)
-- Title block to content: `mb-6`
-- Major regions: `gap-5`
-
-### Surface
-
-- Standard card: `p-5`
-- Dense panel (chat-like): `p-3 sm:p-3.5`
-- Modal body: `p-5 sm:p-6`; compact lists `p-4`; confirmations `p-6` centered
-- Popover / menu: `p-2` around items, or `p-4` when the popover has a header
-- Menu item: `px-3.5 py-2.5`, `gap-3` icon-to-label, `gap-0.5` between items
-- Destructive group: `mt-1.5 pt-1.5` after a divider
-- Overlay inset on media: `top-4 / left-4 / right-4 / bottom-4`, control cluster `gap-2`
-
-### Hits
-
-- Icon button: **44×44** (`w-11 h-11`) on the canvas
-- Media control: **40×40**, `sm:` **44×44**
-- Send / compact circular action: **32×32**
-- List avatar: 28–36px; notes trailing avatar: 20px
-- Active-nav tick: 6×28px (`w-1.5 h-7`) rounded on the inner side
-
-Do not use `gap-8`+ between cards, `p-10` card padding, or centered max-w-prose columns unless the page is truly a long reading view.
-
----
-
-## Layout
-
-Rules below are structural. They are not tied to one screen.
-
-### Shell and canvas
-
-Every authenticated view is a **dark shell** (`#111216`) holding a **light canvas** (`#edf0f7`).
-
-- Desktop: an expanded dark rail (`w-64`, `px-3`, sticky, full viewport height) on the start edge. Logo at top, primary nav in the middle, destructive/session action at the bottom. Nav rows are `rounded-xl`, icon 20px + `text-[13px] font-semibold` label, `gap-3` icon-to-label, `px-3.5 py-2.5`, `gap-1` between rows, `overflow-y-auto scrollbar-thin` so more than ~9 items never clip. Active row: white + `bg-white/5` (persistent light wash), tick on the inner edge; idle `#7f8594`, `hover:text-white hover:bg-white/5`. Group rows (accordion) carry a trailing `AltArrowDown` that rotates 180° when open (the installed Solar version has no `chevron-down`; `alt-arrow-down` is the accordion icon); children rows indent under the parent label start (`pl-[46px]`), and the group auto-opens when one of its children is the selected page. Session action: red Log Out row under a `border-t border-white/10` divider.
-- Mobile: the same nav becomes a **fixed bottom bar** (`z-50`, `border-t border-white/10`). A hamburger on the canvas opens a **left dark drawer** (`w-72`, `max-w-[85vw]`).
-- The canvas is the only place white cards live. Do not put white cards on `#111216`. Do not put a light top-nav bar above the canvas.
-
-### Content geometry
-
-- Primary column + optional secondary column. At `lg`: 12-column grid, primary `col-span-7` (or 8 at `xl`), secondary the remainder. Below `lg`: single column, `gap-5`.
-- Inner pairs (two sibling cards) split at `sm` (`grid-cols-2`), stack on the smallest screens.
-- Cards **stretch** (`h-full`, `items-stretch`). A card is a region, not a shrink-wrapped widget floating in whitespace.
-- Page title sits at the top of the canvas, left-aligned, with compact utility controls (search, alerts, avatar) on the end edge. On small screens, title stacks above controls; controls `self-end`.
-
-### What a page is made of
-
-Compose from **cards**, not from full-bleed sections.
-
-1. One page title + one supporting sentence (muted, with bold fragments for numbers/names).
-2. One or more `rounded-[26px]` white surfaces.
-3. Optional nested dark banner (`#181a1f`, `rounded-[20px]`) when a card has its own mini-header (people stack, count, title).
-4. Lists inside cards: either `divide-y divide-gray-100` or `gap-5` blocks — pick one per list, don’t mix.
-
-Do not introduce a third chrome (tabs as a second top bar, a light sidebar, a footer). If a view needs local navigation, put it in the existing rail or as in-card segmented control that still uses pills / yellow tick — not underline tabs.
-
-### Public surfaces
-
-Donation pages, confirmation, auth and indisponível live outside the shell: a centered `max-w-md` column, `gap-5` between blocks, `px-4 py-6 sm:py-10`. The OBS overlay and queue popout are chromeless live surfaces (no shell, no canvas padding scale).
-
-### Overlays (system-wide)
-
-| Pattern | Surface | Motion | Dismiss |
-|---|---|---|---|
-| Modal | Centered white `rounded-[26px]`, `shadow-xl`, `max-h-[90vh]`. Sizes: 420 / 560 / 720. Backdrop `bg-black/40 backdrop-blur-sm`. | `animate-scale-in` | ESC, backdrop |
-| Popover | Anchored, `rounded-[20px]`, `shadow-lg`, 8px below trigger. | `animate-pop-in` | ESC, outside click |
-| Mobile fallback for popover | Bottom sheet, `rounded-t-[26px]`, `shadow-2xl`, titled, close button. | `animate-slide-up` | ESC, backdrop |
-| Drawer | Left, dark `#111216`, `shadow-2xl`. Backdrop `bg-black/50`. | `animate-slide-left` | ESC, backdrop |
-| Toast | Bottom stack, card surface `rounded-[20px]`, `shadow-xl`, icon + title + close. | 200ms fade/slide | Swipe, close button, timeout |
-
-Lock body scroll while a modal or drawer is open. `z-50` for all overlays. Do not stack competing overlay systems.
-
----
-
-## Controls
-
-### Buttons
-
-All actions are **pills** (`rounded-full`) unless they are a square-ish menu row.
-
-| Kind | Fill | Text | Notes |
-|---|---|---|---|
-| Primary | `#fed130` → hover `#fcc717` | `#11151e` bold | `active:scale-95` or `active:scale-[0.98]` |
-| Secondary | `#f4f5f8` → hover `gray-100` | `#333945` bold | Cancel, quiet |
-| Inverse | `#16181e` → hover black | white | Downloads, “add” FABs |
-| Destructive | `#ef4444` → hover `#dc2626` | white | Optional red glow |
-| Success (transient) | `#10b981` | white | Only after a completed action, replacing the inverse/primary label |
-
-Full-width buttons in dialogs: `py-3 text-sm font-bold`. Compact: `px-4 h-10 text-xs font-bold`. Hero compact: `px-6 py-2.5 text-sm`.
-
-### Icon buttons
-
-Circle, 44px, `bg-white hover:bg-gray-50`, hairline border, `shadow-xs`, icon 20px at the default weight (Outline), color `#3e4452`. `active:scale-95`.
-
-On media: frosted `bg-white/90 backdrop-blur-md` when on, `bg-[#181a1f]/90` when off. Off-camera/off-mic tints red.
-
-### Inputs
-
-Pill. Two legal fills:
-
-1. **Wash field** — `bg-[#eceef3] border-[#dfe3ea]`, used in modals and search.
-2. **Composer** — `bg-white border-gray-200/90`, used when the field sits on a white card (chat, inline edit).
-
-Both: transparent inner input, `font-medium`, placeholder `#707684`, no outline. Focus is `focus-within:border-[#fcc717] focus-within:ring-2 focus-within:ring-[#ffd037]/30`. Leading icon in `#707684`. Trailing submit is a 32px yellow circle.
-
-Multiline textarea (`AutoGrowTextarea`) uses the wash fill with `rounded-2xl`. OTP is one pill cell per digit (`rounded-full`, wash fill). Range slider uses `.slider-primary` (brand fill, wash track, white knob).
-
-### Menus
-
-`text-[13px] font-semibold text-[#333945] rounded-xl hover:bg-[#f4f5f8]`. Icons 16px, `#707684`, stroke ~1.9. Destructive row last, red, `hover:bg-red-50`. Clipboard success swaps the icon to a green check and the label to “Copied!” for ~1.6s — no toast required.
-
-### Badges & ticks
-
-- Numeric / unread: 16px yellow circle, `#11151e` extrabold 11px, or a 10px yellow dot.
-- Status chip: yellow pill, `px-2 py-0.5`, 10px extrabold (`Speaking`).
-- Pending chip: yellow-ink text on yellow-wash (`bg-yellow-wash`), never `warning/10`.
-- Nav active: yellow tick on the inner edge of the rail (`rounded-r-full`) or a 24×4px yellow cap on the mobile bar. Active icon scales slightly and switches to the Bold tier (vs Linear idle).
-
-### Avatars
-
-Always circular, `object-cover`. Stack with negative space (`-space-x-1.5` to `-space-x-2`). Hover `scale-110`. “+N” overflow is a dark circle, white 2px ring, bold 12px.
-
----
-
-## Icons & imagery
-
-- **Icons:** Solar only (`@solar-icons/react`), imported through the `@/components/ui/Icon` wrapper, which maps `strokeWidth` to a style tier: `<2` → Linear (idle / menu icons; the exact stroke value passes through, 1.5–1.9), `2–2.2` → Outline (default controls), `≥2.3` → Bold (active nav, send, confirmation checks — Solar has no heavy stroke style, so its Bold weight is filled; that fill is legal *only* on this accent tier). Never import from `@solar-icons/react` directly, never use Duotone/Broken styles. Do not mix icon sets. Selected-state checks in menus use `check-circle` at Bold tier, never hand-drawn SVG. `ICON_TILE_CLASS` inner icon is 16px by default.
-- **Icons are Solar** — Solar icon set by 480-Design (`@solar-icons/react`, MIT package / CC-BY-4.0 glyphs).
-- **Photos:** real people, cropped as circles or as media wells. Media wells `rounded-[28px] overflow-hidden` with a dark fallback `#1e232d`.
-- **Logo:** 48px rounded-2xl yellow tile, dark glyph, yellow glow. Hover `scale-105`.
-- **Emoji:** allowed as a single page-title companion or as reactions. Not as empty-state illustration, not as a row of three decorative glyphs.
-
-No undraw / blob / gradient-mesh illustrations. Empty states are type-only: bold title + muted sentence, centered, modest vertical padding (`py-6` to `py-10`).
-
-Scan-safe exceptions (contrast, not style): QR code stays black-on-white (`fgColor`/`bgColor` fixed — it must scan), `Switch` knob stays white.
-
-### Shared classes
-
-Single source, no literals: `CARD_CLASS`, `SECTION_HEADING_CLASS`, `LINK_CLASS`, `ICON_TILE_CLASS`, `MENU_ITEM_CLASS`, `STAT_NUMBER_CLASS` (26px card numbers) in `components/ui/classes.ts` (product surfaces); `roundButtonClasses`, `popupClasses`, `menuRowClasses`, `menuRowDangerClasses` in `components/ui/header-styles.ts` (shell chrome). Banned: `bg-white` (use `bg-card`), `hover:bg-black` (use `hover:bg-inverse-hover`), `hover:text-blue-700` (use `LINK_CLASS` / `hover:text-info-hover`), `text-emerald-700` (use `text-success`), `hover:bg-emerald-600` (use `hover:bg-success-hover`), arbitrary gray hexes (`border-[#dfe3ea]`, `bg-[#eceef3]`, `text-[#11151e]` → line-input / wash / ink-heading tokens).
-
----
-
-## Motion
-
-All motion is short and `ease-out`. If it takes longer than 260ms, it is too slow.
-
-| Name | Duration | From |
-|---|---|---|
-| `fade-in` | 200ms | opacity 0 |
-| `scale-in` | 200ms | opacity 0, scale 0.96 |
-| `pop-in` | 180ms | 6px down, scale 0.97 |
-| `slide-up` | 240ms | 100% down (sheets) |
-| `slide-left` | 260ms | 100% left (drawers) |
-
-Interaction: `active:scale-95` on circles, `active:scale-[0.98]` on wide pills, `hover:scale-110` on small avatars and emoji cells. Hover-reveal controls use `opacity-0 group-hover:opacity-100` — do not leave ⋯ buttons permanently visible on dense lists.
-
-No bounce. No spring overshoot. No looping animations except a single `animate-ping` on a live destructive control (end-call). No page-load choreography.
-
-Exceptions (intentional, nowhere else): payment celebration (`confirmed-pop` 0.45s, `confirmed-ring` 0.9s), error shake (0.4s, `FieldError`/`OtpInput` only).
-
-Scrollbars in dense panels: 4px, thumb `#e2e8f0` → hover `#cbd5e1`, transparent track (`scrollbar-thin`).
-
----
-
-## Copy & density
-
-- Titles are specific (“Interview with CEO and Marketing”), not generic (“Dashboard”, “Overview”, “My Workspace”).
-- Supporting lines carry numbers in **bold near-black** inside muted sentences: “Today you have **14 meetings** planned for **4 projects**.”
-- Section labels are tiny uppercase, not H3s.
-- Confirmation copy is one sentence, then two stacked pills (destructive on top, cancel below) — not a three-button footer.
-- Success is inline and quiet. Prefer swapping a label to “Copied!” over a toast stack.
-
----
-
-## Anti-slop checklist
-
-Reject a screen that does any of the following:
-
-1. **Wrong typeface** — Inter, Geist, system-ui, or a serif display.
-2. **Wrong accent** — indigo, violet, cyan-as-brand, rainbow tags, gradient buttons.
-3. **Wrong surface** — white page, gray-900 sidebar, glass panels, mesh/blob backgrounds, dark cards on a dark canvas.
-4. **Wrong radius** — 8–12px cards, squared buttons, `rounded-md` inputs.
-5. **Wrong border** — visible gray frames, 2px outlines, dashed drop-zones as decoration.
-6. **Wrong shadow** — large soft shadows, colored ambient glows on every card.
-7. **Wrong spacing** — marketing whitespace, centered 480px columns, `gap-8`+ card grids, `p-10` empty cards.
-8. **Wrong type scale** — 36–48px heroes, thin weights, muted-everywhere, or all-caps body.
-9. **Wrong controls** — underline tabs, rectangular primary buttons, ghost-border buttons as the default, floating action buttons in Material style (except the 32px inverse “+” that sits on a card corner).
-10. **Wrong motion** — fade-up-on-scroll, staggered card reveals, 400ms+ easings, bounce.
-11. **Stock AI layout** — three equal stat cards with big numbers, a purple sparkline, a “Welcome back,” and a right-rail of generic “tips.”
-12. **Illustration kits** and decorative emoji rows.
-13. **Yellow everywhere** — if more than one large object is yellow, remove yellow until only the primary action (and logo/badge) remain.
-
-When in doubt: **dark shell, cool-gray canvas, 26px white card, hairline border, pill yellow action, Satoshi extrabold title in `#11151e`.**
-)
+| Canvas / wash / ninho | `#FBF8EF` | fundo da página e preenchimentos aninhados |
+| Card | `#FFFFFF` | superfícies |
+| Rail / shell | `#111111` | navegação (fixo nos dois temas) |
+| Borda hairline | `#E8E4DB` | divisórias e molduras quietas |
+| Borda de controle | `#9A8B6F` (dark `#8C8271`) | inputs, selects, datas, OTP, anéis de rádio — ≥3:1 (WCAG 1.4.11) |
+| Tinta título / forte | `#111111` | headings, valores, ênfases |
+| Tinta corpo | `#6B6558` | parágrafos, secundário |
+| Tinta muda | `#8F887C` | meta, labels, ícones idle do rail |
+| Marca azul | `#AEC6E8` | item ativo, logo, avatar, dot |
+| CTA amarelo | `#F5D85D` | só ação primária e badge pendente |
+| Info | `#2B4B7A` (fundo `#DCE8FA`, dot `#5B8DEF`) | links, processando |
+| Success | `#4C5E27` (fundo `#DDE6C3`, dot `#7A9150`) | concluído, confirmações |
+| Error | `#A02A2A` (fundo `#FAD9D9`) | perigo, falhas |
+| Warning | `#D9A400` | dot pendente |
+
+Sólidos com texto branco (`error-solid`, `success-solid`) não mudam no dark.
+
+### Dark (sem inversão mecânica)
+
+Fundo `#1D1913`, superfície `#292420`, borda `#3B342A`, textos
+`#F6F5EE` / `#B7AB97` / `#8C8271`, hero `#0C0A07`. Marca azul `#AEC6E8`
+inalterada. Badges com fundo escuro e texto claro da mesma família
+(`#2A3A55`/`#AEC6E8`, `#333D24`/`#C2D197`, `#472425`/`#F0A6A6`). Botão
+primário escuro vira claro (`#F6F5EE` + tinta `#111111`).
+
+### Raios
+
+Card/seção/modal `28px`, linha `rounded-2xl`, tile `rounded-xl`, resto pill
+`rounded-full`. Card sem sombra. Shell desktop com `rounded-l-[24px]` ("pontas")
+e scroll interno (shell travado).
+
+### Regra de fills (interativo × leitura)
+
+`wash` é tinta de ninho, só para leitura: badges, tiles, contadores, resumos.
+Elemento interativo (input, select, textarea, OTP, trigger de data) usa o fundo
+do pai + `border-line-input` — a borda define o controle, não o preenchimento.
+Opções selecionáveis em lista usam divisória (`divide-line`), não uma caixa por
+item: nem todo conteúdo precisa estar dentro de uma caixa.
+Divisórias de lista recuam (`divide-line/60`); bordas de controle ficam
+sempre a 100% — duas gramaturas distintas para o olho não misturar linha de
+lista com borda de campo. Hairlines nunca escurecem para "compensar": se a
+compreensão depende de enxergar a divisória, o layout está errado — usa-se
+respiro + tipografia.

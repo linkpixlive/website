@@ -114,13 +114,20 @@ export function ChangePasswordModal({
         />
 
         {has2fa && (
-          <OtpField
-            label="Código do autenticador"
-            isOpen={isOpen}
-            disabled={loading}
-            error={Boolean(localError) && !totp}
-            onChange={(code) => setValue("totp", code, { shouldValidate: false })}
-          />
+          <>
+            <div aria-hidden="true" className="h-px bg-line" />
+            <p className="text-xs font-medium leading-relaxed text-ink-muted">
+              Etapa final · com a proteção ativa, pedimos o código atual do
+              app para provar que é você.
+            </p>
+            <OtpField
+              label="Código atual do app (6 dígitos)"
+              isOpen={isOpen}
+              disabled={loading}
+              error={Boolean(localError) && !totp}
+              onChange={(code) => setValue("totp", code, { shouldValidate: false })}
+            />
+          </>
         )}
 
         <SubmitButton

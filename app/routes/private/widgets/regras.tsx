@@ -67,7 +67,7 @@ export async function action({ request }: Route.ActionArgs) {
     filterHateSpeech: formData.get("filterHateSpeech") === "true",
     customRules: String(formData.get("customRules") ?? ""),
   });
-  
+
   if (!parsed.success) {
     return {
       success: false,
@@ -115,17 +115,15 @@ export default function DonationSettingsPage() {
   });
 
   return (
-    <fetcher.Form
-      key={settings.updatedAt}
-      method="post"
-      className="grid grid-cols-1 gap-5 lg:grid-cols-2 items-stretch"
-    >
+    <fetcher.Form key={settings.updatedAt} method="post">
       <MinAmountsSection
         settings={settings}
         formError={formError}
         loading={loading}
         onDirtyChange={() => setDirty(true)}
       />
+
+      <div aria-hidden="true" className="my-8 border-t border-line" />
 
       <ModerationSection
         settings={settings}
@@ -134,15 +132,21 @@ export default function DonationSettingsPage() {
         onDirtyChange={() => setDirty(true)}
       />
 
-      <div className="lg:col-span-2 flex justify-end">
-        <SubmitButton
-          loading={loading}
-          disabled={loading}
-          className="w-full sm:w-auto sm:min-w-52"
-        >
-          Salvar alterações
-        </SubmitButton>
-      </div>
+        <div className="mt-2 flex flex-col gap-2 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <p
+            aria-live="polite"
+            className={`text-xs font-semibold ${dirty ? "text-ink-secondary" : "invisible"}`}
+          >
+            Alterações não salvas
+          </p>
+          <SubmitButton
+            loading={loading}
+            disabled={loading}
+            className="w-full sm:w-auto"
+          >
+            Salvar
+          </SubmitButton>
+        </div>
     </fetcher.Form>
   );
 }

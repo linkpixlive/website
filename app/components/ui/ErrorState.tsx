@@ -1,7 +1,6 @@
 import { isRouteErrorResponse, useNavigate, useRouteError } from "react-router";
 import { Button } from "./Button";
-import { CARD_CLASS } from "./classes";
-import { Icon } from "./Icon";
+import { StatusPage } from "./StatusPage";
 
 interface ErrorStateProps {
   title?: string;
@@ -17,16 +16,17 @@ export function ErrorState({
   retryLabel = "Tentar novamente",
 }: ErrorStateProps) {
   return (
-    <div className={`${CARD_CLASS} text-center flex flex-col items-center gap-4`}>
-      <span className="w-12 h-12 rounded-2xl bg-error/10 flex items-center justify-center text-error">
-        <Icon name="danger-circle" size={22} strokeWidth={2} />
-      </span>
-      <div>
-        <h1 className="text-base font-bold text-ink-heading">{title}</h1>
-        <p className="mt-1 text-sm text-ink-secondary">{message}</p>
-      </div>
+    <div role="alert" className="flex flex-col items-start gap-1 py-6">
+      <p className="text-sm font-bold text-ink-heading">{title}</p>
+      <p className="text-sm leading-relaxed text-ink-secondary">{message}</p>
       {onRetry && (
-        <Button type="button" variant="secondary" size="sm" onClick={onRetry}>
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={onRetry}
+          className="mt-3"
+        >
           {retryLabel}
         </Button>
       )}
@@ -42,29 +42,57 @@ export function RouteErrorState() {
   if (isRouteErrorResponse(error)) {
     if (error.status === 401) {
       return (
-        <ErrorState
-          title="Sessão expirada"
-          message="Entre novamente para continuar."
-          onRetry={() => navigate("/auth/login")}
-          retryLabel="Ir para o login"
+        <StatusPage
+          tone="reconnect"
+          eyebrow="Sessão expirada"
+          title="Sua sessão terminou"
+          body="Por segurança, desconectamos após um tempo sem atividade. Entre de novo para continuar de onde parou."
+          primaryLabel="Entrar novamente"
+          onPrimary={() => navigate("/auth/login")}
+          reassurance="Sua conta e seus dados continuam como você deixou."
         />
       );
     }
     if (error.status === 404) {
       return (
-        <ErrorState
-          title="Não encontrado"
-          message="O conteúdo pode ter sido removido."
-          onRetry={reload}
+        <StatusPage
+          tone="neutral"
+          eyebrow="Não encontrado"
+          title="Essa página não existe"
+          body="O conteúdo pode ter sido removido ou o endereço está incompleto. Volte e tente outro caminho."
+          primaryLabel="Voltar"
+          onPrimary={() => navigate(-1)}
+          secondaryLabel="Ir para o início"
+          onSecondary={() => navigate("/")}
         />
       );
     }
     const message =
       typeof error.data === "string" && error.data
         ? error.data
-        : "Nossos sistemas estão com problemas. Tente novamente mais tarde.";
-    return <ErrorState message={message} onRetry={reload} />;
+        : "Nossos sistemas estão com problemas. Tente novamente em instantes.";
+    return (
+      <StatusPage
+        tone="failure"
+        eyebrow="Algo deu errado"
+        title="Não conseguimos carregar esta página"
+        body={message}
+        primaryLabel="Tentar novamente"
+        onPrimary={reload}
+        reassurance="Seus dados e seu saldo continuam intactos."
+      />
+    );
   }
 
-  return <ErrorState onRetry={reload} />;
+  return (
+    <StatusPage
+      tone="failure"
+      eyebrow="Algo deu errado"
+      title="Não conseguimos carregar esta página"
+      body="Verifique sua conexão e tente novamente."
+      primaryLabel="Tentar novamente"
+      onPrimary={reload}
+      reassurance="Seus dados e seu saldo continuam intactos."
+    />
+  );
 }

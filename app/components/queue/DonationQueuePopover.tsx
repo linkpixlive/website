@@ -4,19 +4,23 @@ import { Button } from "~/components/ui/Button";
 import { Icon } from "~/components/ui/Icon";
 import type { OverlayDonationEntity } from "~/types/queue";
 import { popupClasses } from "~/components/ui/header-styles";
+import { useNow } from "~/hooks/useNow";
 import { QueueRow } from "./QueueRow";
 import { useConfirmRemove } from "./useConfirmRemove";
 
 interface DonationQueuePopoverProps {
   queue: OverlayDonationEntity[];
   token: string | null;
+  quiet?: boolean;
 }
 
 export function DonationQueuePopover({
   queue,
   token,
+  quiet = false,
 }: DonationQueuePopoverProps) {
   const [open, setOpen] = useState(false);
+  const now = useNow();
   const { confirm, removing, handleConfirmClick, handleRemove, resetConfirm } =
     useConfirmRemove(queue, token);
 
@@ -31,10 +35,20 @@ export function DonationQueuePopover({
     <Popover.Root open={open} onOpenChange={handleOpenChange}>
       <Popover.Trigger
           render={
-            <Button variant="secondary" size="sm">
-              <Icon name="list" size={16} strokeWidth={2} />
-              Ver fila {pendingCount > 0 ? `(${pendingCount})` : ""}
-            </Button>
+            quiet ? (
+              <button
+                type="button"
+                className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-bold text-ink-secondary transition-colors outline-none hover:text-ink-heading focus-visible:ring-2 focus-visible:ring-brand/40"
+              >
+                <Icon name="list" size={16} strokeWidth={2} />
+                Ver fila{pendingCount > 0 ? ` (${pendingCount})` : ""}
+              </button>
+            ) : (
+              <Button variant="secondary" size="sm">
+                <Icon name="list" size={16} strokeWidth={2} />
+                Ver fila {pendingCount > 0 ? `(${pendingCount})` : ""}
+              </Button>
+            )
           }
         />
         <Popover.Portal>
@@ -47,10 +61,17 @@ export function DonationQueuePopover({
             <Popover.Popup
               className={`w-[380px] max-w-[92vw] p-4 max-h-[70vh] overflow-y-auto scrollbar-thin ${popupClasses}`}
             >
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-extrabold tracking-tight text-ink-heading">
-                  Fila de exibição • {queue.length} {queue.length === 1 ? "alerta" : "alertas"}
-                </h3>
+              <div className="mb-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-[11px] font-extrabold tracking-wider text-ink-muted uppercase">
+                    Fila de exibição
+                  </h3>
+                  {queue.length > 0 && (
+                    <span className="rounded-full bg-wash px-2 py-0.5 text-[11px] font-extrabold text-ink-secondary">
+                      {queue.length}
+                    </span>
+                  )}
+                </div>
                 <Popover.Close
                   render={
                     <button
@@ -71,7 +92,7 @@ export function DonationQueuePopover({
                   </p>
                 </div>
               ) : (
-                <ul className="divide-y divide-line">
+                <ul className="divide-y divide-line/60">
                   {queue.map((donation, index) => (
                     <QueueRow
                       key={
@@ -86,6 +107,7 @@ export function DonationQueuePopover({
                       onConfirmClick={handleConfirmClick}
                       onRemove={handleRemove}
                       onCancel={resetConfirm}
+                      now={now}
                     />
                   ))}
                 </ul>

@@ -62,13 +62,13 @@ export default function WidgetsLayout() {
     <div>
       <PageHeader
         title="Integrações"
-        subtitle="Configure alertas, widgets e regras de doação da sua transmissão."
+        subtitle="Como a sua live recebe e filtra as doações."
       />
 
       <nav
         ref={navRef}
         aria-label="Seções de integrações"
-        className="relative inline-flex max-w-full gap-1 overflow-x-auto rounded-full border border-line bg-card p-1 shadow-xs"
+        className="relative inline-flex max-w-full gap-1 overflow-x-auto rounded-full border border-line bg-card p-1"
       >
         <span
           aria-hidden="true"
@@ -87,7 +87,7 @@ export default function WidgetsLayout() {
             className={({ isActive }) =>
               `relative z-10 whitespace-nowrap rounded-full px-4 py-2 text-[13px] font-bold transition-colors duration-150 outline-none ${
                 isActive
-                  ? "text-white"
+                  ? "text-on-inverse"
                   : "text-ink-secondary hover:text-ink-heading"
               }`
             }
@@ -97,7 +97,7 @@ export default function WidgetsLayout() {
         ))}
       </nav>
 
-      <div className="mt-5">
+      <div className="mt-6 max-w-2xl">
         <Outlet />
       </div>
     </div>

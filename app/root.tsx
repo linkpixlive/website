@@ -40,10 +40,8 @@ export default function App() {
 
 export function ErrorBoundary() {
   return (
-    <main className="min-h-dvh flex items-center justify-center px-4 bg-canvas">
-      <div className="w-full max-w-md">
-        <RouteErrorState />
-      </div>
+    <main className="flex min-h-dvh items-center justify-center bg-canvas">
+      <RouteErrorState />
     </main>
   );
 }

@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router";
 import { z } from "zod";
-import { AuthDivider } from "./AuthDivider";
 import { PasswordField } from "./PasswordField";
 import { AlertMessage } from "~/components/ui/AlertMessage";
 import { FormField } from "~/components/ui/FormField";
@@ -69,15 +68,13 @@ export function LoginForm({ loading, apiError, onClearError, onSubmit }: LoginFo
         <SubmitButton loading={loading}>Entrar</SubmitButton>
       </div>
 
-      <AuthDivider text="ou" />
-
-      <p className="mt-4 text-center text-sm font-medium text-ink-secondary">
-        Não tem uma conta?{" "}
+      <p className="pt-2 text-center text-sm font-medium text-ink-secondary">
+        Novo no LinkPix?{" "}
         <Link
           to="/auth/register"
           className="text-info hover:text-info-hover font-semibold underline transition-colors duration-150"
         >
-          Crie aqui
+          Criar conta
         </Link>
       </p>
     </form>
