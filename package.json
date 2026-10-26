@@ -18,6 +18,7 @@
     "@react-router/serve": "8.0.0",
     "@solar-icons/react": "^2.0.1",
     "axios": "^1.18.1",
+    "isbot": "^5",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -26,8 +27,7 @@
     "react-router": "8.0.0",
     "recharts": "^3.10.1",
     "socket.io-client": "^4.8.3",
-    "zod": "^4.4.3",
-    "isbot": "^5"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@react-router/dev": "8.0.0",

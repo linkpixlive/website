@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { Link, redirect, useNavigation, useSubmit } from "react-router";
 import { z } from "zod";
 import { authApi } from "~/api/modules/auth";
-import { AuthSplit } from "~/components/auth/AuthSplit";
+import { AuthShell } from "~/components/auth/AuthShell";
 import { PasswordField } from "~/components/auth/PasswordField";
 import { AlertMessage } from "~/components/ui/AlertMessage";
 import { FormField } from "~/components/ui/FormField";
@@ -17,6 +17,12 @@ import type { Route } from "./+types/register";
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: "Criar conta — LinkPix" }];
+}
+
+export async function loader({ request }: Route.LoaderArgs) {
+  const candidate = new URL(request.url).searchParams.get("username") ?? "";
+  const parsed = registerSchema.shape.username.safeParse(candidate);
+  return { initialUsername: parsed.success ? parsed.data : "" };
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -59,12 +65,16 @@ function stepForApiError(message: string): Step {
   return 2;
 }
 
-export default function Register({ actionData }: Route.ComponentProps) {
+export default function Register({ actionData, loaderData }: Route.ComponentProps) {
   const submit = useSubmit();
   const navigation = useNavigation();
   const loading = navigation.state === "submitting";
   const [apiError, clearApiError] = useActionError(actionData);
-  const [step, setStep] = useState<Step>(1);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+  const [validatingUsername, setValidatingUsername] = useState(false);
+  const [step, setStep] = useState<Step>(
+    loaderData.initialUsername ? 2 : 1,
+  );
 
   const {
     register,
@@ -76,6 +86,7 @@ export default function Register({ actionData }: Route.ComponentProps) {
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
+    defaultValues: { username: loaderData.initialUsername },
   });
 
   const passwordValue = watch("password");
@@ -98,7 +109,22 @@ export default function Register({ actionData }: Route.ComponentProps) {
 
   const handleNext = async (fields: (keyof RegisterFormValues)[]) => {
     clearApiError();
-    if (await trigger(fields)) setStep((s) => (s < 3 ? ((s + 1) as Step) : s));
+    setAvailabilityError(null);
+    if (!(await trigger(fields))) return;
+
+    if (step === 1) {
+      setValidatingUsername(true);
+      const result = await authApi.validateUsername(watch("username"));
+      setValidatingUsername(false);
+      if (!result.success) {
+        setAvailabilityError(result.error.message);
+        return;
+      }
+    }
+
+    setStep((current) =>
+      current < 3 ? ((current + 1) as Step) : current,
+    );
   };
 
   const onSubmit = (data: RegisterFormValues) => {
@@ -114,8 +140,7 @@ export default function Register({ actionData }: Route.ComponentProps) {
   };
 
   return (
-    <AuthSplit
-      tone="register"
+    <AuthShell
       eyebrow="Criar conta"
       title="Comece a receber em minutos"
       lede="Sua página fica pronta assim que confirmar o e-mail."
@@ -123,7 +148,10 @@ export default function Register({ actionData }: Route.ComponentProps) {
     >
       <form
         onSubmit={handleSubmit(onSubmit)}
-        onChange={clearApiError}
+        onChange={() => {
+          clearApiError();
+          setAvailabilityError(null);
+        }}
         className="space-y-6"
       >
         <div className="space-y-2">
@@ -138,22 +166,31 @@ export default function Register({ actionData }: Route.ComponentProps) {
           </div>
         </div>
 
-        {apiError && <AlertMessage variant="error" message={apiError} />}
+        {(apiError || availabilityError) && (
+          <AlertMessage
+            variant="error"
+            message={availabilityError ?? apiError ?? ""}
+          />
+        )}
 
         {step === 1 && (
           <div key="step-1" className="space-y-4 animate-fade-in">
             <FormField
               label="Usuário"
               {...register("username")}
-              error={errors.username?.message}
+              error={errors.username?.message ?? availabilityError ?? undefined}
               prefix={hostPrefix || undefined}
-              disabled={loading}
+              disabled={loading || validatingUsername}
               autoFocus
             />
 
             <div className="mt-6">
-              <SubmitButton type="button" onClick={() => handleNext(STEP_FIELDS[1])}>
-                Continuar
+              <SubmitButton
+                type="button"
+                disabled={validatingUsername}
+                onClick={() => handleNext(STEP_FIELDS[1])}
+              >
+                {validatingUsername ? "Validando..." : "Continuar"}
               </SubmitButton>
             </div>
           </div>
@@ -186,7 +223,10 @@ export default function Register({ actionData }: Route.ComponentProps) {
                 value={formatCpf(cpfValue)}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, "").slice(0, 11);
-                  setValue("cpf", val, { shouldDirty: true, shouldValidate: true });
+                  setValue("cpf", val, {
+                    shouldDirty: true,
+                    shouldValidate: val.length === 11,
+                  });
                 }}
                 error={errors.cpf?.message}
                 icon="card"
@@ -265,6 +305,6 @@ export default function Register({ actionData }: Route.ComponentProps) {
           </Link>
         </p>
       </form>
-    </AuthSplit>
+    </AuthShell>
   );
 }

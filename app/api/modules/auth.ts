@@ -1,5 +1,5 @@
 import type { components } from "../generated/api-schema";
-import { api, fetchApi } from "../http/client";
+import { api, authHeaders, fetchApi } from "../http/client";
 
 export type RegisterPayload = components["schemas"]["RegisterAuthDto"];
 export type LoginPayload = components["schemas"]["LoginAuthDto"];
@@ -11,7 +11,13 @@ export type LoginResult =
   | components["schemas"]["Pending2faDto"];
 export type Login2faPayload = components["schemas"]["Login2faDto"];
 
+type ValidateUsernameResult = { available: true };
+
 export const authApi = {
+  validateUsername: (username: string) =>
+    fetchApi<ValidateUsernameResult>(
+      api.post("/auth/validate-username", { username }),
+    ),
   register: (body: RegisterPayload) =>
     fetchApi(api.post("/auth/register", body)),
   login: (body: LoginPayload) =>

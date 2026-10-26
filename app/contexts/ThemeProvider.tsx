@@ -1,3 +1,4 @@
+import { useLocation } from "react-router";
 import {
   createContext,
   useCallback,
@@ -11,7 +12,8 @@ export type Theme = "light" | "dark";
 export const THEME_STORAGE_KEY = "linkpix:theme";
 
 // Runs before the first paint to avoid a flash of light theme on dark mode users.
-export const themePrePaintScript = `(function(){try{var d=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)})==="dark";document.documentElement.classList.toggle("dark",d);document.documentElement.style.colorScheme=d?"dark":"light";}catch(e){}})();`;
+// The landing ("/") is always light: pre-paint never engages dark there.
+export const themePrePaintScript = `(function(){try{var d=location.pathname!=="/"&&localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)})==="dark";document.documentElement.classList.toggle("dark",d);document.documentElement.style.colorScheme=d?"dark":"light";}catch(e){}})();`;
 
 export interface ThemeContextValue {
   theme: Theme;
@@ -44,19 +46,21 @@ export function applyThemeToDom(theme: Theme) {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("light");
+  const { pathname } = useLocation();
 
   useEffect(() => {
-    const stored = readStoredTheme();
-    setThemeState(stored);
-    applyThemeToDom(stored);
+    setThemeState(readStoredTheme());
   }, []);
+
+  useEffect(() => {
+    applyThemeToDom(pathname === "/" ? "light" : theme);
+  }, [pathname, theme]);
 
   useEffect(() => {
     const onStorage = (event: StorageEvent) => {
       if (event.key !== THEME_STORAGE_KEY) return;
       if (event.newValue !== "light" && event.newValue !== "dark") return;
       setThemeState(event.newValue);
-      applyThemeToDom(event.newValue);
     };
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);

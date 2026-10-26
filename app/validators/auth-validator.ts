@@ -17,12 +17,19 @@ export const registerSchema = withPasswordConfirmation(
     username: z
       .string()
       .min(3, "Nome de usuário deve ter pelo menos 3 caracteres")
+      .max(30, "Nome de usuário deve ter no máximo 30 caracteres")
       .regex(/^[a-zA-Z0-9_]+$/, "Nome de usuário pode conter apenas letras, números e underscores"),
     email: z.email("E-mail inválido"),
     cpf: z
       .string()
-      .regex(/^\d{11}$/, "CPF deve conter exatamente 11 dígitos")
-      .refine(isValidCpf, "CPF inválido"),
+      /** aceita a máscara `000.000.000-00` ou cru; normaliza antes de validar */
+      .transform((v) => v.replace(/\D/g, ""))
+      .pipe(
+        z
+          .string()
+          .regex(/^\d{11}$/, "CPF deve conter exatamente 11 dígitos")
+          .refine(isValidCpf, "CPF inválido"),
+      ),
     password: strongPassword,
     confirmPassword: confirmPasswordField,
   },

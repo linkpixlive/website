@@ -7,6 +7,7 @@ import {
 
 export default [
   layout("routes/public/layout.tsx", [
+    index("routes/public/landing.tsx"),
     route(":username", "routes/public/$username.tsx"),
     route("doacao/:id", "routes/public/donation-confirmation.tsx"),
     route("indisponivel", "routes/public/indisponivel.tsx"),
@@ -15,9 +16,10 @@ export default [
     route("auth/forgot-password", "routes/public/auth/forgot-password.tsx"),
     route("auth/reset-password", "routes/public/auth/reset-password.tsx"),
     route("auth/verify-email", "routes/public/auth/verify-email.tsx"),
+    route("privacidade", "routes/public/privacidade.tsx"),
+    route("termos", "routes/public/termos.tsx"),
   ]),
   layout("routes/private/layout.tsx", [
-    index("routes/private/index.tsx"),
     route("dashboard", "routes/private/dashboard.tsx"),
     route("carteira", "routes/private/wallet.tsx"),
     route("widgets", "routes/private/widgets/layout.tsx", [

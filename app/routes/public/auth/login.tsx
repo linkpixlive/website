@@ -6,7 +6,6 @@ import {
   type Login2faPayload,
 } from "~/api/modules/auth";
 import { AuthShell } from "~/components/auth/AuthShell";
-import { AuthSplit } from "~/components/auth/AuthSplit";
 import { LoginForm } from "~/components/auth/LoginForm";
 import { TotpChallenge } from "~/components/auth/TotpChallenge";
 import { createAuthCookie, getAuthToken } from "~/util/session.server";
@@ -140,8 +139,7 @@ export default function Login({ actionData }: Route.ComponentProps) {
   }
 
   return (
-    <AuthSplit
-      tone="login"
+    <AuthShell
       eyebrow="Entrar"
       title="Bem-vindo de volta"
       lede="Entre para ver seu saldo e seus alertas."
@@ -153,6 +151,6 @@ export default function Login({ actionData }: Route.ComponentProps) {
         onClearError={() => setApiError(null)}
         onSubmit={onSubmit}
       />
-    </AuthSplit>
+    </AuthShell>
   );
 }
