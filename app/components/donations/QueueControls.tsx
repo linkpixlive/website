@@ -5,6 +5,7 @@ import { Icon } from "~/components/ui/Icon";
 interface QueueControlsProps {
   queue: OverlayDonationEntity[];
   token: string | null;
+  isPaused?: boolean;
   skipLoading?: boolean;
   clearLoading?: boolean;
   onSkip: () => void;
@@ -14,6 +15,7 @@ interface QueueControlsProps {
 export function QueueControls({
   queue,
   token,
+  isPaused = false,
   skipLoading = false,
   clearLoading = false,
   onSkip,
@@ -21,10 +23,10 @@ export function QueueControls({
 }: QueueControlsProps) {
   return (
     <div className="flex min-h-[36px] items-center gap-2">
+      <DonationQueuePopover queue={queue} token={token} quiet isPaused={isPaused} />
+
       {queue.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 animate-fade-in">
-          <DonationQueuePopover queue={queue} token={token} quiet />
-
           <button
             type="button"
             onClick={onSkip}

@@ -20,7 +20,10 @@ export function useDonationsPage({
   filters,
   enabled = true,
 }: UseDonationsPageOptions) {
-  const { queue, isPaused } = useQueueSocket(token, enabled);
+  const { queue, isPaused, isOnline, setIsPaused } = useQueueSocket(
+    token,
+    enabled,
+  );
   const { items: liveItems, total: liveTotal } = useDonationHistorySocket(
     token,
     history,
@@ -36,13 +39,14 @@ export function useDonationsPage({
     handleClear,
     handleTest,
     handleReplay,
-  } = useQueueActions(token, isPaused);
+  } = useQueueActions(token, isPaused, setIsPaused);
 
   const currentId = queue.find((d) => d.isCurrent)?.id ?? null;
 
   return {
     queue,
     isPaused,
+    isOnline,
     liveItems,
     liveTotal,
     currentId,

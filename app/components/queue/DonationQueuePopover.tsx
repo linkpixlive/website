@@ -12,12 +12,14 @@ interface DonationQueuePopoverProps {
   queue: OverlayDonationEntity[];
   token: string | null;
   quiet?: boolean;
+  isPaused?: boolean;
 }
 
 export function DonationQueuePopover({
   queue,
   token,
   quiet = false,
+  isPaused = false,
 }: DonationQueuePopoverProps) {
   const [open, setOpen] = useState(false);
   const now = useNow();
@@ -69,6 +71,11 @@ export function DonationQueuePopover({
                   {queue.length > 0 && (
                     <span className="rounded-full bg-wash px-2 py-0.5 text-[11px] font-extrabold text-ink-secondary">
                       {queue.length}
+                    </span>
+                  )}
+                  {isPaused && (
+                    <span className="rounded-full bg-warning/15 px-2 py-0.5 text-[11px] font-extrabold text-yellow-ink">
+                      Pausada
                     </span>
                   )}
                 </div>

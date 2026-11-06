@@ -43,6 +43,7 @@ export function DonationsView({
   const {
     queue,
     isPaused,
+    isOnline,
     liveItems,
     liveTotal,
     actionLoading,
@@ -97,7 +98,15 @@ export function DonationsView({
               className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-warning/15 px-3 py-1 text-xs font-bold whitespace-nowrap text-yellow-ink"
             >
               <Icon name="pause" size={14} strokeWidth={2.5} />
-              Fila pausada — retome para exibir os alertas
+              Fila pausada, retome para exibir os alertas
+            </span>
+          ) : isOnline === false ? (
+            <span
+              aria-live="polite"
+              className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-warning/15 px-3 py-1 text-xs font-bold whitespace-nowrap text-yellow-ink"
+            >
+              <Icon name="widget" size={14} strokeWidth={2.5} />
+              Overlay offline, as doações não entram na fila
             </span>
           ) : queue.length > 0 ? (
             `No ar · ${queue.length} na fila`
@@ -137,6 +146,33 @@ export function DonationsView({
         }
       />
 
+      {isPaused && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-warning/30 bg-warning/15 px-4 py-3 animate-slide-down"
+        >
+          <Icon
+            name="pause"
+            size={18}
+            strokeWidth={2.2}
+            className="shrink-0 text-yellow-ink"
+          />
+          <p className="min-w-0 flex-1 text-[13px] font-bold text-yellow-ink">
+            Fila pausada — os alertas não estão sendo exibidos na live.
+          </p>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleTogglePause}
+            loading={actionLoading.togglePause}
+          >
+            <Icon name="play" size={16} strokeWidth={2} />
+            Retomar fila
+          </Button>
+        </div>
+      )}
+
       <section aria-label="Histórico de doações" className="mt-8 border-t border-line pt-6">
         <div className="flex flex-wrap items-center justify-between gap-3 min-h-[40px]">
           <h2 className="flex items-center gap-2 text-base font-bold text-ink-heading">
@@ -151,6 +187,7 @@ export function DonationsView({
           <QueueControls
             queue={queue}
             token={token}
+            isPaused={isPaused}
             skipLoading={actionLoading.skip}
             clearLoading={actionLoading.clear}
             onSkip={handleSkip}

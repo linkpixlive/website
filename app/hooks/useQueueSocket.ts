@@ -5,15 +5,17 @@ import { useDashboardSocket } from "./useDashboardSocket";
 interface UseQueueSocketReturn {
   queue: OverlayDonationEntity[];
   isPaused: boolean;
+  isOnline: boolean | null;
+  setIsPaused: (paused: boolean) => void;
 }
 
-/** Live donation queue and pause state synced over the shared dashboard socket. */
 export function useQueueSocket(
   token: string | null,
   enabled = true,
 ): UseQueueSocketReturn {
   const [queue, setQueue] = useState<OverlayDonationEntity[]>([]);
   const [isPaused, setIsPaused] = useState(false);
+  const [isOnline, setIsOnline] = useState<boolean | null>(null);
   const socket = useDashboardSocket(token, enabled);
 
   useEffect(() => {
@@ -26,6 +28,7 @@ export function useQueueSocket(
       online: boolean;
       isPaused?: boolean;
     }) => {
+      setIsOnline(data.online);
       if (data.isPaused !== undefined) {
         setIsPaused(data.isPaused);
       }
@@ -40,5 +43,5 @@ export function useQueueSocket(
     };
   }, [socket]);
 
-  return { queue, isPaused };
+  return { queue, isPaused, isOnline, setIsPaused };
 }

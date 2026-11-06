@@ -2,10 +2,10 @@ import { useState } from "react";
 import { overlayApi } from "~/api/modules/overlay";
 import { useToast } from "~/contexts/useToast";
 
-/** Queue control actions (pause, skip, clear, test, replay) with per-action loading and toasts. */
 export function useQueueActions(
   token: string | null,
   isPaused: boolean,
+  setIsPaused: (paused: boolean) => void,
 ) {
   const { toast } = useToast();
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>(
@@ -24,8 +24,20 @@ export function useQueueActions(
     }
   };
 
-  const handleTogglePause = () =>
-    runAction("togglePause", () => overlayApi.togglePause(token), isPaused ? "Fila retomada!" : "Fila pausada!");
+  const handleTogglePause = async () => {
+    const nextPaused = !isPaused;
+    setActionLoading((prev) => ({ ...prev, togglePause: true }));
+    setIsPaused(nextPaused);
+    const res = await overlayApi.togglePause(token);
+    setActionLoading((prev) => ({ ...prev, togglePause: false }));
+    if (res.success) {
+      setIsPaused(res.data.isPaused);
+      toast(nextPaused ? "Fila pausada!" : "Fila retomada!", "success");
+    } else {
+      setIsPaused(isPaused);
+      toast(res.error?.message ?? "Tente novamente.", "error");
+    }
+  };
 
   const handleSkip = () =>
     runAction("skip", () => overlayApi.skipAlert(token), isPaused ? "Mensagem removida da fila!" : "Alerta pulado!");

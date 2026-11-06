@@ -1,8 +1,9 @@
 import { api, authHeaders, fetchApi } from "../http/client";
+import type { OverlaySettings } from "./widgets";
 
 export const overlayApi = {
   togglePause: (token: string | null) =>
-    fetchApi<void>(
+    fetchApi<OverlaySettings>(
       api.post("/overlay/toggle-pause", undefined, {
         headers: authHeaders(token),
       }),
