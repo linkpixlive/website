@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type FormEvent } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigation, useSubmit } from "react-router";
 import type { PixKey } from "~/api/modules/pix-keys";
@@ -186,6 +186,15 @@ export function WithdrawalModal({
     submit(formData, { method: "post" });
   };
 
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (step === "details") {
+      void handleContinue();
+      return;
+    }
+    void handleSubmit(onSubmit)(event);
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -257,7 +266,7 @@ export function WithdrawalModal({
           </Button>
         </div>
       ) : (
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleFormSubmit} className="space-y-4">
         {step === "details" ? (
           <>
             <p className="text-[13px] font-medium text-ink-secondary">

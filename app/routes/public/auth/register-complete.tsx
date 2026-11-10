@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useForm } from "react-hook-form";
 import { Link, redirect, useNavigation, useSubmit } from "react-router";
 import { z } from "zod";
@@ -64,8 +64,10 @@ export async function action({ request }: Route.ActionArgs) {
     return { error: parsed.error.issues[0].message };
   }
 
+  const { confirmPassword: _confirmPassword, ...registration } = parsed.data;
+
   const result = await authApi.register({
-    ...parsed.data,
+    ...registration,
     email: parsedEmail.data,
   });
 
@@ -115,6 +117,7 @@ export default function RegisterComplete({
     setValue,
     trigger,
     setFocus,
+    clearErrors,
     formState: { errors },
   } = useForm<CompleteFormValues>({
     resolver: zodResolver(completeRegistrationSchema),
@@ -142,9 +145,11 @@ export default function RegisterComplete({
   }, [apiError]);
 
   const handleNext = async (fields: (keyof CompleteFormValues)[]) => {
+    if (validatingUsername) return;
     clearApiError();
     setAvailabilityError(null);
     if (!(await trigger(fields))) return;
+    clearErrors();
 
     if (step === 1) {
       setValidatingUsername(true);
@@ -172,6 +177,15 @@ export default function RegisterComplete({
     submit(formData, { method: "post" });
   };
 
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (step !== 3) {
+      void handleNext(STEP_FIELDS[step]);
+      return;
+    }
+    void handleSubmit(onSubmit)(event);
+  };
+
   const emailConfirmationError = apiError?.includes("Confirme seu e-mail");
 
   return (
@@ -194,7 +208,7 @@ export default function RegisterComplete({
       aside={{ to: "/auth/login", label: "Entrar" }}
     >
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleFormSubmit}
         onChange={() => {
           clearApiError();
           setAvailabilityError(null);
