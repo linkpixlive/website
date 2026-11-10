@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/auth/register/init": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Iniciar cadastro: valida o e-mail e envia o código de verificação */
+        post: operations["AuthController_registerInit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/register": {
         parameters: {
             query?: never;
@@ -13,8 +30,25 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Registrar um novo usuário */
+        /** Concluir cadastro: exige e-mail confirmado e retorna o JWT da sessão */
         post: operations["AuthController_register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/validate-username": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Validar disponibilidade de nome de usuÃ¡rio */
+        post: operations["AuthController_validateUsername"];
         delete?: never;
         options?: never;
         head?: never;
@@ -552,6 +586,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/withdrawals/fee": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Retorna a taxa de saque aplicável ao usuário logado e o valor mínimo */
+        get: operations["WithdrawalsController_getFee"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/withdrawals/{id}/approve": {
         parameters: {
             query?: never;
@@ -601,6 +652,23 @@ export interface paths {
         head?: never;
         /** Verificar/desverificar um usuário (Admin) */
         patch: operations["AdminController_verifyUser"];
+        trace?: never;
+    };
+    "/admin/users/{id}/fee": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Definir taxa de saque personalizada de um usuário (null volta para a taxa global) */
+        patch: operations["AdminController_updateUserFee"];
         trace?: never;
     };
     "/admin/voices": {
@@ -858,6 +926,21 @@ export interface components {
              */
             nonce: string;
         };
+        RegistrationPendingDto: {
+            /**
+             * @description E-mail confirmado sem conta associada: prosseguir para a conclusão do cadastro (dados do usuário).
+             * @example true
+             */
+            requiresRegistrationCompletion: boolean;
+        };
+        RegisterInitDto: {
+            /**
+             * Format: email
+             * @description E-mail do novo usuário (receberá o código de verificação)
+             * @example johndoe@email.com
+             */
+            email: string;
+        };
         RegisterAuthDto: {
             /**
              * @description Nome completo do usuário
@@ -885,6 +968,13 @@ export interface components {
              * @example 12345678901
              */
             cpf: string;
+        };
+        ValidateUsernameDto: {
+            /**
+             * @description Nome de usuário alfanumérico a validar
+             * @example johndoe
+             */
+            username: string;
         };
         LoginAuthDto: {
             /**
@@ -953,8 +1043,6 @@ export interface components {
             username: string;
             /** @example https://cdn.linkpix.com.br/avatars/uuid.webp */
             profileImageUrl: string | null;
-            /** @example null */
-            cpf: string | null;
             /**
              * Format: date-time
              * @example 2026-04-16T12:00:00.000Z
@@ -972,8 +1060,6 @@ export interface components {
             roles: Record<string, never>[][];
             /** @example false */
             totpEnabled: boolean;
-            password: string;
-            totpSecret: string | null;
         };
         UpdateUsernameDto: {
             newUsername: string;
@@ -1393,8 +1479,32 @@ export interface components {
             items: components["schemas"]["WithdrawalEntity"][];
             meta: components["schemas"]["PaginationMetaDto"];
         };
+        WithdrawalFeeEntity: {
+            /**
+             * @description Taxa de saque percentual aplicável ao usuário (personalizada ou global)
+             * @example 4
+             */
+            feePercentage: number;
+            /**
+             * @description Indica se o usuário possui taxa personalizada de conta
+             * @example false
+             */
+            isCustom: boolean;
+            /**
+             * @description Valor mínimo para solicitar um saque
+             * @example 1
+             */
+            minAmount: number;
+        };
         VerifyUserDto: {
             verified: boolean;
+        };
+        UpdateUserFeeDto: {
+            /**
+             * @description Taxa de saque personalizada da conta (0–100). Envie null para remover e voltar à taxa global.
+             * @example 2.5
+             */
+            withdrawalFeePercentage?: number | null;
         };
         VoiceEntity: {
             /** @example uuid-123 */
@@ -1607,6 +1717,51 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    AuthController_registerInit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterInitDto"];
+            };
+        };
+        responses: {
+            /** @description Código de verificação enviado para o e-mail. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+            /** @description E-mail inválido ou cooldown de reenvio ativo (60s). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description E-mail já cadastrado em conta verificada. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Muitas solicitações. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     AuthController_register: {
         parameters: {
             query?: never;
@@ -1620,7 +1775,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Usuário registrado com sucesso. */
+            /** @description Usuário criado com e-mail verificado. Retorna o JWT da sessão (login automático). */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -1629,8 +1784,15 @@ export interface operations {
                     "application/json": string;
                 };
             };
-            /** @description Dados inválidos (email já existe, formato, etc). */
+            /** @description E-mail não confirmado (ticket ausente/expirado), dados inválidos ou username indisponível. */
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description E-mail, username ou CPF já em uso. */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1638,6 +1800,39 @@ export interface operations {
             };
             /** @description Muitas solicitações. */
             429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_validateUsername: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ValidateUsernameDto"];
+            };
+        };
+        responses: {
+            /** @description Nome de usuÃ¡rio disponÃ­vel. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        available?: boolean;
+                    };
+                };
+            };
+            /** @description Nome de usuÃ¡rio invÃ¡lido, em uso ou bloqueado. */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1847,15 +2042,13 @@ export interface operations {
             };
         };
         responses: {
-            /** @description OTP verificado. Retorna o JWT ou { requiresLogin: true } para contas com 2FA. */
+            /** @description OTP verificado. Retorna o JWT (conta existente), { requiresRegistrationCompletion: true } (e-mail novo confirmado: concluir cadastro) ou { requiresLogin: true } (conta com 2FA). */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": string | {
-                        requiresLogin: boolean;
-                    };
+                    "application/json": string | components["schemas"]["Pending2faDto"] | components["schemas"]["RegistrationPendingDto"];
                 };
             };
             /** @description Dados inválidos (formato de OTP, etc). */
@@ -2686,6 +2879,26 @@ export interface operations {
             };
         };
     };
+    WithdrawalsController_getFee: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Taxa personalizada da conta quando existir; caso contrário, a taxa global. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WithdrawalFeeEntity"];
+                };
+            };
+        };
+    };
     AdminController_approveWithdrawal: {
         parameters: {
             query?: never;
@@ -2789,6 +3002,44 @@ export interface operations {
             };
             /** @description Não autorizado. */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Sem permissão. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminController_updateUserFee: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUserFeeDto"];
+            };
+        };
+        responses: {
+            /** @description Taxa atualizada com sucesso. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Usuário não encontrado ou valor inválido. */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -1,13 +1,7 @@
 import { z } from "zod";
 import { totpField } from "./account-validator";
 
-export const MIN_WITHDRAWAL_AMOUNT = Number(
-  import.meta.env.VITE_MIN_WITHDRAWAL_AMOUNT || "10",
-);
 export const MAX_WITHDRAWAL_AMOUNT = 100000;
-export const WITHDRAWAL_FEE_PERCENTAGE = Number(
-  import.meta.env.VITE_WITHDRAWAL_FEE_PERCENTAGE || "4",
-);
 
 export function createWithdrawalSchema(minAmount: number, maxAmount: number) {
   return z.object({

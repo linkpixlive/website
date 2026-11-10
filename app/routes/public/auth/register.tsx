@@ -1,18 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, redirect, useNavigation, useSubmit } from "react-router";
 import { z } from "zod";
 import { authApi } from "~/api/modules/auth";
 import { AuthShell } from "~/components/auth/AuthShell";
-import { PasswordField } from "~/components/auth/PasswordField";
 import { AlertMessage } from "~/components/ui/AlertMessage";
 import { FormField } from "~/components/ui/FormField";
 import { SubmitButton } from "~/components/ui/SubmitButton";
 import { useActionError } from "~/hooks/useActionError";
-import { formatCpf } from "~/util/cpf";
-import { registerSchema } from "~/validators/auth-validator";
-import { getPasswordStrength } from "~/validators/password";
+import { registerInitSchema, registerSchema } from "~/validators/auth-validator";
 import type { Route } from "./+types/register";
 
 export function meta({}: Route.MetaArgs) {
@@ -26,116 +22,50 @@ export async function loader({ request }: Route.LoaderArgs) {
 }
 
 export async function action({ request }: Route.ActionArgs) {
+  const url = new URL(request.url);
+  const candidate = url.searchParams.get("username") ?? "";
+  const parsedUsername = registerSchema.shape.username.safeParse(candidate);
+
   const formData = await request.formData();
-  const parsed = registerSchema.safeParse({
-    name: String(formData.get("name") ?? ""),
-    username: String(formData.get("username") ?? ""),
+  const parsed = registerInitSchema.safeParse({
     email: String(formData.get("email") ?? ""),
-    cpf: String(formData.get("cpf") ?? "").replace(/\D/g, ""),
-    password: String(formData.get("password") ?? ""),
-    confirmPassword: String(formData.get("confirmPassword") ?? ""),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
   }
 
-  const { name, username, email, password, cpf } = parsed.data;
-  const result = await authApi.register({ name, username, email, password, cpf });
-
+  const result = await authApi.registerInit(parsed.data);
   if (!result.success) {
     return { error: result.error.message };
   }
 
-  return redirect(`/auth/verify-email?email=${encodeURIComponent(email)}`);
+  const params = new URLSearchParams({ email: parsed.data.email });
+  if (parsedUsername.success) params.set("username", parsedUsername.data);
+
+  return redirect(`/auth/verify-email?${params.toString()}`);
 }
 
-type RegisterFormValues = z.infer<typeof registerSchema>;
+type RegisterFormValues = z.infer<typeof registerInitSchema>;
 
-type Step = 1 | 2 | 3;
-
-const STEP_FIELDS: Record<Exclude<Step, 3>, (keyof RegisterFormValues)[]> = {
-  1: ["username"],
-  2: ["name", "email", "cpf"],
-};
-
-function stepForApiError(message: string): Step {
-  const msg = message.toLowerCase();
-  if (msg.includes("usuário") || msg.includes("username")) return 1;
-  if (msg.includes("senha") || msg.includes("password")) return 3;
-  return 2;
-}
-
-export default function Register({ actionData, loaderData }: Route.ComponentProps) {
+export default function Register({ actionData }: Route.ComponentProps) {
   const submit = useSubmit();
   const navigation = useNavigation();
   const loading = navigation.state === "submitting";
   const [apiError, clearApiError] = useActionError(actionData);
-  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
-  const [validatingUsername, setValidatingUsername] = useState(false);
-  const [step, setStep] = useState<Step>(
-    loaderData.initialUsername ? 2 : 1,
-  );
 
   const {
     register,
     handleSubmit,
-    watch,
-    setValue,
-    trigger,
-    setFocus,
     formState: { errors },
   } = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: { username: loaderData.initialUsername },
+    resolver: zodResolver(registerInitSchema),
+    defaultValues: { email: "" },
   });
-
-  const passwordValue = watch("password");
-  const cpfValue = watch("cpf") || "";
-
-  const [hostPrefix, setHostPrefix] = useState("");
-  useEffect(() => {
-    setHostPrefix(`${window.location.host}/`);
-  }, []);
-
-  useEffect(() => {
-    if (step === 1) setFocus("username");
-    else if (step === 2) setFocus("name");
-    else setFocus("password");
-  }, [step, setFocus]);
-
-  useEffect(() => {
-    if (apiError) setStep(stepForApiError(apiError));
-  }, [apiError]);
-
-  const handleNext = async (fields: (keyof RegisterFormValues)[]) => {
-    clearApiError();
-    setAvailabilityError(null);
-    if (!(await trigger(fields))) return;
-
-    if (step === 1) {
-      setValidatingUsername(true);
-      const result = await authApi.validateUsername(watch("username"));
-      setValidatingUsername(false);
-      if (!result.success) {
-        setAvailabilityError(result.error.message);
-        return;
-      }
-    }
-
-    setStep((current) =>
-      current < 3 ? ((current + 1) as Step) : current,
-    );
-  };
 
   const onSubmit = (data: RegisterFormValues) => {
     clearApiError();
     const formData = new FormData();
-    formData.append("name", data.name);
-    formData.append("username", data.username);
     formData.append("email", data.email);
-    formData.append("cpf", data.cpf.replace(/\D/g, ""));
-    formData.append("password", data.password);
-    formData.append("confirmPassword", data.confirmPassword);
     submit(formData, { method: "post" });
   };
 
@@ -143,157 +73,28 @@ export default function Register({ actionData, loaderData }: Route.ComponentProp
     <AuthShell
       eyebrow="Criar conta"
       title="Comece a receber em minutos"
-      lede="Sua página fica pronta assim que confirmar o e-mail."
+      lede="Informe seu e-mail para receber o código de confirmação."
       aside={{ to: "/auth/login", label: "Entrar" }}
     >
       <form
         onSubmit={handleSubmit(onSubmit)}
-        onChange={() => {
-          clearApiError();
-          setAvailabilityError(null);
-        }}
+        onChange={() => clearApiError()}
         className="space-y-6"
       >
-        <div className="space-y-2">
-          <p className="text-xs font-semibold text-ink-muted">Etapa {step} de 3</p>
-          <div className="flex gap-1.5" aria-hidden="true">
-            {[1, 2, 3].map((i) => (
-              <span
-                key={i}
-                className={`h-1 flex-1 rounded-full ${i <= step ? "bg-ink-heading" : "bg-line"}`}
-              />
-            ))}
-          </div>
-        </div>
+        {apiError && <AlertMessage variant="error" message={apiError} />}
 
-        {(apiError || availabilityError) && (
-          <AlertMessage
-            variant="error"
-            message={availabilityError ?? apiError ?? ""}
-          />
-        )}
+        <FormField
+          label="E-mail"
+          {...register("email")}
+          type="email"
+          error={errors.email?.message}
+          icon="letter"
+          placeholder="email@email.com"
+          disabled={loading}
+          autoFocus
+        />
 
-        {step === 1 && (
-          <div key="step-1" className="space-y-4 animate-fade-in">
-            <FormField
-              label="Usuário"
-              {...register("username")}
-              error={errors.username?.message ?? availabilityError ?? undefined}
-              prefix={hostPrefix || undefined}
-              disabled={loading || validatingUsername}
-              autoFocus
-            />
-
-            <div className="mt-6">
-              <SubmitButton
-                type="button"
-                disabled={validatingUsername}
-                onClick={() => handleNext(STEP_FIELDS[1])}
-              >
-                {validatingUsername ? "Validando..." : "Continuar"}
-              </SubmitButton>
-            </div>
-          </div>
-        )}
-
-        {step === 2 && (
-          <div key="step-2" className="space-y-4 animate-fade-in">
-            <FormField
-              label="Nome"
-              {...register("name")}
-              error={errors.name?.message}
-              icon="user"
-              disabled={loading}
-            />
-
-            <FormField
-              label="E-mail"
-              {...register("email")}
-              type="email"
-              error={errors.email?.message}
-              icon="letter"
-              placeholder="email@email.com"
-              disabled={loading}
-            />
-
-            <div className="space-y-1.5">
-              <FormField
-                label="CPF"
-                {...register("cpf")}
-                value={formatCpf(cpfValue)}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, "").slice(0, 11);
-                  setValue("cpf", val, {
-                    shouldDirty: true,
-                    shouldValidate: val.length === 11,
-                  });
-                }}
-                error={errors.cpf?.message}
-                icon="card"
-                placeholder="000.000.000-00"
-                inputMode="numeric"
-                disabled={loading}
-              />
-              {!errors.cpf?.message && (
-                <p className="text-xs font-medium text-ink-muted">
-                  Usado para liberar seus saques via Pix.
-                </p>
-              )}
-            </div>
-
-            <div className="mt-6 space-y-3">
-              <SubmitButton type="button" onClick={() => handleNext(STEP_FIELDS[2])}>
-                Continuar
-              </SubmitButton>
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="text-[13px] font-semibold text-info hover:text-info-hover transition-colors duration-150"
-                >
-                  Voltar
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {step === 3 && (
-          <div key="step-3" className="space-y-4 animate-fade-in">
-            <PasswordField
-              label="Senha"
-              {...register("password")}
-              error={errors.password?.message}
-              icon="lock"
-              placeholder="Crie uma senha forte"
-              disabled={loading}
-              showStrength
-              strengthScore={getPasswordStrength(passwordValue || "")}
-            />
-
-            <PasswordField
-              label="Confirmar Senha"
-              {...register("confirmPassword")}
-              error={errors.confirmPassword?.message}
-              icon="lock"
-              placeholder="Confirme sua senha"
-              disabled={loading}
-            />
-
-            <div className="mt-6 space-y-3">
-              <SubmitButton loading={loading}>Criar conta</SubmitButton>
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={() => setStep(2)}
-                  className="text-[13px] font-semibold text-info hover:text-info-hover transition-colors duration-150"
-                >
-                  Voltar
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <SubmitButton loading={loading}>Continuar</SubmitButton>
 
         <p className="text-center text-sm font-medium text-ink-secondary">
           Já tem uma conta?{" "}

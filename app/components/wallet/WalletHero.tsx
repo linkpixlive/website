@@ -7,16 +7,16 @@ import { Skeleton } from "~/components/ui/Skeleton";
 import { Icon } from "~/components/ui/Icon";
 import { popupClasses } from "~/components/ui/header-styles";
 import { formatBRLReais } from "~/util/currency";
-import { MIN_WITHDRAWAL_AMOUNT } from "~/validators/wallet-validator";
 
 interface WalletHeroProps {
   balances: WalletBalances;
   loading?: boolean;
+  minAmount: number;
   onWithdraw: () => void;
   onManageKeys: () => void;
 }
 
-export function WalletHero({ balances, loading = false, onWithdraw, onManageKeys }: WalletHeroProps) {
+export function WalletHero({ balances, loading = false, minAmount, onWithdraw, onManageKeys }: WalletHeroProps) {
   const [showValues, setShowValues] = useState(false);
 
   const total = balances.available + balances.pending + balances.blocked;
@@ -129,7 +129,7 @@ export function WalletHero({ balances, loading = false, onWithdraw, onManageKeys
             </Button>
           </div>
           <p className="text-[12px] font-medium text-ink-secondary md:text-right">
-            Mínimo {formatBRLReais(MIN_WITHDRAWAL_AMOUNT)} · cai em até 1 dia útil
+            Mínimo {formatBRLReais(minAmount)} · cai em até 1 dia útil
           </p>
         </div>
       </div>

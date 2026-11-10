@@ -27,6 +27,8 @@ export function toWithdrawalStatus(
 
 export type Withdrawal = components["schemas"]["WithdrawalEntity"];
 
+export type WithdrawalFee = components["schemas"]["WithdrawalFeeEntity"];
+
 export const DEFAULT_PAGE_LIMIT = 10;
 
 export const withdrawalsApi = {
@@ -39,6 +41,10 @@ export const withdrawalsApi = {
       api.post("/withdrawals", body, {
         headers: { ...authHeaders(token), "Idempotency-Key": idempotencyKey },
       }),
+    ),
+  getFee: (token: string | null | undefined) =>
+    fetchApi<WithdrawalFee>(
+      api.get("/withdrawals/fee", { headers: authHeaders(token) })
     ),
   list: (token: string | null | undefined, query?: WithdrawalFilters) =>
     fetchApi<PaginatedResponse<Withdrawal>>(

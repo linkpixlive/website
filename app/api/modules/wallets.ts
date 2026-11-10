@@ -4,6 +4,7 @@ import { pixKeysApi, type PixKey } from "./pix-keys";
 import {
   withdrawalsApi,
   type Withdrawal,
+  type WithdrawalFee,
   type WithdrawalFilters,
 } from "./withdrawals";
 
@@ -20,6 +21,7 @@ export interface WalletPageFilters {
 export interface WalletPage {
   balances: WalletBalances;
   pixKeys: PixKey[];
+  fee: WithdrawalFee;
   withdrawals: {
     items: Withdrawal[];
     meta: { total: number; page: number; limit: number; totalPages: number };
@@ -36,7 +38,7 @@ export const walletsApi = {
     token: string | null,
     filters: WalletPageFilters,
   ): Promise<WalletPage> => {
-    const [balRes, keysRes, withRes] = await Promise.all([
+    const [balRes, keysRes, withRes, feeRes] = await Promise.all([
       walletsApi.getBalances(token),
       pixKeysApi.list(token),
       withdrawalsApi.list(token, {
@@ -46,11 +48,13 @@ export const walletsApi = {
         startDate: filters.startDate,
         endDate: filters.endDate,
       }),
+      withdrawalsApi.getFee(token),
     ]);
 
     return {
       balances: dataOrThrow(balRes),
       pixKeys: dataOrThrow(keysRes),
+      fee: dataOrThrow(feeRes),
       withdrawals: dataOrThrow(withRes),
     };
   },

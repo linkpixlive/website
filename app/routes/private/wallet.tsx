@@ -31,10 +31,15 @@ import { clearAuthCookie, getAuthToken } from "~/util/session.server";
 import {
   createWithdrawalSchema,
   MAX_WITHDRAWAL_AMOUNT,
-  MIN_WITHDRAWAL_AMOUNT,
   pixKeySchema,
 } from "~/validators/wallet-validator";
 import type { Route } from "./+types/wallet";
+
+type ServerReceipt = {
+  amount: number;
+  feeAmount: number;
+  netAmount: number;
+};
 
 export async function loader({ request }: Route.LoaderArgs) {
   const token = getAuthToken(request);
@@ -69,14 +74,22 @@ type WalletActionResult = {
   success: boolean;
   action: string;
   error?: string;
+  withdrawal?: ServerReceipt;
 };
 
 async function createWithdrawalAction(
   token: string | null,
   formData: FormData,
 ): Promise<WalletActionResult> {
+  const intent = "createWithdrawal";
+
+  const feeRes = await withdrawalsApi.getFee(token);
+  if (!feeRes.success) {
+    return fail(intent, feeRes.error.message);
+  }
+
   const parsed = createWithdrawalSchema(
-    MIN_WITHDRAWAL_AMOUNT,
+    feeRes.data.minAmount,
     MAX_WITHDRAWAL_AMOUNT,
   ).safeParse({
     amount: String(formData.get("amount") ?? ""),
@@ -84,8 +97,6 @@ async function createWithdrawalAction(
     password: String(formData.get("password") ?? ""),
     totp: formData.get("totp") ? String(formData.get("totp")) : undefined,
   });
-
-  const intent = "createWithdrawal";
 
   if (!parsed.success) {
     return fail(intent, parsed.error.issues[0].message);
@@ -108,7 +119,15 @@ async function createWithdrawalAction(
     return fail(intent, res.error.message);
   }
 
-  return ok(intent);
+  return {
+    success: true,
+    action: intent,
+    withdrawal: {
+      amount: res.data.amount,
+      feeAmount: res.data.feeAmount,
+      netAmount: res.data.netAmount,
+    },
+  };
 }
 
 async function createPixKeyAction(
@@ -200,7 +219,7 @@ const STATUS_OPTIONS = [
 ];
 
 export default function WalletPage() {
-  const { balances, pixKeys, withdrawals, page, totalPages, has2fa } =
+  const { balances, pixKeys, withdrawals, page, totalPages, has2fa, fee } =
     useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const { handlePageChange } = usePageParam();
@@ -211,6 +230,9 @@ export default function WalletPage() {
 
   const [withdrawalError, setWithdrawalError] = useState<string | null>(null);
   const [withdrawSuccess, setWithdrawSuccess] = useState(false);
+  const [serverReceipt, setServerReceipt] = useState<ServerReceipt | null>(
+    null,
+  );
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [showFullKeys, setShowFullKeys] = useState(false);
 
@@ -223,6 +245,7 @@ export default function WalletPage() {
       if (result.action !== "createWithdrawal") return;
       if (result.success) {
         setWithdrawSuccess(true);
+        setServerReceipt(result.withdrawal ?? null);
         setWithdrawalError(null);
       } else if (result.error) {
         setWithdrawalError(result.error);
@@ -233,6 +256,7 @@ export default function WalletPage() {
   const openWithdrawal = () => {
     setWithdrawalError(null);
     setWithdrawSuccess(false);
+    setServerReceipt(null);
     setModal("withdraw");
   };
 
@@ -240,6 +264,7 @@ export default function WalletPage() {
     setModal(null);
     setWithdrawSuccess(false);
     setWithdrawalError(null);
+    setServerReceipt(null);
   };
 
   const status = searchParams.get("status") || "all";
@@ -293,6 +318,7 @@ export default function WalletPage() {
         <WalletHero
           balances={balances}
           loading={loadingData}
+          minAmount={fee.minAmount}
           onWithdraw={openWithdrawal}
           onManageKeys={() => setModal("pixKeys")}
         />
@@ -374,6 +400,9 @@ export default function WalletPage() {
         has2fa={has2fa}
         available={balances.available}
         success={withdrawSuccess}
+        feePercentage={fee.feePercentage}
+        minAmount={fee.minAmount}
+        serverReceipt={serverReceipt}
       />
 
       <PixKeysModal

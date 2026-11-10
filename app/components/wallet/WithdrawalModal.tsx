@@ -15,8 +15,6 @@ import { WithdrawalDestination } from "./WithdrawalDestination";
 import { getPixDisplayName } from "./pix-key-format";
 import {
   MAX_WITHDRAWAL_AMOUNT,
-  MIN_WITHDRAWAL_AMOUNT,
-  WITHDRAWAL_FEE_PERCENTAGE,
   createWithdrawalSchema,
 } from "~/validators/wallet-validator";
 import {
@@ -36,6 +34,9 @@ interface WithdrawalModalProps {
   has2fa?: boolean;
   available: number;
   success?: boolean;
+  feePercentage: number;
+  minAmount: number;
+  serverReceipt?: ServerReceipt | null;
 }
 
 interface WithdrawalReceipt {
@@ -43,6 +44,13 @@ interface WithdrawalReceipt {
   fee: number;
   net: number;
   dest: string;
+}
+
+/** Valores oficiais do saque, calculados pelo backend */
+interface ServerReceipt {
+  amount: number;
+  feeAmount: number;
+  netAmount: number;
 }
 
 export function WithdrawalModal({
@@ -54,12 +62,14 @@ export function WithdrawalModal({
   has2fa,
   available,
   success = false,
+  feePercentage,
+  minAmount,
+  serverReceipt = null,
 }: WithdrawalModalProps) {
   const submit = useSubmit();
   const navigation = useNavigation();
   const loading = navigation.state === "submitting";
 
-  const feePercentage = WITHDRAWAL_FEE_PERCENTAGE;
   const maxAmount = MAX_WITHDRAWAL_AMOUNT;
 
   const [amountDisplay, setAmountDisplay] = useState("");
@@ -82,7 +92,7 @@ export function WithdrawalModal({
     reset,
   } = useForm({
     resolver: zodResolver(
-      createWithdrawalSchema(MIN_WITHDRAWAL_AMOUNT, MAX_WITHDRAWAL_AMOUNT),
+      createWithdrawalSchema(minAmount, MAX_WITHDRAWAL_AMOUNT),
     ),
     defaultValues: {
       amount: "",
@@ -200,7 +210,7 @@ export function WithdrawalModal({
                 Valor do saque
               </dt>
               <dd className="text-sm font-bold text-ink-heading tabular-nums">
-                {formatBRLReais(receipt.amount)}
+                {formatBRLReais(serverReceipt?.amount ?? receipt.amount)}
               </dd>
             </div>
             <div className="flex items-center justify-between gap-4 py-2.5">
@@ -208,7 +218,7 @@ export function WithdrawalModal({
                 Taxa ({feePercentage}%)
               </dt>
               <dd className="text-sm font-semibold text-error tabular-nums">
-                -{formatBRLReais(receipt.fee)}
+                -{formatBRLReais(serverReceipt?.feeAmount ?? receipt.fee)}
               </dd>
             </div>
             <div className="flex items-center justify-between gap-4 py-2.5">
@@ -224,7 +234,7 @@ export function WithdrawalModal({
                 Você receberá
               </dt>
               <dd className="text-base font-extrabold text-ink-heading tabular-nums">
-                {formatBRLReais(receipt.net)}
+                {formatBRLReais(serverReceipt?.netAmount ?? receipt.net)}
               </dd>
             </div>
           </dl>

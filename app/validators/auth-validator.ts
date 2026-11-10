@@ -11,30 +11,47 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Senha é obrigatória"),
 });
 
+const registerFields = {
+  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  username: z
+    .string()
+    .min(3, "Nome de usuário deve ter pelo menos 3 caracteres")
+    .max(30, "Nome de usuário deve ter no máximo 30 caracteres")
+    .regex(/^[a-zA-Z0-9_]+$/, "Nome de usuário pode conter apenas letras, números e underscores"),
+  email: z.email("E-mail inválido"),
+  cpf: z
+    .string()
+    /** aceita a máscara `000.000.000-00` ou cru; normaliza antes de validar */
+    .transform((v) => v.replace(/\D/g, ""))
+    .pipe(
+      z
+        .string()
+        .regex(/^\d{11}$/, "CPF deve conter exatamente 11 dígitos")
+        .refine(isValidCpf, "CPF inválido"),
+    ),
+  password: strongPassword,
+  confirmPassword: confirmPasswordField,
+};
+
 export const registerSchema = withPasswordConfirmation(
+  registerFields,
+  "password",
+);
+
+export const completeRegistrationSchema = withPasswordConfirmation(
   {
-    name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-    username: z
-      .string()
-      .min(3, "Nome de usuário deve ter pelo menos 3 caracteres")
-      .max(30, "Nome de usuário deve ter no máximo 30 caracteres")
-      .regex(/^[a-zA-Z0-9_]+$/, "Nome de usuário pode conter apenas letras, números e underscores"),
-    email: z.email("E-mail inválido"),
-    cpf: z
-      .string()
-      /** aceita a máscara `000.000.000-00` ou cru; normaliza antes de validar */
-      .transform((v) => v.replace(/\D/g, ""))
-      .pipe(
-        z
-          .string()
-          .regex(/^\d{11}$/, "CPF deve conter exatamente 11 dígitos")
-          .refine(isValidCpf, "CPF inválido"),
-      ),
-    password: strongPassword,
-    confirmPassword: confirmPasswordField,
+    name: registerFields.name,
+    username: registerFields.username,
+    cpf: registerFields.cpf,
+    password: registerFields.password,
+    confirmPassword: registerFields.confirmPassword,
   },
   "password",
 );
+
+export const registerInitSchema = z.object({
+  email: registerFields.email,
+});
 
 export const forgotPasswordSchema = z.object({
   email: z.email("E-mail inválido"),
